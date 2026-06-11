@@ -2,7 +2,3 @@ name = "kalmate"
 compatibility_date = "2024-11-01"
 
 pages_build_output_dir = ".output/public"
-
-[[kv_namespaces]]
-binding = "KALMATE_KV"
-id = "placeholder"
