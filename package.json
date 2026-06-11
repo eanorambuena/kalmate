@@ -10,9 +10,6 @@
     "preview": "nuxi preview",
     "postinstall": "nuxi prepare"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": ["@parcel/watcher", "esbuild"]
-  },
   "dependencies": {
     "nuxt": "^4.4.7",
     "vue": "^3.5.13",
