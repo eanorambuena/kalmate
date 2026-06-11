@@ -21,8 +21,13 @@ jobs:
       - run: pnpm install --no-frozen-lockfile --ignore-scripts
       - run: pnpm rebuild esbuild 2>/dev/null || true
       - run: pnpm build
+      - name: Create Cloudflare Pages project
+        run: npx wrangler pages project create kalmate --production-branch main 2>/dev/null || true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy to Cloudflare
-        run: npx wrangler pages deploy .output/public --project-name=kalmate
+        run: npx wrangler pages deploy .output/public --project-name=kalmate --branch main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
