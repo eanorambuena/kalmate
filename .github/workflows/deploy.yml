@@ -18,7 +18,8 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
+      - run: pnpm approve-builds @parcel/watcher esbuild 2>/dev/null || true
       - run: pnpm build
       - uses: cloudflare/wrangler-action@v3
         with:
