@@ -6,6 +6,10 @@ const quotes = ref<Record<string, QuoteData>>({})
 const newSymbol = ref('')
 const newShares = ref('')
 const newAvgPrice = ref('')
+const searchResults = ref<any[]>([])
+const searching = ref(false)
+const showSearch = ref(false)
+let searchTimer: ReturnType<typeof setTimeout>
 
 async function fetchPortfolio() {
   try {
@@ -91,6 +95,35 @@ onMounted(() => {
 })
 
 watch(holdings, () => { fetchQuotes() }, { deep: true })
+
+watch(newSymbol, (val) => {
+  clearTimeout(searchTimer)
+  if (val.length < 1) {
+    searchResults.value = []
+    showSearch.value = false
+    return
+  }
+  searching.value = true
+  searchTimer = setTimeout(async () => {
+    try {
+      const data = await $fetch(`/api/search?q=${encodeURIComponent(val)}`)
+      searchResults.value = (data as any[]).slice(0, 8)
+      showSearch.value = true
+    } catch (e) {
+      console.error(e)
+      searchResults.value = []
+      showSearch.value = true
+    } finally {
+      searching.value = false
+    }
+  }, 300)
+})
+
+function selectSearchResult(symbol: string) {
+  newSymbol.value = symbol
+  searchResults.value = []
+  showSearch.value = false
+}
 </script>
 
 <template>
@@ -98,11 +131,29 @@ watch(holdings, () => { fetchQuotes() }, { deep: true })
     <div class="bg-[#111] border border-[#333] rounded p-3 mb-4">
       <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">ADD POSITION</div>
       <div class="flex flex-wrap gap-2">
-        <input
-          v-model="newSymbol"
-          placeholder="SYMBOL"
-          class="bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-sm w-24 text-white uppercase"
-        />
+        <div class="relative">
+          <input
+            v-model="newSymbol"
+            placeholder="SYMBOL"
+            class="bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-sm w-24 text-white uppercase"
+          />
+          <div
+            v-if="showSearch && newSymbol.length > 0"
+            class="absolute top-full left-0 mt-1 bg-[#1a1a1a] border border-[#333] rounded shadow-xl z-50 min-w-[240px]"
+          >
+            <div v-if="searching" class="text-center text-[#aaa] py-2 text-xs">Searching...</div>
+            <button
+              v-for="r in searchResults"
+              :key="r.symbol"
+              class="w-full text-left px-3 py-2 hover:bg-[#2a2a2a] border-b border-[#222] last:border-0"
+              @mousedown="selectSearchResult(r.symbol)"
+            >
+              <span class="text-[#00c853] font-mono text-sm">{{ r.symbol }}</span>
+              <span class="text-[#aaa] text-xs ml-2 font-sans">{{ r.exchange }}</span>
+              <div v-if="r.shortname || r.longname" class="text-[#bbb] text-xs truncate font-sans">{{ r.shortname || r.longname }}</div>
+            </button>
+          </div>
+        </div>
         <input
           v-model="newShares"
           placeholder="SHARES"

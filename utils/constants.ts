@@ -46,4 +46,3 @@ export const ALL_MARKETS = {
   'CRYPTO': CRYPTO,
 }
 
-export const DATA_PATH = '../data'

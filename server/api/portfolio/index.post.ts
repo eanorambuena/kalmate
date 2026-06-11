@@ -17,5 +17,5 @@ export default defineEventHandler(async (event) => {
     createdAt: new Date().toISOString(),
   }
 
-  return addHolding(holding)
+  return addHolding(holding, event.context.cloudflare?.env)
 })

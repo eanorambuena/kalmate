@@ -1,4 +1,4 @@
-import { getNews, searchTickers, getQuotes } from '../../utils/yahoo'
+import { searchTickers, getQuotes } from '../../utils/yahoo'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)

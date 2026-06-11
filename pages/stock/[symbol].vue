@@ -54,14 +54,7 @@ watch(range, () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0a0a0a]">
-    <Header />
-    <main class="max-w-7xl mx-auto px-4 py-4">
-      <div class="mb-4">
-        <SearchBar />
-      </div>
-
-      <div v-if="loading" class="text-center text-[#aaa] py-20 text-sm animate-pulse-slow">
+  <div v-if="loading" class="text-center text-[#aaa] py-20 text-sm animate-pulse-slow">
         Loading market data...
       </div>
       <div v-else-if="error" class="text-center py-20">
@@ -145,6 +138,4 @@ watch(range, () => {
           </div>
         </div>
       </template>
-    </main>
-  </div>
 </template>

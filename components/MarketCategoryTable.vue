@@ -22,9 +22,8 @@ async function fetchData() {
   try {
     const syms = props.symbols.map(s => s.symbol).join(',')
     const data = await $fetch(`/api/quote?symbols=${syms}`)
-    const arr = Array.isArray(data) ? data : [data]
-    items.value = props.symbols.map((sym, i) => {
-      const q = arr[i] || {}
+    items.value = props.symbols.map((sym) => {
+      const q = Array.isArray(data) ? (data as any[]).find((d: any) => d.symbol === sym.symbol) : (data as any) || {}
       return {
         symbol: sym.symbol,
         name: sym.name,

@@ -5,6 +5,6 @@ export default defineEventHandler(async (event) => {
   if (!id) {
     throw createError({ statusCode: 400, statusMessage: 'id parameter required' })
   }
-  removeAlert(id)
+  await removeAlert(id, event.context.cloudflare?.env)
   return { success: true }
 })

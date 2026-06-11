@@ -20,5 +20,5 @@ export default defineEventHandler(async (event) => {
     createdAt: new Date().toISOString(),
   }
 
-  return addAlert(alert)
+  return addAlert(alert, event.context.cloudflare?.env)
 })

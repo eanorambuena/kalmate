@@ -1,8 +1,8 @@
 import { getAlerts, updateAlert } from './store'
 import { getQuote } from './yahoo'
 
-export async function checkAlerts() {
-  const alerts = getAlerts().filter(a => !a.triggered)
+export async function checkAlerts(env?: any) {
+  const alerts = (await getAlerts(env)).filter(a => !a.triggered)
   const results: { alert: any; currentPrice: number; triggered: boolean }[] = []
 
   for (const alert of alerts) {
@@ -13,10 +13,10 @@ export async function checkAlerts() {
         ? currentPrice >= alert.targetPrice
         : currentPrice <= alert.targetPrice
 
-      updateAlert(alert.id, {
+      await updateAlert(alert.id, {
         triggered,
         lastChecked: new Date().toISOString(),
-      })
+      }, env)
 
       results.push({ alert, currentPrice, triggered })
     } catch (e) {

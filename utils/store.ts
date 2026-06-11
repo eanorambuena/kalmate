@@ -32,54 +32,79 @@ function writeJSON<T>(filePath: string, data: T) {
 }
 
 // Portfolio
-export function getPortfolio(): PortfolioData {
+export async function getPortfolio(env?: any): Promise<PortfolioData> {
+  if (env?.KALMATE_KV) {
+    const raw = await env.KALMATE_KV.get('portfolio')
+    return raw ? JSON.parse(raw) : { holdings: [] }
+  }
   return readJSON<PortfolioData>(PORTFOLIO_FILE, { holdings: [] })
 }
 
-export function savePortfolio(data: PortfolioData) {
+export async function savePortfolio(data: PortfolioData, env?: any) {
+  if (env?.KALMATE_KV) {
+    await env.KALMATE_KV.put('portfolio', JSON.stringify(data))
+    return
+  }
   writeJSON(PORTFOLIO_FILE, data)
 }
 
-export function addHolding(holding: PortfolioHolding): PortfolioHolding {
-  const portfolio = getPortfolio()
+export async function addHolding(holding: PortfolioHolding, env?: any): Promise<PortfolioHolding> {
+  const portfolio = await getPortfolio(env)
   portfolio.holdings.push(holding)
-  savePortfolio(portfolio)
+  await savePortfolio(portfolio, env)
   return holding
 }
 
-export function removeHolding(id: string) {
-  const portfolio = getPortfolio()
+export async function removeHolding(id: string, env?: any) {
+  const portfolio = await getPortfolio(env)
   portfolio.holdings = portfolio.holdings.filter(h => h.id !== id)
-  savePortfolio(portfolio)
+  await savePortfolio(portfolio, env)
+}
+
+export async function updateHolding(id: string, update: Partial<PortfolioHolding>, env?: any) {
+  const portfolio = await getPortfolio(env)
+  const index = portfolio.holdings.findIndex(h => h.id === id)
+  if (index !== -1) {
+    portfolio.holdings[index] = { ...portfolio.holdings[index], ...update }
+    await savePortfolio(portfolio, env)
+  }
 }
 
 // Alerts
-export function getAlerts(): AlertCondition[] {
+export async function getAlerts(env?: any): Promise<AlertCondition[]> {
+  if (env?.KALMATE_KV) {
+    const raw = await env.KALMATE_KV.get('alerts')
+    return raw ? JSON.parse(raw) : []
+  }
   return readJSON<AlertCondition[]>(ALERTS_FILE, [])
 }
 
-export function saveAlerts(alerts: AlertCondition[]) {
+export async function saveAlerts(alerts: AlertCondition[], env?: any) {
+  if (env?.KALMATE_KV) {
+    await env.KALMATE_KV.put('alerts', JSON.stringify(alerts))
+    return
+  }
   writeJSON(ALERTS_FILE, alerts)
 }
 
-export function addAlert(alert: AlertCondition): AlertCondition {
-  const alerts = getAlerts()
+export async function addAlert(alert: AlertCondition, env?: any): Promise<AlertCondition> {
+  const alerts = await getAlerts(env)
   alerts.push(alert)
-  saveAlerts(alerts)
+  await saveAlerts(alerts, env)
   return alert
 }
 
-export function removeAlert(id: string) {
-  const alerts = getAlerts()
+export async function removeAlert(id: string, env?: any) {
+  const alerts = await getAlerts(env)
   const filtered = alerts.filter(a => a.id !== id)
-  saveAlerts(filtered)
+  await saveAlerts(filtered, env)
 }
 
-export function updateAlert(id: string, update: Partial<AlertCondition>) {
-  const alerts = getAlerts()
+export async function updateAlert(id: string, update: Partial<AlertCondition>, env?: any) {
+  const alerts = await getAlerts(env)
   const index = alerts.findIndex(a => a.id === id)
   if (index !== -1) {
     alerts[index] = { ...alerts[index], ...update }
-    saveAlerts(alerts)
+    await saveAlerts(alerts, env)
   }
 }

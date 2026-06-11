@@ -52,14 +52,7 @@ onMounted(search)
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0a0a0a]">
-    <Header />
-    <main class="max-w-6xl mx-auto px-4 py-4">
-      <div class="mb-4">
-        <SearchBar />
-      </div>
-
-      <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">SCREENER</div>
+  <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">SCREENER</div>
 
       <!-- Presets -->
       <div class="flex flex-wrap gap-2 mb-4">
@@ -200,6 +193,4 @@ onMounted(search)
           </tbody>
         </table>
       </div>
-    </main>
-  </div>
 </template>
