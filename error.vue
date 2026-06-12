@@ -9,7 +9,7 @@ const props = defineProps<{
     <div class="text-center">
       <div class="text-4xl font-bold text-[#ff1744] font-mono mb-2">{{ error.statusCode || 500 }}</div>
       <div class="text-[#aaa] text-sm font-sans">{{ error.statusMessage || error.message || 'Something went wrong' }}</div>
-      <NuxtLink to="/" class="inline-block mt-4 text-[#00c853] hover:underline text-sm font-sans">Back to Market</NuxtLink>
+      <NuxtLink to="/console" class="inline-block mt-4 text-[#00c853] hover:underline text-sm font-sans">Back to Market</NuxtLink>
     </div>
   </div>
 </template>
