@@ -1,0 +1,23 @@
+# Kalmate
+> Free Bloomberg-style financial terminal with real-time market data.
+
+https://kalmate.app
+
+## About
+Kalmate is a free financial terminal that provides real-time market data for equities, forex, bonds, commodities, and crypto. Features include portfolio tracking, price alerts, a stock screener, TradingView-powered charts, and financial news.
+
+## Key pages
+- Landing page: https://kalmate.app/
+- Console: https://kalmate.app/console
+- Documentation: https://kalmate.app/console/stock/AAPL
+
+## Features
+- Market Dashboard: Real-time quotes for 6 market categories
+- Portfolio Tracking: Track holdings with real-time P&L
+- Smart Alerts: Price alerts with browser notifications
+- Stock Screener: Filter and sort thousands of instruments
+- Professional Charts: TradingView-powered with 1d-1y ranges
+- Financial News: Integrated news feed per instrument
+
+## Tech
+Built with Nuxt 3, Vue 3, TypeScript, Tailwind CSS, TradingView Lightweight Charts, Yahoo Finance API, Cloudflare Pages.
