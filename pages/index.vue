@@ -5,9 +5,36 @@ useHead({
   title: 'Kalmate — Bloomberg-Style Financial Terminal',
   meta: [
     { name: 'description', content: 'Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts. Powered by Yahoo Finance.' },
-    { name: 'keywords', content: 'financial terminal, bloomberg alternative, stock market, real-time quotes, portfolio tracker, yahoo finance' },
+    { name: 'keywords', content: 'financial terminal, bloomberg alternative, stock market, real-time quotes, portfolio tracker, yahoo finance, chile' },
     { property: 'og:title', content: 'Kalmate — Bloomberg-Style Financial Terminal' },
     { property: 'og:description', content: 'Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.' },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: 'Kalmate — Bloomberg-Style Financial Terminal' },
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Kalmate",
+        "url": "https://kalmate.app",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "description": "Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Emmanuel Norambuena",
+          "url": "https://eanorambuena.github.io"
+        }
+      })
+    }
   ]
 })
 </script>
