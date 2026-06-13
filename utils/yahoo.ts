@@ -2,9 +2,22 @@ import type { QuoteData, HistoryData } from './types'
 
 const BASE = 'https://query2.finance.yahoo.com'
 
+const HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  Accept: 'application/json',
+  'Accept-Language': 'en-US,en;q=0.9',
+  Origin: 'https://finance.yahoo.com',
+  Referer: 'https://finance.yahoo.com/',
+}
+
+async function apiFetch(url: string) {
+  const res = await fetch(url, { headers: HEADERS })
+  if (!res.ok) throw new Error(`Yahoo API ${res.status}: ${res.statusText}`)
+  return res.json()
+}
+
 export async function getQuote(symbol: string): Promise<QuoteData> {
-  const res = await fetch(`${BASE}/v8/finance/chart/${symbol}?range=1d&interval=1d`)
-  const data = await res.json()
+  const data = await apiFetch(`${BASE}/v8/finance/chart/${symbol}?range=1d&interval=1d`)
   const result = data.chart?.result?.[0]
   const meta = result?.meta
   if (!meta) throw new Error(`No quote data for ${symbol}`)
@@ -42,8 +55,7 @@ export async function getHistory(
 ): Promise<HistoryData[]> {
   const period1 = getPeriod1(range)
   const url = `${BASE}/v8/finance/chart/${symbol}?period1=${Math.floor(period1.getTime() / 1000)}&period2=${Math.floor(Date.now() / 1000)}&interval=${interval}`
-  const res = await fetch(url)
-  const data = await res.json()
+  const data = await apiFetch(url)
   const quotes = data.chart?.result?.[0]?.quotes ?? []
   return quotes.map((q: any) => ({
     timestamp: q.date ?? 0,
@@ -56,31 +68,12 @@ export async function getHistory(
 }
 
 export async function searchTickers(query: string) {
-  const url = `${BASE}/v1/finance/search?q=${encodeURIComponent(query)}`
-  const res = await fetch(url)
-  const data = await res.json()
+  const data = await apiFetch(`${BASE}/v1/finance/search?q=${encodeURIComponent(query)}`)
   return data.quotes?.slice(0, 10) ?? []
 }
 
 export async function getNews(symbol?: string) {
   const query = symbol || 'stock market'
-  const url = `${BASE}/v1/finance/search?q=${encodeURIComponent(query)}`
-  const res = await fetch(url)
-  const data = await res.json()
+  const data = await apiFetch(`${BASE}/v1/finance/search?q=${encodeURIComponent(query)}`)
   return data.news?.slice(0, 10) ?? []
-}
-
-function getPeriod1(range: string): Date {
-  const now = new Date()
-  const ms = (n: number) => n * 24 * 60 * 60 * 1000
-  switch (range) {
-    case '1d': return new Date(now.getTime() - ms(1))
-    case '5d': return new Date(now.getTime() - ms(5))
-    case '1mo': return new Date(now.getTime() - ms(30))
-    case '3mo': return new Date(now.getTime() - ms(90))
-    case '6mo': return new Date(now.getTime() - ms(180))
-    case '1y': return new Date(now.getTime() - ms(365))
-    case '5y': return new Date(now.getTime() - ms(1825))
-    default: return new Date(now.getTime() - ms(30))
-  }
 }
