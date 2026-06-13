@@ -45,10 +45,10 @@ export default defineNuxtPlugin(() => {
       }
     }
 
-    if (e.key === '1') router.push('/terminales')
-    if (e.key === '2') router.push('/terminales/portfolio')
-    if (e.key === '3') router.push('/terminales/alerts')
-    if (e.key === '4') router.push('/terminales/screener')
+    if (e.key === '1') router.push('/terminal')
+    if (e.key === '2') router.push('/terminal/portfolio')
+    if (e.key === '3') router.push('/terminal/alerts')
+    if (e.key === '4') router.push('/terminal/screener')
     if (e.key === '/') {
       e.preventDefault()
       const input = document.querySelector<HTMLInputElement>('input[type="text"]')

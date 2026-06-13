@@ -6,20 +6,20 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://kalmate.app/terminales</loc>
+    <loc>https://kalmate.app/terminal</loc>
     <lastmod>2026-06-11</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://kalmate.app/terminales/portfolio</loc>
+    <loc>https://kalmate.app/terminal/portfolio</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://kalmate.app/terminales/screener</loc>
+    <loc>https://kalmate.app/terminal/screener</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://kalmate.app/terminales/alerts</loc>
+    <loc>https://kalmate.app/terminal/alerts</loc>
     <priority>0.7</priority>
   </url>
 </urlset>

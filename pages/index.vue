@@ -53,7 +53,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
       <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <span class="text-[#00c853] font-bold text-xl tracking-wider">KALMATE⌘</span>
         <div class="flex items-center gap-6">
-          <a href="/terminales" class="text-[#888] hover:text-white transition-colors text-sm">Terminales</a>
+          <a href="/terminal" class="text-[#888] hover:text-white transition-colors text-sm">Terminal</a>
           <a href="#features" class="text-[#888] hover:text-white transition-colors text-sm">Features</a>
           <a href="#tech" class="text-[#888] hover:text-white transition-colors text-sm">Tech</a>
         </div>
@@ -76,11 +76,11 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
             Free Bloomberg-style terminal powered by Yahoo Finance. Track equities, forex, bonds, commodities, and crypto with real-time data and professional-grade charts.
           </p>
           <div class="flex items-center gap-4 animate-fade-in-up" style="animation-delay: 0.7s">
-            <a href="/terminales" class="inline-flex items-center gap-2 bg-[#00c853] text-black font-bold px-8 py-3.5 rounded-lg hover:bg-[#00e060] transition-colors text-sm tracking-wide">
-              LAUNCH CONSOLE
+            <a href="/terminal" class="inline-flex items-center gap-2 bg-[#00c853] text-black font-bold px-8 py-3.5 rounded-lg hover:bg-[#00e060] transition-colors text-sm tracking-wide">
+              LAUNCH TERMINAL
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </a>
-            <a href="/terminales/stock/AAPL" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm">
+            <a href="/terminal/stock/AAPL" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm">
               VIEW SAMPLE
             </a>
           </div>

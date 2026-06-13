@@ -46,7 +46,7 @@ function selectSymbol(symbol: string) {
   results.value = []
   isOpen.value = false
   noResults.value = false
-  router.push(`/terminales/stock/${symbol}`)
+  router.push(`/terminal/stock/${symbol}`)
 }
 </script>
 
