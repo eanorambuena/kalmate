@@ -1,52 +1,38 @@
-import YahooFinance from 'yahoo-finance2'
 import type { QuoteData, HistoryData } from './types'
 
-const yahoo = new YahooFinance()
+const BASE = 'https://query2.finance.yahoo.com'
 
 export async function getQuote(symbol: string): Promise<QuoteData> {
-  const result = await yahoo.quote(symbol)
+  const res = await fetch(`${BASE}/v8/finance/chart/${symbol}?range=1d&interval=1d`)
+  const data = await res.json()
+  const result = data.chart?.result?.[0]
+  const meta = result?.meta
+  if (!meta) throw new Error(`No quote data for ${symbol}`)
+
+  const quote = result.indicators?.quote?.[0]
   return {
-    symbol: result.symbol,
-    shortName: result.shortName ?? result.symbol,
-    longName: result.longName,
-    regularMarketPrice: result.regularMarketPrice ?? 0,
-    regularMarketChange: result.regularMarketChange ?? 0,
-    regularMarketChangePercent: result.regularMarketChangePercent ?? 0,
-    regularMarketPreviousClose: result.regularMarketPreviousClose ?? 0,
-    regularMarketOpen: result.regularMarketOpen,
-    regularMarketDayHigh: result.regularMarketDayHigh,
-    regularMarketDayLow: result.regularMarketDayLow,
-    regularMarketVolume: result.regularMarketVolume,
-    marketCap: result.marketCap,
-    fiftyTwoWeekHigh: result.fiftyTwoWeekHigh,
-    fiftyTwoWeekLow: result.fiftyTwoWeekLow,
-    currency: result.currency,
-    exchangeName: result.exchangeName,
-    quoteType: result.quoteType,
+    symbol: meta.symbol,
+    shortName: meta.symbol,
+    longName: meta.longName ?? meta.symbol,
+    regularMarketPrice: meta.regularMarketPrice ?? meta.previousClose ?? 0,
+    regularMarketChange: meta.chartPreviousClose ? (meta.regularMarketPrice ?? 0) - meta.chartPreviousClose : 0,
+    regularMarketChangePercent: meta.chartPreviousClose ? (((meta.regularMarketPrice ?? 0) - meta.chartPreviousClose) / meta.chartPreviousClose) * 100 : 0,
+    regularMarketPreviousClose: meta.chartPreviousClose ?? 0,
+    regularMarketOpen: quote?.open?.[quote.open.length - 1] ?? 0,
+    regularMarketDayHigh: quote?.high?.[quote.high.length - 1] ?? 0,
+    regularMarketDayLow: quote?.low?.[quote.low.length - 1] ?? 0,
+    regularMarketVolume: quote?.volume?.[quote.volume.length - 1] ?? 0,
+    marketCap: meta.marketCap ?? 0,
+    fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh ?? 0,
+    fiftyTwoWeekLow: meta.fiftyTwoWeekLow ?? 0,
+    currency: meta.currency ?? 'USD',
+    exchangeName: meta.exchangeName ?? '',
+    quoteType: meta.instrumentType ?? 'EQUITY',
   }
 }
 
 export async function getQuotes(symbols: string[]): Promise<QuoteData[]> {
-  const results = await yahoo.quote(symbols)
-  return results.map((r: any) => ({
-    symbol: r.symbol,
-    shortName: r.shortName ?? r.symbol,
-    longName: r.longName,
-    regularMarketPrice: r.regularMarketPrice ?? 0,
-    regularMarketChange: r.regularMarketChange ?? 0,
-    regularMarketChangePercent: r.regularMarketChangePercent ?? 0,
-    regularMarketPreviousClose: r.regularMarketPreviousClose ?? 0,
-    regularMarketOpen: r.regularMarketOpen,
-    regularMarketDayHigh: r.regularMarketDayHigh,
-    regularMarketDayLow: r.regularMarketDayLow,
-    regularMarketVolume: r.regularMarketVolume,
-    marketCap: r.marketCap,
-    fiftyTwoWeekHigh: r.fiftyTwoWeekHigh,
-    fiftyTwoWeekLow: r.fiftyTwoWeekLow,
-    currency: r.currency,
-    exchangeName: r.exchangeName,
-    quoteType: r.quoteType,
-  }))
+  return Promise.all(symbols.map(s => getQuote(s).catch(() => null))).then(r => r.filter(Boolean))
 }
 
 export async function getHistory(
@@ -54,12 +40,13 @@ export async function getHistory(
   range: '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '5y' = '1mo',
   interval: '1m' | '5m' | '15m' | '1h' | '1d' = '1d',
 ): Promise<HistoryData[]> {
-  const result = await yahoo.chart(symbol, {
-    period1: getPeriod1(range),
-    interval,
-  })
-  return (result?.quotes ?? []).map((q: any) => ({
-    timestamp: Math.floor(new Date(q.date).getTime() / 1000),
+  const period1 = getPeriod1(range)
+  const url = `${BASE}/v8/finance/chart/${symbol}?period1=${Math.floor(period1.getTime() / 1000)}&period2=${Math.floor(Date.now() / 1000)}&interval=${interval}`
+  const res = await fetch(url)
+  const data = await res.json()
+  const quotes = data.chart?.result?.[0]?.quotes ?? []
+  return quotes.map((q: any) => ({
+    timestamp: q.date ?? 0,
     open: q.open ?? 0,
     high: q.high ?? 0,
     low: q.low ?? 0,
@@ -69,14 +56,18 @@ export async function getHistory(
 }
 
 export async function searchTickers(query: string) {
-  const results = await yahoo.search(query)
-  return results.quotes?.slice(0, 10) ?? []
+  const url = `${BASE}/v1/finance/search?q=${encodeURIComponent(query)}`
+  const res = await fetch(url)
+  const data = await res.json()
+  return data.quotes?.slice(0, 10) ?? []
 }
 
 export async function getNews(symbol?: string) {
   const query = symbol || 'stock market'
-  const results = await yahoo.search(query)
-  return results.news?.slice(0, 10) ?? []
+  const url = `${BASE}/v1/finance/search?q=${encodeURIComponent(query)}`
+  const res = await fetch(url)
+  const data = await res.json()
+  return data.news?.slice(0, 10) ?? []
 }
 
 function getPeriod1(range: string): Date {
