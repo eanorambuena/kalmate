@@ -5,8 +5,8 @@
       <span class="text-[10px] font-bold text-[#888] uppercase tracking-wider">OUTPUT</span>
     </div>
     <p class="text-white text-xs font-medium mb-2">Chart</p>
-    <div v-if="chartData.length > 0" ref="chartRef" class="w-full h-[120px]" />
-    <div v-else class="h-[120px] flex items-center justify-center text-[#555] text-[10px]">
+    <div v-show="chartData.length > 0" ref="chartRef" class="w-full h-[120px]" />
+    <div v-show="chartData.length === 0" class="h-[120px] flex items-center justify-center text-[#555] text-[10px]">
       {{ result?.error || 'Run pipeline to see chart' }}
     </div>
     <div v-if="price" class="mt-1 text-center">
@@ -28,30 +28,20 @@ const props = defineProps({
 })
 
 const chartRef = ref<HTMLDivElement | null>(null)
+let chart: any = null
+let series: any = null
+
 const result = computed(() => props.data?.result)
 const chartData = computed(() => {
-  const h = result.value?.history || result.value?.price
-  if (Array.isArray(h)) return h
+  const h = result.value?.history
+  if (Array.isArray(h) && h.length > 0) return h
   return []
 })
 const price = computed(() => result.value?.price)
 
-onMounted(() => {
-  if (chartData.value.length > 0 && chartRef.value) {
-    renderChart()
-  }
-})
-
-watch(chartData, () => {
-  if (chartData.value.length > 0 && chartRef.value) {
-    nextTick(() => renderChart())
-  }
-})
-
-function renderChart() {
-  if (!chartRef.value) return
-  chartRef.value.innerHTML = ''
-  const chart = createChart(chartRef.value, {
+function initChart() {
+  if (!chartRef.value || chart) return
+  chart = createChart(chartRef.value, {
     width: chartRef.value.clientWidth,
     height: 120,
     layout: { background: { type: ColorType.Solid, color: '#111' }, textColor: '#555' },
@@ -60,17 +50,36 @@ function renderChart() {
     timeScale: { visible: false },
     rightPriceScale: { visible: true, borderColor: '#333', textColor: '#555' },
   })
-  const series = chart.addAreaSeries({
+  series = chart.addAreaSeries({
     lineColor: '#00c853',
     topColor: '#00c85330',
     bottomColor: '#00c85305',
     lineWidth: 2,
     priceFormat: { type: 'price', minMove: 0.01 },
   })
-  series.setData(chartData.value.map((d: any, i: number) => ({
+}
+
+function updateData() {
+  if (!series || chartData.value.length === 0) return
+  const items = chartData.value.map((d: any, i: number) => ({
     time: (d.timestamp || i) as any,
     value: d.close || d,
-  })))
-  chart.timeScale().fitContent()
+  }))
+  series.setData(items)
+  chart?.timeScale().fitContent()
 }
+
+watch(chartData, () => {
+  if (chartData.value.length > 0 && chartRef.value) {
+    if (!chart) initChart()
+    nextTick(() => updateData())
+  }
+})
+
+onMounted(() => {
+  if (chartData.value.length > 0 && chartRef.value) {
+    initChart()
+    nextTick(() => updateData())
+  }
+})
 </script>
