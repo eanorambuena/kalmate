@@ -40,6 +40,13 @@
       >
         Clear
       </button>
+      <button
+        class="px-2.5 py-1.5 bg-[#222] text-[#555] text-[10px] font-bold rounded hover:text-white transition-colors"
+        @click="$emit('help')"
+        title="Show tutorial"
+      >
+        ?
+      </button>
     </div>
 
     <div class="vue-flow-bg h-full">
@@ -78,6 +85,8 @@ import { executePipeline } from '../../utils/pipeline/runner'
 import CustomNode from './nodes/CustomNode.vue'
 
 const nodeTypes = { custom: CustomNode }
+
+const emit = defineEmits<{ help: [] }>()
 
 const nodes = ref<any[]>([])
 const edges = ref<any[]>([])
