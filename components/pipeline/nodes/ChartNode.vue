@@ -5,8 +5,13 @@
       <span class="text-[10px] font-bold text-[#888] uppercase tracking-wider">OUTPUT</span>
     </div>
     <p class="text-white text-xs font-medium mb-2">Chart</p>
-    <div v-show="chartData.length > 0" ref="chartRef" class="w-full h-[120px]" />
-    <div v-show="chartData.length === 0" class="h-[120px] flex items-center justify-center text-[#555] text-[10px]">
+    <div v-if="chartPoints.length > 0" class="w-full h-[120px] relative">
+      <svg viewBox="0 0 260 110" class="w-full h-full" preserveAspectRatio="none">
+        <polyline :points="svgPoints" fill="none" stroke="#00c853" stroke-width="2" vector-effect="non-scaling-stroke" />
+        <path :d="svgArea" fill="#00c853" opacity="0.15" />
+      </svg>
+    </div>
+    <div v-else class="h-[120px] flex items-center justify-center text-[#555] text-[10px]">
       {{ result?.error || 'Run pipeline to see chart' }}
     </div>
     <div v-if="price" class="mt-1 text-center">
@@ -20,66 +25,53 @@
 
 <script setup lang="ts">
 import { Handle, Position } from '@vue-flow/core'
-import { createChart, ColorType } from 'lightweight-charts'
 
 const props = defineProps({
   id: { type: String, required: true },
   data: { type: Object, default: () => ({}) },
 })
 
-const chartRef = ref<HTMLDivElement | null>(null)
-let chart: any = null
-let series: any = null
-
 const result = computed(() => props.data?.result)
-const chartData = computed(() => {
+
+const chartPoints = computed(() => {
   const h = result.value?.history
-  if (Array.isArray(h) && h.length > 0) return h
-  return []
+  if (!Array.isArray(h) || h.length === 0) return []
+  return h.map((d: any) => d.close ?? d)
 })
+
 const price = computed(() => result.value?.price)
 
-function initChart() {
-  if (!chartRef.value || chart) return
-  chart = createChart(chartRef.value, {
-    width: chartRef.value.clientWidth,
-    height: 120,
-    layout: { background: { type: ColorType.Solid, color: '#111' }, textColor: '#555' },
-    grid: { vertLines: { color: '#222' }, horzLines: { color: '#222' } },
-    crosshair: { vertLine: { visible: false }, horzLine: { visible: false } },
-    timeScale: { visible: false },
-    rightPriceScale: { visible: true, borderColor: '#333', textColor: '#555' },
-  })
-  series = chart.addAreaSeries({
-    lineColor: '#00c853',
-    topColor: '#00c85330',
-    bottomColor: '#00c85305',
-    lineWidth: 2,
-    priceFormat: { type: 'price', minMove: 0.01 },
-  })
-}
+const w = 260, h = 110, pad = 5
 
-function updateData() {
-  if (!series || chartData.value.length === 0) return
-  const items = chartData.value.map((d: any, i: number) => ({
-    time: (d.timestamp || i) as any,
-    value: d.close || d,
-  }))
-  series.setData(items)
-  chart?.timeScale().fitContent()
-}
-
-watch(chartData, () => {
-  if (chartData.value.length > 0 && chartRef.value) {
-    if (!chart) initChart()
-    nextTick(() => updateData())
-  }
+const svgPoints = computed(() => {
+  const pts = chartPoints.value
+  if (pts.length < 2) return ''
+  const min = Math.min(...pts)
+  const max = Math.max(...pts)
+  const range = max - min || 1
+  return pts.map((v: number, i: number) => {
+    const x = pad + (i / (pts.length - 1)) * (w - pad * 2)
+    const y = h - pad - ((v - min) / range) * (h - pad * 2)
+    return `${x},${y}`
+  }).join(' ')
 })
 
-onMounted(() => {
-  if (chartData.value.length > 0 && chartRef.value) {
-    initChart()
-    nextTick(() => updateData())
-  }
+const svgArea = computed(() => {
+  const pts = chartPoints.value
+  if (pts.length < 2) return ''
+  const min = Math.min(...pts)
+  const max = Math.max(...pts)
+  const range = max - min || 1
+  const firstX = pad
+  const lastX = pad + (w - pad * 2)
+  const bottom = h - pad
+  let d = `M${firstX},${bottom}`
+  pts.forEach((v: number, i: number) => {
+    const x = pad + (i / (pts.length - 1)) * (w - pad * 2)
+    const y = h - pad - ((v - min) / range) * (h - pad * 2)
+    d += ` L${x},${y}`
+  })
+  d += ` L${lastX},${bottom} Z`
+  return d
 })
 </script>
