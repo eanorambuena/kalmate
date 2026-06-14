@@ -74,6 +74,11 @@
         <span class="text-white ml-1">{{ formatResult(val) }}</span>
       </div>
     </div>
+
+    <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[9px] text-[#555] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
+      <span>🖱 Arrastra de salida a entrada para conectar</span>
+      <span>🖱 Click en flecha para borrar</span>
+    </div>
   </div>
 </template>
 
