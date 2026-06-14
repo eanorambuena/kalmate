@@ -22,7 +22,7 @@ const executors: Record<string, NodeExecutor> = {
   },
 
   chartOutput: async (ctx) => {
-    return { price: ctx.inputs.price ?? null, smoothed: ctx.inputs.smoothed ?? null, trend: ctx.inputs.trend ?? null }
+    return { price: ctx.inputs.price ?? null, history: ctx.inputs.history ?? null, smoothed: ctx.inputs.smoothed ?? null, trend: ctx.inputs.trend ?? null }
   },
 
   priceDisplay: async (ctx) => {

@@ -114,6 +114,14 @@ onMounted(() => {
   isPro.value = (localStorage.getItem('kalmate-plan') || 'free') === 'pro'
 })
 
+let autoRunTimer: any = null
+watch(edges, () => {
+  if (edges.value.length > 0 && nodes.value.some(n => n.data?.type === 'priceFeed' || n.data?.type === 'kalmanFilter')) {
+    clearTimeout(autoRunTimer)
+    autoRunTimer = setTimeout(() => runPipeline(), 300)
+  }
+}, { deep: true })
+
 const freeNodes = computed(() => nodeDefinitions.filter(n => !n.pro))
 const proNodes = computed(() => nodeDefinitions.filter(n => n.pro))
 
