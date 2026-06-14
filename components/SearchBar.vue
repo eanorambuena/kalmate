@@ -56,23 +56,34 @@ function selectSymbol(symbol: string) {
       v-model="query"
       type="text"
       placeholder="Search ticker... (e.g. AAPL, USDCLP=X)"
+      aria-label="Search stocks and symbols"
+      role="combobox"
+      aria-expanded="isOpen && results.length > 0"
+      aria-autocomplete="list"
+      aria-controls="search-results"
+      aria-activedescendant=""
       class="w-full bg-[#1a1a1a] border border-[#333] rounded px-3 py-1.5 text-sm text-white placeholder-[#888] focus:outline-none focus:border-[#00c853] font-sans"
       @focus="isOpen = true"
       @blur="setTimeout(() => { isOpen = false; noResults = false }, 200)"
     />
     <div
       v-if="isOpen && query.length > 0"
+      id="search-results"
+      role="listbox"
+      aria-label="Search results"
       class="absolute top-full left-0 right-0 mt-1 bg-[#1a1a1a] border border-[#333] rounded shadow-xl z-50 max-h-80 overflow-y-auto"
     >
-      <div v-if="searching" class="text-center text-[#aaa] py-3 text-xs">
+      <div v-if="searching" class="text-center text-[#aaa] py-3 text-xs" aria-live="polite">
         Searching...
       </div>
-      <div v-else-if="noResults" class="text-center text-[#aaa] py-3 text-xs">
+      <div v-else-if="noResults" class="text-center text-[#aaa] py-3 text-xs" aria-live="polite">
         No results for "{{ query }}"
       </div>
       <button
         v-for="r in results"
         :key="r.symbol"
+        role="option"
+        :aria-label="`${r.symbol} - ${r.shortname || r.longname || ''} on ${r.exchange || ''}`"
         class="w-full text-left px-3 py-2 hover:bg-[#2a2a2a] border-b border-[#222] last:border-0"
         @mousedown="selectSymbol(r.symbol)"
       >

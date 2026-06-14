@@ -67,11 +67,12 @@ onMounted(search)
       </div>
 
       <!-- Filters -->
-      <div class="bg-[#111] border border-[#333] rounded p-3 mb-4">
+      <div class="bg-[#111] border border-[#333] rounded p-3 mb-4" role="search" aria-label="Stock screener filters">
         <div class="flex flex-wrap gap-2 items-end">
           <div>
-            <div class="text-[#888] text-[10px] mb-1 font-sans">Search</div>
+            <label for="scr-query" class="text-[#888] text-[10px] mb-1 font-sans block">Search</label>
             <input
+              id="scr-query"
               v-model="searchQuery"
               type="text"
               placeholder="e.g. tech stocks, dividend..."
@@ -80,8 +81,9 @@ onMounted(search)
             />
           </div>
           <div>
-            <div class="text-[#888] text-[10px] mb-1 font-sans">Min Price</div>
+            <label for="scr-min" class="text-[#888] text-[10px] mb-1 font-sans block">Min Price</label>
             <input
+              id="scr-min"
               v-model="minPrice"
               type="number"
               step="0.01"
@@ -90,8 +92,9 @@ onMounted(search)
             />
           </div>
           <div>
-            <div class="text-[#888] text-[10px] mb-1 font-sans">Max Price</div>
+            <label for="scr-max" class="text-[#888] text-[10px] mb-1 font-sans block">Max Price</label>
             <input
+              id="scr-max"
               v-model="maxPrice"
               type="number"
               step="0.01"
@@ -100,8 +103,9 @@ onMounted(search)
             />
           </div>
           <div>
-            <div class="text-[#888] text-[10px] mb-1 font-sans">Sort By</div>
+            <label for="scr-sort" class="text-[#888] text-[10px] mb-1 font-sans block">Sort By</label>
             <select
+              id="scr-sort"
               v-model="sortBy"
               class="bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-sm text-white font-sans"
             >
@@ -113,8 +117,9 @@ onMounted(search)
             </select>
           </div>
           <div>
-            <div class="text-[#888] text-[10px] mb-1 font-sans">Order</div>
+            <label for="scr-dir" class="text-[#888] text-[10px] mb-1 font-sans block">Order</label>
             <select
+              id="scr-dir"
               v-model="sortDir"
               class="bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-sm text-white font-sans"
             >

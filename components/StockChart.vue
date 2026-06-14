@@ -125,5 +125,5 @@ onUnmounted(() => window.removeEventListener('resize', handleResize))
 </script>
 
 <template>
-  <div ref="chartContainer" class="w-full" />
+  <div ref="chartContainer" class="w-full" role="img" aria-label="Stock price chart showing candlestick data with volume histogram" />
 </template>

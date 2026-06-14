@@ -124,10 +124,12 @@ onMounted(fetchAlerts)
 <template>
   <div>
     <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-4 card-hover">
-      <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">CREATE ALERT</div>
-      <div class="flex flex-wrap gap-2 items-center">
+      <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans" id="create-alert-label">CREATE ALERT</div>
+      <div class="flex flex-wrap gap-2 items-center" role="form" aria-labelledby="create-alert-label">
         <div class="relative">
+          <label for="alert-symbol" class="sr-only">Symbol</label>
           <input
+            id="alert-symbol"
             v-model="symbol"
             placeholder="SYMBOL"
             class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm w-24 text-white uppercase placeholder-[#555] focus:border-[#2979ff] focus:outline-none transition-colors font-sans"

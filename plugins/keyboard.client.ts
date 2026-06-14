@@ -13,6 +13,9 @@ export default defineNuxtPlugin(() => {
       }
       const overlay = document.createElement('div')
       overlay.id = 'kb-help-overlay'
+      overlay.setAttribute('role', 'dialog')
+      overlay.setAttribute('aria-modal', 'true')
+      overlay.setAttribute('aria-label', 'Keyboard shortcuts')
       overlay.innerHTML = `
         <div class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" style="background: rgba(0,0,0,0.7)">
           <div class="bg-[#111] border border-[#333] rounded p-6 max-w-sm w-full mx-4">
@@ -34,6 +37,8 @@ export default defineNuxtPlugin(() => {
         if (e.target === overlay.firstChild || e.target === overlay) overlay.remove()
       })
       document.body.appendChild(overlay)
+      const first = overlay.querySelector('div[class*="bg-\\[\\#111\\]"]')
+      if (first) (first as HTMLElement).focus()
       return
     }
 

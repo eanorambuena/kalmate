@@ -37,12 +37,12 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="text-xs text-[#aaa] mb-2 tracking-wider font-sans flex items-center gap-2">
+    <div class="text-xs text-[#aaa] mb-2 tracking-wider font-sans flex items-center gap-2" aria-live="polite">
       <span>MARKET NEWS</span>
-      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" />
+      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Loading news" />
     </div>
-    <div class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden card-hover">
-      <div v-if="pending && news.length === 0" class="divide-y divide-[#1a1a1a]">
+    <div class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden card-hover" aria-label="Financial news">
+      <div v-if="pending && news.length === 0" class="divide-y divide-[#1a1a1a]" aria-label="Loading news">
         <div v-for="i in 5" :key="i" class="px-3 py-3">
           <div class="skeleton h-4 w-full mb-2" />
           <div class="skeleton h-4 w-3/4 mb-2" />
@@ -60,6 +60,7 @@ onMounted(() => {
           target="_blank"
           rel="noopener noreferrer"
           class="block px-3 py-2.5 hover:bg-[#1a1a1a] transition-colors"
+          :aria-label="`${item.title} - by ${item.publisher || 'unknown'}`"
         >
           <div class="text-sm text-white line-clamp-2 font-sans leading-snug">{{ item.title }}</div>
           <div class="flex items-center gap-2 mt-1">

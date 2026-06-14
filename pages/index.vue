@@ -134,6 +134,18 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
           <span>Data: Yahoo Finance</span>
           <span>Deploy: Cloudflare Pages</span>
         </div>
+        <div class="mt-8 pt-8 border-t border-[#1a1a1a]">
+          <p class="text-[#555] text-xs mb-3">Kalmate is free and open source. Support development:</p>
+          <a
+            href="https://github.com/sponsors/eanorambuena"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#ff69b4]/10 text-[#ff69b4] border border-[#ff69b4]/20 rounded-lg text-sm font-medium hover:bg-[#ff69b4]/20 transition-all"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="m8 14.25-.345.666a.75.75 0 0 0 .69 0l-.345-.666Zm0 0 .345.666a.75.75 0 0 1-.69 0L8 14.25ZM4.268 2.47a3.72 3.72 0 0 0-3.31 1.34c-1.27 1.7-1 4.04.64 5.78l.02.02.02.02L8 14.25l6.37-4.62.02-.02.02-.02c1.64-1.74 1.91-4.08.64-5.78a3.72 3.72 0 0 0-3.31-1.34 4.9 4.9 0 0 0-3.3 1.73L8 4.69l-.44-.49a4.9 4.9 0 0 0-3.3-1.73h.02Z"/></svg>
+            Sponsor on GitHub
+          </a>
+        </div>
       </div>
     </footer>
   </div>

@@ -62,17 +62,18 @@ watch(range, () => {
         <div class="text-[#aaa] text-xs">Yahoo Finance may be unreachable or {{ symbol }} is not a valid symbol.</div>
       </div>
       <template v-else>
-        <div v-if="quote" class="bg-[#111] border border-[#333] rounded p-4 mb-4">
+        <div v-if="quote" class="bg-[#111] border border-[#333] rounded p-4 mb-4" aria-live="polite" aria-label="Quote data">
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div>
               <h1 class="text-2xl font-bold font-mono text-[#00c853]">{{ symbol }}</h1>
               <div v-if="quote.shortName" class="text-sm text-[#bbb] font-sans">{{ quote.shortName }}</div>
             </div>
-            <div class="text-right">
-              <div class="text-3xl font-bold font-mono">{{ '$' + quote.regularMarketPrice?.toFixed(2) }}</div>
+            <div class="text-right" aria-label="Price and change">
+              <div class="text-3xl font-bold font-mono" aria-label="Current price: {{ '$' + quote.regularMarketPrice?.toFixed(2) }}">{{ '$' + quote.regularMarketPrice?.toFixed(2) }}</div>
               <div
                 class="text-sm font-mono"
                 :class="quote.regularMarketChange >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
+                :aria-label="`Change: ${quote.regularMarketChange >= 0 ? '+' : ''}${quote.regularMarketChange?.toFixed(2)} (${quote.regularMarketChangePercent?.toFixed(2)}%)`"
               >
                 {{ quote.regularMarketChange >= 0 ? '+' : '' }}{{ quote.regularMarketChange?.toFixed(2) }}
                 ({{ quote.regularMarketChangePercent?.toFixed(2) }}%)
@@ -117,7 +118,7 @@ watch(range, () => {
         </div>
 
         <div class="bg-[#111] border border-[#333] rounded p-4">
-          <div class="flex items-center gap-2 mb-4">
+          <div class="flex items-center gap-2 mb-4" role="group" aria-label="Chart time range">
             <button
               v-for="r in (['1d', '5d', '1mo', '3mo', '6mo', '1y'] as const)"
               :key="r"
@@ -126,6 +127,8 @@ watch(range, () => {
                 ? 'bg-[#00c853] text-black font-bold'
                 : 'bg-[#1a1a1a] text-[#bbb] hover:text-white'"
               @click="range = r"
+              :aria-pressed="range === r"
+              :aria-label="`${r} range`"
             >
               {{ r.toUpperCase() }}
             </button>
@@ -133,7 +136,7 @@ watch(range, () => {
           <div v-if="history.length > 0">
             <ClientOnly><StockChart :data="history" /></ClientOnly>
           </div>
-          <div v-else class="h-[400px] flex items-center justify-center text-[#aaa] text-sm">
+          <div v-else class="h-[400px] flex items-center justify-center text-[#aaa] text-sm" aria-label="No chart data">
             No chart data available
           </div>
         </div>

@@ -10,6 +10,8 @@ const { toasts, remove } = useToast()
       <div
         v-for="t in toasts"
         :key="t.id"
+        role="alert"
+        aria-live="assertive"
         class="pointer-events-auto px-4 py-2.5 rounded-lg text-sm font-medium shadow-2xl backdrop-blur-xl border animate-slide-up whitespace-nowrap"
         :class="{
           'bg-[#00c853]/15 text-[#00c853] border-[#00c853]/30': t.type === 'success',
@@ -18,9 +20,9 @@ const { toasts, remove } = useToast()
         }"
       >
         <div class="flex items-center gap-2">
-          <span class="text-lg leading-none">{{ t.type === 'success' ? '✓' : t.type === 'error' ? '✗' : 'i' }}</span>
+          <span class="text-lg leading-none" aria-hidden="true">{{ t.type === 'success' ? '✓' : t.type === 'error' ? '✗' : 'i' }}</span>
           <span>{{ t.message }}</span>
-          <button class="ml-2 opacity-50 hover:opacity-100 transition-opacity text-xs" @click="remove(t.id)">✕</button>
+          <button class="ml-2 opacity-50 hover:opacity-100 transition-opacity text-xs" @click="remove(t.id)" aria-label="Dismiss notification">✕</button>
         </div>
       </div>
     </TransitionGroup>

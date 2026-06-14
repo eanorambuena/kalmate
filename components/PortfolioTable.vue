@@ -147,10 +147,12 @@ function selectSearchResult(symbol: string) {
 <template>
   <div>
     <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-4 card-hover">
-      <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">ADD POSITION</div>
-      <div class="flex flex-wrap gap-2">
+      <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans" id="add-position-label">ADD POSITION</div>
+      <div class="flex flex-wrap gap-2" role="form" aria-labelledby="add-position-label">
         <div class="relative">
+          <label for="pos-symbol" class="sr-only">Symbol</label>
           <input
+            id="pos-symbol"
             v-model="newSymbol"
             placeholder="SYMBOL"
             class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm w-24 text-white uppercase placeholder-[#555] focus:border-[#00c853] focus:outline-none transition-colors"
@@ -172,13 +174,17 @@ function selectSearchResult(symbol: string) {
             </button>
           </div>
         </div>
+        <label for="pos-shares" class="sr-only">Shares</label>
         <input
+          id="pos-shares"
           v-model="newShares"
           placeholder="SHARES"
           type="number"
           class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm w-20 text-white placeholder-[#555] focus:border-[#00c853] focus:outline-none transition-colors"
         />
+        <label for="pos-price" class="sr-only">Average price</label>
         <input
+          id="pos-price"
           v-model="newAvgPrice"
           placeholder="AVG $"
           type="number"
@@ -210,7 +216,7 @@ function selectSearchResult(symbol: string) {
     </div>
 
     <!-- Summary -->
-    <div v-else-if="holdings.length > 0" class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-3 card-hover">
+    <div v-else-if="holdings.length > 0" class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-3 card-hover" aria-live="polite" aria-label="Portfolio summary">
       <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">PORTFOLIO SUMMARY</div>
       <div class="grid grid-cols-3 gap-4 text-center">
         <div class="bg-[#1a1a1a] rounded-lg p-3">
