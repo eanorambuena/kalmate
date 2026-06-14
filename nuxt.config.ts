@@ -49,6 +49,7 @@ export default defineNuxtConfig({
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
         { name: 'theme-color', content: '#0a0a0a' },
         { name: 'msapplication-TileColor', content: '#0a0a0a' },
+        { name: 'google-adsense-account', content: 'ca-pub-5127016522335908' },
       ],
       script: [
         {
