@@ -1,18 +1,33 @@
 import type { PipelineSpec, ExecutionContext, NodeExecutor } from './types'
-import { getHistory } from '../yahoo'
 import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman'
 
 const executors: Record<string, NodeExecutor> = {
+  symbolInput: async (ctx) => {
+    return { symbol: ctx.data.symbol || 'AAPL' }
+  },
+
   priceFeed: async (ctx) => {
     const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
     try {
-      const history = await getHistory(symbol, '1y', '1d')
-      const prices = history.map(h => h.close).filter(p => p > 0)
+      const history = await $fetch(`/api/history?symbol=${symbol}&range=1y&interval=1d`)
+      const prices = (history as any[]).map(h => h.close).filter(p => p > 0)
       const currentPrice = prices[prices.length - 1]
       return { price: currentPrice, history: prices }
     } catch {
       return { price: 0, history: [] }
     }
+  },
+
+  chartOutput: async (ctx) => {
+    return { price: ctx.inputs.price, smoothed: ctx.inputs.smoothed, trend: ctx.inputs.trend }
+  },
+
+  priceDisplay: async (ctx) => {
+    return { price: ctx.inputs.price }
+  },
+
+  alertOutput: async (ctx) => {
+    return { signal: ctx.inputs.signal, threshold: ctx.data.threshold }
   },
 
   kalmanFilter: async (ctx) => {
