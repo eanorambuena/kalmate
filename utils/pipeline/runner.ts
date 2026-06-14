@@ -9,12 +9,14 @@ const executors: Record<string, NodeExecutor> = {
   priceFeed: async (ctx) => {
     const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
     try {
-      const history = await $fetch(`/api/history?symbol=${symbol}&range=1y&interval=1d`)
-      const prices = (history as any[]).map(h => h.close).filter(p => p > 0)
+      const res = await fetch(`/api/history?symbol=${symbol}&range=1y&interval=1d`)
+      const history = await res.json()
+      if (!Array.isArray(history)) return { price: 0, history: [], error: 'Invalid response' }
+      const prices = history.map(h => h.close).filter(p => p > 0)
       const currentPrice = prices[prices.length - 1]
       return { price: currentPrice, history: prices }
-    } catch {
-      return { price: 0, history: [] }
+    } catch (e: any) {
+      return { price: 0, history: [], error: e?.message || 'Fetch failed' }
     }
   },
 
