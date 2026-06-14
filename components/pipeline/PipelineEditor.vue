@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { VueFlow, useVueFlow } from '@vue-flow/core'
+import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { nodeDefinitions } from '../../utils/pipeline/nodeDefinitions'
@@ -78,38 +78,32 @@ import { executePipeline } from '../../utils/pipeline/runner'
 import CustomNode from './nodes/CustomNode.vue'
 
 const nodeTypes = { custom: CustomNode }
-const { nodes, edges, addNodes, addEdges, removeNodes, removeEdges } = useVueFlow({ id: 'pipeline' })
 
+const nodes = ref<any[]>([])
+const edges = ref<any[]>([])
 const running = ref(false)
 const results = ref({})
 const isPro = ref(false)
-
-function getPlan(): string {
-  if (import.meta.client) return localStorage.getItem('kalmate-plan') || 'free'
-  return 'free'
-}
+let nodeCounter = 0
 
 onMounted(() => {
-  isPro.value = getPlan() === 'pro'
+  isPro.value = (localStorage.getItem('kalmate-plan') || 'free') === 'pro'
 })
 
 const freeNodes = computed(() => nodeDefinitions.filter(n => !n.pro))
 const proNodes = computed(() => nodeDefinitions.filter(n => n.pro))
-
-let nodeCounter = 0
 
 function addNode(type: string) {
   const def = nodeDefinitions.find(n => n.type === type)
   if (!def) return
   nodeCounter++
   const id = `${type}-${nodeCounter}`
-  const label = `${def.label} ${nodeCounter}`
-  addNodes([{
+  nodes.value = [...nodes.value, {
     id,
     type: 'custom',
     position: { x: 100 + nodeCounter * 40, y: 100 + nodeCounter * 60 },
-    data: { ...def.defaultData, label, type, pro: def.pro },
-  }])
+    data: { ...def.defaultData, label: `${def.label} ${nodeCounter}`, type, pro: def.pro },
+  }]
 }
 
 function goPricing() {
@@ -117,11 +111,11 @@ function goPricing() {
 }
 
 function onConnect(connection: any) {
-  addEdges([{
+  edges.value = [...edges.value, {
     ...connection,
     id: `e-${connection.source}-${connection.target}`,
     style: { stroke: '#555', strokeWidth: 2 },
-  }])
+  }]
 }
 
 function formatResult(val: any): string {
@@ -154,11 +148,10 @@ async function runPipeline() {
     }
     const res = await executePipeline(spec)
     results.value = res
-    for (const node of nodes.value) {
-      if (res[node.id]) {
-        node.data = { ...node.data, result: res[node.id] }
-      }
-    }
+    nodes.value = nodes.value.map((n: any) => ({
+      ...n,
+      data: { ...n.data, result: res[n.id] || n.data.result },
+    }))
   } catch (e) {
     console.error(e)
   }
@@ -166,8 +159,8 @@ async function runPipeline() {
 }
 
 function clearAll() {
-  removeNodes(nodes.value.map((n: any) => n.id))
-  removeEdges(edges.value.map((e: any) => e.id))
+  nodes.value = []
+  edges.value = []
   results.value = {}
 }
 </script>
