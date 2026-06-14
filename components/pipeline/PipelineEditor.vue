@@ -47,6 +47,14 @@
       >
         ?
       </button>
+      <button
+        class="px-2.5 py-1.5 rounded text-[10px] font-bold transition-all"
+        :class="eraserMode ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-[#222] text-[#555] hover:text-white'"
+        @click="eraserMode = !eraserMode"
+        title="Eraser mode: click edges to delete"
+      >
+        🗑
+      </button>
     </div>
 
     <div class="vue-flow-bg h-full">
@@ -99,6 +107,7 @@ const edges = ref<any[]>([])
 const running = ref(false)
 const results = ref({})
 const isPro = ref(false)
+const eraserMode = ref(false)
 let nodeCounter = 0
 
 onMounted(() => {
@@ -134,7 +143,9 @@ function onConnect(connection: any) {
 }
 
 function onEdgeClick(edge: any) {
-  edges.value = edges.value.filter(e => e.id !== edge.id)
+  if (eraserMode.value) {
+    edges.value = edges.value.filter(e => e.id !== edge.id)
+  }
 }
 
 function formatResult(val: any): string {
