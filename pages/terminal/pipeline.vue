@@ -10,16 +10,22 @@ function showTutorial() {
 }
 </script>
 
+<style>
+main#main-content {
+  max-width: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+</style>
+
 <template>
-  <div class="-mx-4 -mt-4">
-    <ClientOnly>
-      <PipelineEditor @help="showTutorial" />
-      <PipelineTutorial :key="tutorialKey" />
-      <template #fallback>
-        <div class="flex items-center justify-center h-96">
-          <p class="text-[#555] text-sm">Loading editor...</p>
-        </div>
-      </template>
-    </ClientOnly>
-  </div>
+  <ClientOnly>
+    <PipelineEditor @help="showTutorial" />
+    <PipelineTutorial :key="tutorialKey" />
+    <template #fallback>
+      <div class="flex items-center justify-center h-96">
+        <p class="text-[#555] text-sm">Loading editor...</p>
+      </div>
+    </template>
+  </ClientOnly>
 </template>
