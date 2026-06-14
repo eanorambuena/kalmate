@@ -33,6 +33,7 @@ useHead({
 const { el: featuresEl, visible: featuresVisible } = useScrollReveal(0.1, 100)
 const { el: techEl, visible: techVisible } = useScrollReveal(0.2, 200)
 
+import AdBanner from '../components/AdBanner.vue'
 import { monetization as m } from '../utils/monetization'
 
 const features = [
@@ -136,6 +137,8 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
           <span>Data: Yahoo Finance</span>
           <span>Deploy: Cloudflare Pages</span>
         </div>
+        <AdBanner ad-unit-id="1234567890" />
+
         <div class="mt-8 pt-8 border-t border-[#1a1a1a]">
           <p class="text-[#555] text-xs mb-3">Kalmate is free and open source.</p>
           <div class="flex flex-wrap items-center justify-center gap-3">
