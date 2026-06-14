@@ -37,23 +37,33 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="text-xs text-[#aaa] mb-2 tracking-wider font-sans">MARKET NEWS</div>
-    <div class="bg-[#111] border border-[#333] rounded overflow-hidden">
-      <div v-if="pending" class="text-center text-[#aaa] py-8 text-xs animate-pulse-slow">
-        Loading news...
+    <div class="text-xs text-[#aaa] mb-2 tracking-wider font-sans flex items-center gap-2">
+      <span>MARKET NEWS</span>
+      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" />
+    </div>
+    <div class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden card-hover">
+      <div v-if="pending && news.length === 0" class="divide-y divide-[#1a1a1a]">
+        <div v-for="i in 5" :key="i" class="px-3 py-3">
+          <div class="skeleton h-4 w-full mb-2" />
+          <div class="skeleton h-4 w-3/4 mb-2" />
+          <div class="skeleton h-3 w-24" />
+        </div>
+      </div>
+      <div v-else-if="news.length === 0" class="text-center text-[#555] py-10 text-sm">
+        No news available
       </div>
       <div v-else class="divide-y divide-[#1a1a1a]">
         <a
-          v-for="item in news"
+          v-for="(item, i) in news"
           :key="item.link"
           :href="item.link"
           target="_blank"
           rel="noopener noreferrer"
-          class="block px-3 py-2 hover:bg-[#1a1a1a] transition-colors"
+          class="block px-3 py-2.5 hover:bg-[#1a1a1a] transition-colors"
         >
-          <div class="text-sm text-white line-clamp-2 font-sans">{{ item.title }}</div>
+          <div class="text-sm text-white line-clamp-2 font-sans leading-snug">{{ item.title }}</div>
           <div class="flex items-center gap-2 mt-1">
-            <span v-if="item.publisher" class="text-[#00c853] text-[10px] font-sans">{{ item.publisher }}</span>
+            <span v-if="item.publisher" class="text-[#00c853] text-[10px] font-sans font-medium">{{ item.publisher }}</span>
             <span class="text-[#555] text-[10px] font-sans">{{ timeAgo(item.publishedDate) }}</span>
           </div>
         </a>

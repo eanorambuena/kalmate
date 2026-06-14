@@ -9,7 +9,7 @@ interface IndexQuote {
   changePercent: number
 }
 
-const { data, pending, error: hasError } = await useAsyncData(
+const { data, pending, error } = await useAsyncData(
   'market-indices',
   async () => {
     const symbols = MAJOR_INDICES.map(i => i.symbol).join(',')
@@ -38,25 +38,38 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-[#111] border border-[#333] rounded p-3">
-    <div class="text-xs text-[#aaa] mb-2 tracking-wider font-sans">MARKET INDICES</div>
-    <div v-if="error" class="text-[#ff1744] text-xs">No data available</div>
+  <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-3 card-hover">
+    <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans flex items-center gap-2">
+      <span>MARKET INDICES</span>
+      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" />
+    </div>
+    <div v-if="error" class="text-[#ff1744] text-xs py-4 text-center">No data available</div>
+    <div v-else-if="pending && indices.length === 0" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div v-for="i in 4" :key="i" class="rounded-lg p-3">
+        <div class="skeleton h-3 w-16 mb-2" />
+        <div class="skeleton h-5 w-24 mb-1" />
+        <div class="skeleton h-3 w-20" />
+      </div>
+    </div>
     <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <NuxtLink
         v-for="idx in indices"
         :key="idx.symbol"
         :to="`/stock/${idx.symbol}`"
-        class="block hover:bg-[#1a1a1a] rounded p-2 transition-colors"
+        class="block rounded-lg p-3 transition-all duration-200 hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98]"
+        :style="(idx.change ?? 0) >= 0 ? { '--glow': 'var(--glow-green)' } : { '--glow': 'var(--glow-red)' }"
       >
-        <div class="text-xs text-[#bbb] font-sans">{{ idx.name }}</div>
-        <div class="text-sm font-mono font-bold">
+        <div class="text-xs text-[#bbb] font-sans font-medium">{{ idx.name }}</div>
+        <div class="text-lg font-mono font-bold mt-0.5 tracking-tight">
           {{ idx.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
         </div>
         <div
-          class="text-xs font-mono"
+          class="text-xs font-mono font-medium mt-0.5"
           :class="(idx.change ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
         >
-          {{ idx.change >= 0 ? '+' : '' }}{{ idx.change?.toFixed(2) }} ({{ idx.changePercent?.toFixed(2) }}%)
+          <span v-if="(idx.change ?? 0) >= 0">▲</span>
+          <span v-else>▼</span>
+          {{ Math.abs(idx.change ?? 0).toFixed(2) }} ({{ Math.abs(idx.changePercent ?? 0).toFixed(2) }}%)
         </div>
       </NuxtLink>
     </div>

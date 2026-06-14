@@ -32,7 +32,6 @@ const { data, pending, error } = await useAsyncData(
 )
 
 const items = computed(() => data.value || [])
-const hasError = computed(() => error.value)
 
 onMounted(() => {
   const interval = setInterval(() => refresh(), 30000)
@@ -42,53 +41,71 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="text-xs text-[#aaa] mb-2 tracking-wider flex items-center gap-2 font-sans">
+    <div class="text-xs text-[#aaa] mb-2 tracking-wider font-sans flex items-center gap-2">
       <span>{{ title }}</span>
-      <span v-if="pending" class="text-[#555] animate-pulse-slow text-[10px] font-sans">updating...</span>
+      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" />
     </div>
-    <div v-if="hasError" class="text-[#ff1744] text-xs py-6 text-center bg-[#111] border border-[#333] rounded">
+    <div v-if="error" class="text-[#ff1744] text-xs py-8 text-center bg-[#111] border border-[#2a2a2a] rounded-xl">
       No data available
     </div>
-    <div v-else class="bg-[#111] border border-[#333] rounded overflow-hidden">
+    <div v-else-if="pending && items.length === 0" class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden">
+      <div class="p-3 space-y-2">
+        <div v-for="i in 4" :key="i" class="flex items-center gap-3">
+          <div class="skeleton h-4 w-16" />
+          <div class="skeleton h-4 flex-1 hidden sm:block" />
+          <div class="skeleton h-4 w-20 ml-auto" />
+          <div class="skeleton h-4 w-20" />
+          <div class="skeleton h-4 w-16 hidden sm:block" />
+        </div>
+      </div>
+    </div>
+    <div v-else class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden card-hover">
       <table class="w-full text-sm">
         <thead>
-          <tr class="border-b border-[#333] text-[#aaa] text-xs">
-            <th class="text-left px-3 py-2 font-sans">SYMBOL</th>
-            <th class="text-left px-3 py-2 font-sans hidden sm:table-cell">NAME</th>
-            <th class="text-right px-3 py-2 font-sans">PRICE</th>
-            <th class="text-right px-3 py-2 font-sans">CHANGE</th>
-            <th class="text-right px-3 py-2 font-sans hidden sm:table-cell">CHANGE %</th>
+          <tr class="border-b border-[#2a2a2a] text-[#aaa] text-xs">
+            <th class="text-left px-3 py-2.5 font-sans">SYMBOL</th>
+            <th class="text-left px-3 py-2.5 font-sans hidden sm:table-cell">NAME</th>
+            <th class="text-right px-3 py-2.5 font-sans">PRICE</th>
+            <th class="text-right px-3 py-2.5 font-sans">CHANGE</th>
+            <th class="text-right px-3 py-2.5 font-sans hidden sm:table-cell">CHANGE %</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="item in items"
+            v-for="(item, i) in items"
             :key="item.symbol"
-            class="border-b border-[#1a1a1a] hover:bg-[#1a1a1a]"
+            class="border-b border-[#1a1a1a] hover:bg-[#1a1a1a] transition-colors duration-150"
+            :style="{ animationDelay: `${i * 30}ms` }"
           >
-            <td class="px-3 py-2">
+            <td class="px-3 py-2.5">
               <NuxtLink
                 :to="`/stock/${item.symbol}`"
-                class="text-[#00c853] font-mono font-bold hover:underline"
+                class="text-[#00c853] font-mono font-bold hover:underline hover:text-[#00e060] transition-colors"
               >
                 {{ item.symbol }}
               </NuxtLink>
             </td>
-            <td class="px-3 py-2 text-[#bbb] text-xs hidden sm:table-cell font-sans">{{ item.name }}</td>
-            <td class="px-3 py-2 text-right font-mono">
+            <td class="px-3 py-2.5 text-[#bbb] text-xs hidden sm:table-cell font-sans truncate max-w-[160px]">{{ item.name }}</td>
+            <td class="px-3 py-2.5 text-right font-mono font-medium">
               {{ item.price != null ? '$' + item.price.toFixed(2) : '...' }}
             </td>
             <td
-              class="px-3 py-2 text-right font-mono"
+              class="px-3 py-2.5 text-right font-mono font-medium"
               :class="(item.change ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
             >
-              {{ item.change != null ? (item.change >= 0 ? '+' : '') + item.change.toFixed(2) : '...' }}
+              <span v-if="item.change != null" class="animate-count-up">
+                {{ item.change >= 0 ? '+' : '' }}{{ item.change.toFixed(2) }}
+              </span>
+              <span v-else>...</span>
             </td>
             <td
-              class="px-3 py-2 text-right font-mono hidden sm:table-cell"
+              class="px-3 py-2.5 text-right font-mono font-medium hidden sm:table-cell"
               :class="(item.changePercent ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
             >
-              {{ item.changePercent != null ? (item.changePercent >= 0 ? '+' : '') + item.changePercent.toFixed(2) + '%' : '...' }}
+              <span v-if="item.changePercent != null">
+                {{ item.changePercent >= 0 ? '+' : '' }}{{ item.changePercent.toFixed(2) }}%
+              </span>
+              <span v-else>...</span>
             </td>
           </tr>
         </tbody>

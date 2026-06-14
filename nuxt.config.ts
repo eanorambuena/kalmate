@@ -22,5 +22,9 @@ export default defineNuxtConfig({
         { property: 'og:type', content: 'website' },
       ],
     },
+    pageTransition: {
+      name: 'page',
+      mode: 'out-in',
+    },
   },
 })
