@@ -23,13 +23,27 @@
     <div v-if="price" class="mt-1 text-center">
       <span class="text-white font-mono text-sm font-bold">${{ price }}</span>
     </div>
-    <Handle type="target" :position="Position.Left" id="price" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-    <Handle type="target" :position="Position.Left" id="history" class="w-2 h-2 !bg-[#2979ff] !border-0" style="top: 25%" />
-    <Handle type="target" :position="Position.Left" id="smoothed" class="w-2 h-2 !bg-[#2979ff] !border-0" style="top: 45%" />
-    <Handle type="target" :position="Position.Left" id="trend" class="w-2 h-2 !bg-[#2979ff] !border-0" style="top: 65%" />
-    <Handle type="target" :position="Position.Left" id="sma" class="w-2 h-2 !bg-[#2979ff] !border-0" style="top: 85%" />
-    <Handle type="target" :position="Position.Left" id="ema" class="w-2 h-2 !bg-[#2979ff] !border-0" style="top: 95%" />
-    <Handle type="target" :position="Position.Left" id="forecast" class="w-2 h-2 !bg-[#2979ff] !border-0" style="top: 105%" />
+
+    <div class="flex items-start justify-between gap-2 mb-1">
+      <div class="flex flex-col gap-1">
+        <div class="flex items-center gap-1">
+          <Handle type="target" :position="Position.Left" id="series" class="w-2 h-2 !bg-[#2979ff] !border-0" />
+          <span class="text-[7px] text-[#555] w-20">series (price[])</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <Handle type="target" :position="Position.Left" id="overlay1" class="w-2 h-2 !bg-[#2979ff] !border-0" />
+          <span class="text-[7px] text-[#555] w-20">overlay 1 (series)</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <Handle type="target" :position="Position.Left" id="overlay2" class="w-2 h-2 !bg-[#2979ff] !border-0" />
+          <span class="text-[7px] text-[#555] w-20">overlay 2 (series)</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <Handle type="target" :position="Position.Left" id="overlay3" class="w-2 h-2 !bg-[#2979ff] !border-0" />
+          <span class="text-[7px] text-[#555] w-20">overlay 3 (series)</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -48,15 +62,18 @@ const seriesToPlot = computed(() => {
   const r = result.value
   if (!r) return []
   const series: Array<{ label: string; values: number[]; color: string }> = []
-  const history = r.history || r.price
-  if (Array.isArray(history) && history.length > 0) {
-    series.push({ label: 'Price', values: history.map((d: any) => d.close ?? d), color: '#00c853' })
+  const mainSeries = r.history || r.series || r.price
+  if (Array.isArray(mainSeries) && mainSeries.length > 0) {
+    series.push({ label: 'Main', values: mainSeries.map((d: any) => d.close ?? d), color: '#00c853' })
   }
-  if (Array.isArray(r.smoothed) && r.smoothed.length > 0) {
-    series.push({ label: 'Smoothed (Kalman)', values: r.smoothed, color: '#ff69b4' })
+  if (Array.isArray(r.overlay1) && r.overlay1.length > 0) {
+    series.push({ label: 'Overlay 1', values: r.overlay1, color: '#2979ff' })
   }
-  if (Array.isArray(r.trend) && r.trend.length > 0) {
-    series.push({ label: 'Trend (Kalman)', values: r.trend, color: '#ff6d00' })
+  if (Array.isArray(r.overlay2) && r.overlay2.length > 0) {
+    series.push({ label: 'Overlay 2', values: r.overlay2, color: '#aa00ff' })
+  }
+  if (Array.isArray(r.overlay3) && r.overlay3.length > 0) {
+    series.push({ label: 'Overlay 3', values: r.overlay3, color: '#ff6d00' })
   }
   if (Array.isArray(r.sma) && r.sma.length > 0) {
     series.push({ label: 'SMA', values: r.sma, color: '#2979ff' })
@@ -66,6 +83,12 @@ const seriesToPlot = computed(() => {
   }
   if (Array.isArray(r.forecast) && r.forecast.length > 0) {
     series.push({ label: 'Forecast', values: r.forecast, color: '#ff9100' })
+  }
+  if (Array.isArray(r.smoothed) && r.smoothed.length > 0) {
+    series.push({ label: 'Smoothed', values: r.smoothed, color: '#ff69b4' })
+  }
+  if (Array.isArray(r.trend) && r.trend.length > 0) {
+    series.push({ label: 'Trend', values: r.trend, color: '#ff6d00' })
   }
   return series
 })

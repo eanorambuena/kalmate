@@ -29,7 +29,19 @@ export const executors: Record<string, NodeExecutor> = {
   },
 
   chartOutput: async (ctx) => {
-    return { price: ctx.inputs.price ?? null, history: ctx.inputs.history ?? null, smoothed: ctx.inputs.smoothed ?? null, trend: ctx.inputs.trend ?? null }
+    return {
+      price: ctx.inputs.price ?? null,
+      history: ctx.inputs.history ?? ctx.inputs.series ?? null,
+      series: ctx.inputs.series ?? ctx.inputs.history ?? null,
+      smoothed: ctx.inputs.smoothed ?? null,
+      trend: ctx.inputs.trend ?? null,
+      overlay1: ctx.inputs.overlay1 ?? ctx.inputs.sma ?? ctx.inputs.ema ?? ctx.inputs.smoothed ?? null,
+      overlay2: ctx.inputs.overlay2 ?? ctx.inputs.forecast ?? null,
+      overlay3: ctx.inputs.overlay3 ?? ctx.inputs.trend ?? null,
+      sma: ctx.inputs.sma ?? null,
+      ema: ctx.inputs.ema ?? null,
+      forecast: ctx.inputs.forecast ?? null,
+    }
   },
 
   priceDisplay: async (ctx) => {
