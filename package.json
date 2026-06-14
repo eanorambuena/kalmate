@@ -8,6 +8,7 @@
     "build": "nuxi build",
     "generate": "nuxi generate",
     "preview": "nuxi preview",
+    "test": "node --experimental-strip-types --test test/pipeline.test.ts",
     "postinstall": "nuxi prepare"
   },
   "dependencies": {

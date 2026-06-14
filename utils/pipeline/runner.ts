@@ -1,8 +1,8 @@
-import type { PipelineSpec, ExecutionContext, NodeExecutor } from './types'
-import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman'
-import { calcSMA, calcRSI } from '../indicators'
+import type { PipelineSpec, ExecutionContext, NodeExecutor } from './types.ts'
+import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman.ts'
+import { calcSMA, calcRSI } from '../indicators.ts'
 
-const executors: Record<string, NodeExecutor> = {
+export const executors: Record<string, NodeExecutor> = {
   symbolInput: async (ctx) => {
     return { symbol: ctx.data.symbol || 'AAPL' }
   },
