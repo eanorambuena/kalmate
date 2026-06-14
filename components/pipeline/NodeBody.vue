@@ -24,6 +24,7 @@ const displayData = computed(() => {
 })
 
 function formatVal(v) {
+  if (v === null || v === undefined) return '-'
   if (typeof v === 'number') return v.toFixed(2)
   if (Array.isArray(v)) return `[${v.length} pts]`
   return String(v)

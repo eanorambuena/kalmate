@@ -19,11 +19,11 @@ const executors: Record<string, NodeExecutor> = {
   },
 
   chartOutput: async (ctx) => {
-    return { price: ctx.inputs.price, smoothed: ctx.inputs.smoothed, trend: ctx.inputs.trend }
+    return { price: ctx.inputs.price ?? null, smoothed: ctx.inputs.smoothed ?? null, trend: ctx.inputs.trend ?? null }
   },
 
   priceDisplay: async (ctx) => {
-    return { price: ctx.inputs.price }
+    return { price: ctx.inputs.price ?? null }
   },
 
   alertOutput: async (ctx) => {
