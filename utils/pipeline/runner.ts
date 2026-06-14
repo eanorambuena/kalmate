@@ -12,13 +12,13 @@ const executors: Record<string, NodeExecutor> = {
     try {
       const res = await fetch(`/api/history?symbol=${symbol}&range=1y&interval=1d`)
       const data = await res.json()
-      if (!res.ok) return { price: 0, history: [], error: data?.statusMessage || `HTTP ${res.status}` }
-      if (!Array.isArray(data)) return { price: 0, history: [], error: 'Unexpected response format' }
+      if (!res.ok) return { price: 0, history: [], error: data?.statusMessage || `HTTP ${res.status}`, symbol }
+      if (!Array.isArray(data)) return { price: 0, history: [], error: 'Unexpected response format', symbol }
       const prices = data.map(h => h.close).filter(p => p > 0)
       const currentPrice = prices[prices.length - 1]
-      return { price: currentPrice, history: prices }
+      return { price: currentPrice, history: prices, symbol }
     } catch (e: any) {
-      return { price: 0, history: [], error: e?.message || 'Fetch failed' }
+      return { price: 0, history: [], error: e?.message || 'Fetch failed', symbol }
     }
   },
 
@@ -55,6 +55,34 @@ const executors: Record<string, NodeExecutor> = {
     return { rsi: lastRsi, rsi_history: rsi }
   },
 
+  forecastNode: async (ctx) => {
+    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
+    if (!Array.isArray(series) || series.length < 10) {
+      return { forecast: [], error: 'Need at least 10 price points' }
+    }
+    try {
+      const steps = ctx.data.steps || 15
+      const params = series.length > 100 ? calibrateMLE(series) : createDefaultParams()
+      const result = runKalmanFilter(series, params, steps)
+      const lastPrices = series.slice(-10)
+      const avgStep = lastPrices.reduce((s, v, i, a) => i > 0 ? s + (v - a[i - 1]) : s, 0) / (lastPrices.length - 1)
+      const trend = result.trend
+      const lastTrend = trend[trend.length - 1] || series[series.length - 1]
+      const lastSmoothed = result.smoothed[result.smoothed.length - 1] || series[series.length - 1]
+      const forecast: number[] = []
+      const confidence: number[] = []
+      for (let i = 1; i <= steps; i++) {
+        const val = lastSmoothed + avgStep * i
+        forecast.push(val)
+        const band = val * (0.01 + 0.015 * i)
+        confidence.push(band)
+      }
+      return { forecast, confidence }
+    } catch (e: any) {
+      return { forecast: [], error: e?.message || 'Forecast error' }
+    }
+  },
+
   kalmanFilter: async (ctx) => {
     const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series || ctx.inputs.price
     if (!series) return { smoothed: [], trend: [], signal: 0, error: 'No series input' }
@@ -79,17 +107,19 @@ const executors: Record<string, NodeExecutor> = {
     const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
     try {
       const res = await fetch(`/api/news?symbol=${symbol}`)
-      if (!res.ok) return { news: [], error: `HTTP ${res.status}` }
+      if (!res.ok) return { news: [], latest: '-', count: 0, error: `HTTP ${res.status}` }
       const articles = await res.json()
-      if (!Array.isArray(articles)) return { news: [], error: 'Unexpected format' }
-      const headlines = articles.slice(0, 5).map(a => a.title || 'No title')
+      if (!Array.isArray(articles)) return { news: [], latest: '-', count: 0, error: 'Unexpected format' }
+      if (articles.length === 0) return { news: [], latest: 'Sin noticias recientes', count: 0 }
+      const headlines = articles.slice(0, 5).map(a => a.title || 'Sin título')
       return {
         count: articles.length,
-        latest: headlines[0] || '-',
+        latest: headlines[0],
         headlines,
+        symbol,
       }
     } catch (e: any) {
-      return { news: [], error: e?.message || 'Fetch failed' }
+      return { news: [], latest: '-', count: 0, error: e?.message || 'Fetch failed' }
     }
   },
 }
