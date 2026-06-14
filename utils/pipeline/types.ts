@@ -27,6 +27,7 @@ export interface NodePort {
 export interface NodeDefinition {
   type: string
   label: string
+  description: string
   category: 'input' | 'process' | 'output'
   color: string
   pro: boolean

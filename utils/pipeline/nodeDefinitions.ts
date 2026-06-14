@@ -4,6 +4,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'symbolInput',
     label: 'Symbol Input',
+    description: 'Escribe el ticker a analizar (ej: AAPL, GOOGL)',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -14,6 +15,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'priceFeed',
     label: 'Price Feed',
+    description: 'Obtiene precio actual + historial desde Yahoo Finance',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -27,6 +29,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'kalmanFilter',
     label: 'Kalman Filter',
+    description: 'Suaviza precio con Schwartz-Smith, detecta sobre/precio justo',
     category: 'process',
     color: '#00c853',
     pro: false,
@@ -41,11 +44,13 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'chartOutput',
     label: 'Chart',
+    description: 'Visualiza precios y series temporales en un gráfico',
     category: 'output',
     color: '#ff69b4',
     pro: false,
     inputs: [
       { id: 'price', label: 'Price', type: 'price' },
+      { id: 'history', label: 'History', type: 'series' },
       { id: 'smoothed', label: 'Smoothed', type: 'series' },
       { id: 'trend', label: 'Trend', type: 'series' },
     ],
@@ -55,6 +60,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'priceDisplay',
     label: 'Price Display',
+    description: 'Muestra el precio actual del activo',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -65,6 +71,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'alertOutput',
     label: 'Alert',
+    description: 'Activa alerta cuando se cruza un umbral de precio',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -75,6 +82,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'multiSymbolInput',
     label: 'Multi Symbol',
+    description: 'Varios tickers separados por coma para análisis batch',
     category: 'input',
     color: '#2979ff',
     pro: true,
@@ -84,7 +92,8 @@ export const nodeDefinitions: NodeDefinition[] = [
   },
   {
     type: 'smaIndicator',
-    label: 'SMA Indicator',
+    label: 'SMA',
+    description: 'Media móvil simple del precio',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -94,7 +103,8 @@ export const nodeDefinitions: NodeDefinition[] = [
   },
   {
     type: 'rsiIndicator',
-    label: 'RSI Indicator',
+    label: 'RSI',
+    description: 'Índice de fuerza relativa (sobrecompra/sobreventa)',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -104,7 +114,8 @@ export const nodeDefinitions: NodeDefinition[] = [
   },
   {
     type: 'forecastNode',
-    label: 'Price Forecast',
+    label: 'Forecast',
+    description: 'Predice precio futuro usando el filtro de Kalman',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -117,7 +128,8 @@ export const nodeDefinitions: NodeDefinition[] = [
   },
   {
     type: 'telegramOutput',
-    label: 'Telegram Alert',
+    label: 'Telegram',
+    description: 'Envía alertas a tu Telegram cuando hay señal',
     category: 'output',
     color: '#ff69b4',
     pro: true,
@@ -127,7 +139,8 @@ export const nodeDefinitions: NodeDefinition[] = [
   },
   {
     type: 'emailOutput',
-    label: 'Email Report',
+    label: 'Email',
+    description: 'Envía reporte por email con precios y señales',
     category: 'output',
     color: '#ff69b4',
     pro: true,
