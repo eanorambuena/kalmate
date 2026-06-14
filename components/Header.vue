@@ -1,7 +1,7 @@
 <template>
   <header role="banner" class="bg-[#111] border-b border-[#2a2a2a] px-4 py-2 flex items-center justify-between sticky top-0 z-50 backdrop-blur-xl bg-[#111]/95">
     <div class="flex items-center gap-4 md:gap-6">
-      <NuxtLink to="/terminal" class="text-[#00c853] font-bold text-lg tracking-wider shrink-0" aria-label="Kalmate terminal home">
+      <NuxtLink to="/" class="text-[#00c853] font-bold text-lg tracking-wider shrink-0" aria-label="Kalmate home">
         KALMATE<span class="text-[#555]" aria-hidden="true">⌘</span>
       </NuxtLink>
       <div class="hidden md:block flex-1 max-w-md">
