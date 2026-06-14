@@ -71,15 +71,19 @@ export async function getHistory(
   const period1 = getPeriod1(range)
   const url = `${BASE}/v8/finance/chart/${symbol}?period1=${Math.floor(period1.getTime() / 1000)}&period2=${Math.floor(Date.now() / 1000)}&interval=${interval}`
   const data = await apiFetch(url)
-  const quotes = data.chart?.result?.[0]?.quotes ?? []
-  return quotes.map((q: any) => ({
-    timestamp: q.date ?? 0,
-    open: q.open ?? 0,
-    high: q.high ?? 0,
-    low: q.low ?? 0,
-    close: q.close ?? 0,
-    volume: q.volume ?? 0,
-  }))
+  const result = data.chart?.result?.[0]
+  if (!result) return []
+  const timestamps: number[] = result.timestamp ?? []
+  const quote = result.indicators?.quote?.[0]
+  if (!quote) return []
+  return timestamps.map((t, i) => ({
+    timestamp: t,
+    open: quote.open?.[i] ?? 0,
+    high: quote.high?.[i] ?? 0,
+    low: quote.low?.[i] ?? 0,
+    close: quote.close?.[i] ?? 0,
+    volume: quote.volume?.[i] ?? 0,
+  })).filter(h => h.close > 0)
 }
 
 export async function searchTickers(query: string) {
