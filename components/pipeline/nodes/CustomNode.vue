@@ -73,27 +73,25 @@
         />
         <span class="text-[7px] text-[#555]">×</span>
       </div>
-      <button
-        @click="addInput"
-        class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[9px] font-mono outline-none focus:border-[#00c853] cursor-pointer"
-      >
-        + Añadir input
-      </button>
     </div>
 
     <div class="flex items-start justify-between gap-2 mb-1">
-      <div v-for="(inp, i) in def.inputs" :key="'in-' + i" class="flex items-center gap-1">
-        <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-        <span class="text-[7px] text-[#555]">{{ inp.label }}</span>
+      <div v-if="def.type === 'portfolioInput'">
+        <div v-for="(weight, idx) in data.weights" :key="'in-' + idx" class="flex items-center gap-1 mb-1">
+          <Handle type="target" :position="Position.Left" :id="`in${idx}`" class="w-2 h-2 !bg-[#2979ff] !border-0" />
+          <span class="text-[7px] text-[#555]">In{{ idx + 1 }}</span>
+        </div>
+      </div>
+      <div v-else>
+        <div v-for="(inp, i) in def.inputs" :key="'in-' + i" class="flex items-center gap-1">
+          <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" />
+          <span class="text-[7px] text-[#555]">{{ inp.label }}</span>
+        </div>
       </div>
       <div v-for="(out, i) in def.outputs" :key="'out-' + i" class="flex items-center gap-1">
         <span class="text-[7px] text-[#555]">{{ out.label }}</span>
         <Handle type="source" :position="Position.Right" :id="out.id" class="w-2 h-2 !bg-[#00c853] !border-0" />
       </div>
-    </div>
-
-    <div v-if="result" class="mt-1 pt-1 border-t border-[#2a2a2a]">
-      <NodeBody :label="def.label" :color="color" :data="result" />
     </div>
   </div>
 </template>
@@ -101,8 +99,7 @@
 <script setup>
 import { Handle, Position } from '@vue-flow/core'
 import { nodeDefinitions, currencies } from '../../../utils/pipeline/nodeDefinitions'
-import NodeBody from '../NodeBody.vue'
-import { ref, computed } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -112,15 +109,16 @@ const props = defineProps({
 const def = computed(() => nodeDefinitions.find(n => n.type === props.data.type) || nodeDefinitions[0])
 const label = computed(() => props.data.label || def.value.label)
 const color = computed(() => def.value.color)
-const result = computed(() => props.data.result)
+
+onMounted(() => {
+  if (def.value.type === 'portfolioInput' && (!props.data.weights || props.data.weights.length === 0)) {
+    props.data.weights = [1, 1]
+  }
+})
 
 const addInput = () => {
   if (def.value.dynamicInputs && props.data.weights) {
     props.data.weights.push(1)
-    if (def.value.inputs) {
-      const newIdx = def.value.inputs.length
-      def.value.inputs.push({ id: `in${newIdx}`, label: `In ${newIdx + 1}`, type: 'scalar' })
-    }
   }
 }
 </script>
