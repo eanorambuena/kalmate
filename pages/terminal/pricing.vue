@@ -55,9 +55,9 @@ const methods = [
     icon: 'M',
     color: '#00a3ff',
     bgColor: '#00a3ff10',
-    details: 'Transfiere $9.990 CLP al email asociado a MACH. Recibo transferencias desde cualquier banco (Santander, BCI, BancoEstado, etc.).',
-    action: null,
-    actionLabel: 'Transferir',
+    details: 'Paga $9.990 CLP con MACH desde cualquier banco (Santander, BCI, BancoEstado, etc.).',
+    action: 'https://app.soymach.com/rF2V/vv4l7jpk',
+    actionLabel: 'Pagar con MACH',
     email: 'eanorambuena@uc.cl',
   },
   {
@@ -198,7 +198,7 @@ const features = [
           <p class="text-[#888] text-sm mb-6">{{ methods.find(m => m.id === selectedMethod)?.details }}</p>
 
           <div v-if="selectedMethod === 'mach'" class="bg-[#0a0a0a] border border-[#333] rounded-xl p-4 mb-6 text-left">
-            <p class="text-[#888] text-xs mb-1">Enviar a:</p>
+            <p class="text-[#888] text-xs mb-1">O transfiere manualmente a:</p>
             <p class="text-white font-mono text-sm break-all">eanorambuena@uc.cl</p>
             <p class="text-[#555] text-xs mt-2">Monto: $9.990 CLP (cualquier banco)</p>
           </div>
