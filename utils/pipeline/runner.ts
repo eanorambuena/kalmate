@@ -1,5 +1,6 @@
 import type { PipelineSpec, ExecutionContext, NodeExecutor } from './types'
 import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman'
+import { calcSMA, calcRSI } from '../indicators'
 
 const executors: Record<string, NodeExecutor> = {
   symbolInput: async (ctx) => {
@@ -33,6 +34,27 @@ const executors: Record<string, NodeExecutor> = {
     return { signal: ctx.inputs.signal, threshold: ctx.data.threshold }
   },
 
+  smaIndicator: async (ctx) => {
+    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
+    if (!Array.isArray(series) || series.length < 2) {
+      return { sma: [], error: 'Need price series' }
+    }
+    const period = ctx.data.period || 20
+    const sma = calcSMA(series, period)
+    return { sma }
+  },
+
+  rsiIndicator: async (ctx) => {
+    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
+    if (!Array.isArray(series) || series.length < 2) {
+      return { rsi: [], error: 'Need price series' }
+    }
+    const period = ctx.data.period || 14
+    const rsi = calcRSI(series, period)
+    const lastRsi = rsi[rsi.length - 1] ?? 50
+    return { rsi: lastRsi, rsi_history: rsi }
+  },
+
   kalmanFilter: async (ctx) => {
     const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series || ctx.inputs.price
     if (!series) return { smoothed: [], trend: [], signal: 0, error: 'No series input' }
@@ -50,6 +72,24 @@ const executors: Record<string, NodeExecutor> = {
       }
     } catch (e: any) {
       return { smoothed: [], trend: [], signal: 0, error: e?.message || 'Kalman error' }
+    }
+  },
+
+  newsOutput: async (ctx) => {
+    const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
+    try {
+      const res = await fetch(`/api/news?symbol=${symbol}`)
+      if (!res.ok) return { news: [], error: `HTTP ${res.status}` }
+      const articles = await res.json()
+      if (!Array.isArray(articles)) return { news: [], error: 'Unexpected format' }
+      const headlines = articles.slice(0, 5).map(a => a.title || 'No title')
+      return {
+        count: articles.length,
+        latest: headlines[0] || '-',
+        headlines,
+      }
+    } catch (e: any) {
+      return { news: [], error: e?.message || 'Fetch failed' }
     }
   },
 }

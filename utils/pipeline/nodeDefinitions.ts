@@ -127,6 +127,17 @@ export const nodeDefinitions: NodeDefinition[] = [
     defaultData: { steps: 15 },
   },
   {
+    type: 'newsOutput',
+    label: 'Noticias',
+    description: 'Últimas noticias del ticker desde Yahoo Finance',
+    category: 'process',
+    color: '#ff9100',
+    pro: false,
+    inputs: [{ id: 'symbol', label: 'Symbol', type: 'symbol' }],
+    outputs: [{ id: 'news', label: 'Noticias', type: 'any' }],
+    defaultData: {},
+  },
+  {
     type: 'telegramOutput',
     label: 'Telegram',
     description: 'Envía alertas a tu Telegram cuando hay señal',
