@@ -19,7 +19,7 @@
         class="px-2.5 py-1.5 rounded text-[10px] font-bold transition-colors flex items-center gap-1"
         :style="{ background: isPro ? n.color + '20' : '#222', color: isPro ? n.color : '#555', border: '1px solid ' + (isPro ? n.color + '40' : '#333') }"
         :disabled="!isPro"
-        @click="isPro ? addNode(n.type) : goPricing()"
+        @click="isPro ? addNode(n.type) : showProModal = true"
       >
         <svg v-if="!isPro" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
         {{ n.label }}
@@ -79,6 +79,7 @@
       <span>🖱 Arrastra de salida a entrada para conectar</span>
       <span>🖱 Click en flecha para borrar</span>
     </div>
+    <ProModal v-if="showProModal" @close="showProModal = false" />
   </div>
 </template>
 
@@ -90,6 +91,7 @@ import { nodeDefinitions } from '../../utils/pipeline/nodeDefinitions'
 import { executePipeline } from '../../utils/pipeline/runner'
 import CustomNode from './nodes/CustomNode.vue'
 import ChartNode from './nodes/ChartNode.vue'
+import ProModal from './ProModal.vue'
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode }
 
@@ -101,6 +103,7 @@ const running = ref(false)
 const results = ref({})
 const isPro = ref(false)
 const eraserMode = ref(false)
+const showProModal = ref(false)
 let nodeCounter = 0
 
 onMounted(() => {
@@ -151,10 +154,6 @@ function addNode(type: string) {
     position: { x: 100 + nodeCounter * 40, y: 100 + nodeCounter * 60 },
     data: { ...def.defaultData, label: `${def.label} ${nodeCounter}`, type, pro: def.pro },
   }]
-}
-
-function goPricing() {
-  window.location.href = '/terminal/pricing'
 }
 
 function onConnect(connection: any) {
