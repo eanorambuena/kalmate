@@ -1,5 +1,9 @@
 <template>
-  <div class="bg-[#111] border border-[#333] rounded-xl p-3 min-w-[160px] cursor-grab active:cursor-grabbing">
+  <div class="bg-[#111] border border-[#333] rounded-xl p-3 min-w-[160px] cursor-grab active:cursor-grabbing relative">
+    <span
+      v-if="props.data?.pro"
+      class="absolute -top-2 -right-2 bg-[#ff69b4] text-black text-[7px] font-bold px-1.5 py-0.5 rounded"
+    >PRO</span>
     <div class="flex items-center gap-2 mb-2">
       <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: color }" />
       <span class="text-[10px] font-bold text-[#888] uppercase tracking-wider">{{ def.category }}</span>

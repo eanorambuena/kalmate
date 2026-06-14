@@ -1,37 +1,32 @@
 <template>
   <div class="h-[calc(100vh-120px)] relative">
-    <div class="absolute top-3 left-3 z-10 flex gap-2">
+    <div class="absolute top-3 left-3 z-10 flex flex-wrap gap-1.5">
+      <div class="flex items-center gap-1 text-[10px] text-[#555] mr-1 font-mono">FREE</div>
       <button
-        class="px-3 py-1.5 bg-[#00c853] text-black text-[10px] font-bold rounded hover:bg-[#00e060] transition-colors"
-        @click="addNode('symbolInput')"
+        v-for="n in freeNodes" :key="n.type"
+        class="px-2.5 py-1.5 rounded text-[10px] font-bold transition-colors"
+        :style="{ background: n.color + '20', color: n.color, border: '1px solid ' + n.color + '40' }"
+        @click="addNode(n.type)"
       >
-        + Symbol
+        + {{ n.label }}
       </button>
+
+      <div class="w-px h-6 bg-[#333] mx-1 self-center" />
+
+      <div class="flex items-center gap-1 text-[10px] text-[#ff69b4] mr-1 font-mono">PRO</div>
       <button
-        class="px-3 py-1.5 bg-[#00c853] text-black text-[10px] font-bold rounded hover:bg-[#00e060] transition-colors"
-        @click="addNode('priceFeed')"
+        v-for="n in proNodes" :key="n.type"
+        class="px-2.5 py-1.5 rounded text-[10px] font-bold transition-colors flex items-center gap-1"
+        :style="{ background: isPro ? n.color + '20' : '#222', color: isPro ? n.color : '#555', border: '1px solid ' + (isPro ? n.color + '40' : '#333') }"
+        :disabled="!isPro"
+        @click="isPro ? addNode(n.type) : goPricing()"
       >
-        + Price
+        <svg v-if="!isPro" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
+        {{ n.label }}
       </button>
-      <button
-        class="px-3 py-1.5 bg-[#00c853] text-black text-[10px] font-bold rounded hover:bg-[#00e060] transition-colors"
-        @click="addNode('kalmanFilter')"
-      >
-        + Kalman
-      </button>
-      <button
-        class="px-3 py-1.5 bg-[#ff69b4] text-black text-[10px] font-bold rounded hover:bg-[#ff85c8] transition-colors"
-        @click="addNode('chartOutput')"
-      >
-        + Chart
-      </button>
-      <button
-        class="px-3 py-1.5 bg-[#ff69b4] text-black text-[10px] font-bold rounded hover:bg-[#ff85c8] transition-colors"
-        @click="addNode('priceDisplay')"
-      >
-        + Display
-      </button>
-      <div class="w-px bg-[#333]" />
+
+      <div class="w-px h-6 bg-[#333] mx-2 self-center" />
+
       <button
         class="px-3 py-1.5 bg-[#2979ff] text-white text-[10px] font-bold rounded hover:bg-[#4a9aff] transition-colors"
         :disabled="running"
@@ -83,11 +78,23 @@ import { executePipeline } from '../../utils/pipeline/runner'
 import CustomNode from './nodes/CustomNode.vue'
 
 const nodeTypes = { custom: CustomNode }
-
 const { nodes, edges, addNodes, addEdges, removeNodes, removeEdges } = useVueFlow({ id: 'pipeline' })
 
 const running = ref(false)
 const results = ref({})
+const isPro = ref(false)
+
+function getPlan(): string {
+  if (import.meta.client) return localStorage.getItem('kalmate-plan') || 'free'
+  return 'free'
+}
+
+onMounted(() => {
+  isPro.value = getPlan() === 'pro'
+})
+
+const freeNodes = computed(() => nodeDefinitions.filter(n => !n.pro))
+const proNodes = computed(() => nodeDefinitions.filter(n => n.pro))
 
 let nodeCounter = 0
 
@@ -101,8 +108,12 @@ function addNode(type: string) {
     id,
     type: 'custom',
     position: { x: 100 + nodeCounter * 40, y: 100 + nodeCounter * 60 },
-    data: { ...def.defaultData, label, type },
+    data: { ...def.defaultData, label, type, pro: def.pro },
   }])
+}
+
+function goPricing() {
+  window.location.href = '/terminal/pricing'
 }
 
 function onConnect(connection: any) {
@@ -143,7 +154,6 @@ async function runPipeline() {
     }
     const res = await executePipeline(spec)
     results.value = res
-
     for (const node of nodes.value) {
       if (res[node.id]) {
         node.data = { ...node.data, result: res[node.id] }
@@ -183,9 +193,6 @@ function clearAll() {
 .vue-flow__connection-path {
   stroke: #00c853 !important;
   stroke-width: 2 !important;
-}
-.vue-flow__minimap {
-  background: #111 !important;
 }
 .vue-flow__controls-button {
   background: #1a1a1a !important;

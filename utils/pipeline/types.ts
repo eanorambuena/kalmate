@@ -29,6 +29,7 @@ export interface NodeDefinition {
   label: string
   category: 'input' | 'process' | 'output'
   color: string
+  pro: boolean
   inputs: NodePort[]
   outputs: NodePort[]
   defaultData: Record<string, any>
