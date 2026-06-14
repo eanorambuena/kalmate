@@ -197,10 +197,11 @@ const features = [
           <h3 class="text-white font-bold text-lg mb-2">{{ methods.find(m => m.id === selectedMethod)?.name }}</h3>
           <p class="text-[#888] text-sm mb-6">{{ methods.find(m => m.id === selectedMethod)?.details }}</p>
 
-          <div v-if="selectedMethod === 'mach'" class="bg-[#0a0a0a] border border-[#333] rounded-xl p-4 mb-6 text-left">
-            <p class="text-[#888] text-xs mb-1">O transfiere manualmente a:</p>
-            <p class="text-white font-mono text-sm break-all">eanorambuena@uc.cl</p>
-            <p class="text-[#555] text-xs mt-2">Monto: $9.990 CLP (cualquier banco)</p>
+          <div v-if="selectedMethod === 'mach'" class="bg-[#0a0a0a] border border-[#333] rounded-xl p-4 mb-6">
+            <img src="/qr-mach.jpg" alt="QR MACH" class="w-48 h-48 mx-auto rounded-lg mb-4">
+            <p class="text-[#888] text-xs mb-1 text-center">O transfiere manualmente a:</p>
+            <p class="text-white font-mono text-sm break-all text-center">eanorambuena@uc.cl</p>
+            <p class="text-[#555] text-xs mt-2 text-center">Monto: $9.990 CLP (cualquier banco)</p>
           </div>
 
           <a
