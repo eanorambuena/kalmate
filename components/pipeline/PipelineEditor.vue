@@ -96,8 +96,9 @@ import { Controls } from '@vue-flow/controls'
 import { nodeDefinitions } from '../../utils/pipeline/nodeDefinitions'
 import { executePipeline } from '../../utils/pipeline/runner'
 import CustomNode from './nodes/CustomNode.vue'
+import ChartNode from './nodes/ChartNode.vue'
 
-const nodeTypes = { custom: CustomNode }
+const nodeTypes = { custom: CustomNode, chart: ChartNode }
 
 const emit = defineEmits<{ help: [] }>()
 
@@ -121,9 +122,10 @@ function addNode(type: string) {
   if (!def) return
   nodeCounter++
   const id = `${type}-${nodeCounter}`
+  const nodeType = type === 'chartOutput' ? 'chart' : 'custom'
   nodes.value = [...nodes.value, {
     id,
-    type: 'custom',
+    type: nodeType,
     position: { x: 100 + nodeCounter * 40, y: 100 + nodeCounter * 60 },
     data: { ...def.defaultData, label: `${def.label} ${nodeCounter}`, type, pro: def.pro },
   }]
