@@ -33,7 +33,8 @@
         </svg>
       </button>
       <a
-        href="https://github.com/sponsors/eanorambuena"
+        v-if="monetization.githubSponsors.enabled"
+        :href="monetization.githubSponsors.url"
         target="_blank"
         rel="noopener noreferrer"
         class="hidden md:inline-flex items-center gap-1 text-[10px] text-[#555] hover:text-[#ff69b4] transition-colors"
@@ -95,6 +96,8 @@
 </template>
 
 <script setup lang="ts">
+import { monetization } from '../utils/monetization'
+
 const route = useRoute()
 const mobileOpen = ref(false)
 
