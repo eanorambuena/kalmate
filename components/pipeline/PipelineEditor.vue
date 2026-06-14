@@ -156,6 +156,7 @@ function onCanvasClick(e: MouseEvent) {
 
 function formatResult(val: any): string {
   if (!val) return '-'
+  if (val.error) return 'Error: ' + val.error
   if (typeof val === 'number') return val.toFixed(2)
   if (val.price) return '$' + val.price.toFixed(2)
   if (val.signal === 1) return 'Overpriced'

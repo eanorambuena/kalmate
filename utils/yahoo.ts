@@ -48,6 +48,21 @@ export async function getQuotes(symbols: string[]): Promise<QuoteData[]> {
   return Promise.all(symbols.map(s => getQuote(s).catch(() => null))).then(r => r.filter(Boolean))
 }
 
+function getPeriod1(range: string): Date {
+  const now = new Date()
+  const ms = (n: number) => n * 24 * 60 * 60 * 1000
+  switch (range) {
+    case '1d': return new Date(now.getTime() - ms(1))
+    case '5d': return new Date(now.getTime() - ms(5))
+    case '1mo': return new Date(now.getTime() - ms(30))
+    case '3mo': return new Date(now.getTime() - ms(90))
+    case '6mo': return new Date(now.getTime() - ms(180))
+    case '1y': return new Date(now.getTime() - ms(365))
+    case '5y': return new Date(now.getTime() - ms(1825))
+    default: return new Date(now.getTime() - ms(30))
+  }
+}
+
 export async function getHistory(
   symbol: string,
   range: '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '5y' = '1mo',

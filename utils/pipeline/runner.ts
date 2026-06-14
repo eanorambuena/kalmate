@@ -10,9 +10,10 @@ const executors: Record<string, NodeExecutor> = {
     const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
     try {
       const res = await fetch(`/api/history?symbol=${symbol}&range=1y&interval=1d`)
-      const history = await res.json()
-      if (!Array.isArray(history)) return { price: 0, history: [], error: 'Invalid response' }
-      const prices = history.map(h => h.close).filter(p => p > 0)
+      const data = await res.json()
+      if (!res.ok) return { price: 0, history: [], error: data?.statusMessage || `HTTP ${res.status}` }
+      if (!Array.isArray(data)) return { price: 0, history: [], error: 'Unexpected response format' }
+      const prices = data.map(h => h.close).filter(p => p > 0)
       const currentPrice = prices[prices.length - 1]
       return { price: currentPrice, history: prices }
     } catch (e: any) {
