@@ -41,7 +41,7 @@ const chartPoints = computed(() => {
 
 const price = computed(() => result.value?.price)
 
-const w = 260, h = 110, pad = 5
+const svgW = 260, svgH = 110, pad = 5
 
 const svgPoints = computed(() => {
   const pts = chartPoints.value
@@ -50,8 +50,8 @@ const svgPoints = computed(() => {
   const max = Math.max(...pts)
   const range = max - min || 1
   return pts.map((v: number, i: number) => {
-    const x = pad + (i / (pts.length - 1)) * (w - pad * 2)
-    const y = h - pad - ((v - min) / range) * (h - pad * 2)
+    const x = pad + (i / (pts.length - 1)) * (svgW - pad * 2)
+    const y = svgH - pad - ((v - min) / range) * (svgH - pad * 2)
     return `${x},${y}`
   }).join(' ')
 })
@@ -63,12 +63,12 @@ const svgArea = computed(() => {
   const max = Math.max(...pts)
   const range = max - min || 1
   const firstX = pad
-  const lastX = pad + (w - pad * 2)
-  const bottom = h - pad
+  const lastX = pad + (svgW - pad * 2)
+  const bottom = svgH - pad
   let d = `M${firstX},${bottom}`
   pts.forEach((v: number, i: number) => {
-    const x = pad + (i / (pts.length - 1)) * (w - pad * 2)
-    const y = h - pad - ((v - min) / range) * (h - pad * 2)
+    const x = pad + (i / (pts.length - 1)) * (svgW - pad * 2)
+    const y = svgH - pad - ((v - min) / range) * (svgH - pad * 2)
     d += ` L${x},${y}`
   })
   d += ` L${lastX},${bottom} Z`
