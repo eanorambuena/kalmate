@@ -168,12 +168,18 @@ function onConnect(connection: any) {
 function onCanvasClick(e: MouseEvent) {
   if (!eraserMode.value) return
   const target = e.target as HTMLElement
-  const path = target.closest('.vue-flow__edge-path, .vue-flow__edge')
-  if (path) {
-    const edgeEl = path.closest('.vue-flow__edge')
-    const edgeId = edgeEl?.getAttribute('data-id')
-    if (edgeId) {
-      edges.value = edges.value.filter(ed => ed.id !== edgeId)
+  const edgeEl = target.closest('.vue-flow__edge')
+  if (edgeEl) {
+    const edgeId = edgeEl.getAttribute('data-id')
+    if (edgeId) edges.value = edges.value.filter(ed => ed.id !== edgeId)
+    return
+  }
+  const nodeEl = target.closest('.vue-flow__node')
+  if (nodeEl) {
+    const nodeId = nodeEl.getAttribute('data-id')
+    if (nodeId) {
+      nodes.value = nodes.value.filter(n => n.id !== nodeId)
+      edges.value = edges.value.filter(e => e.source !== nodeId && e.target !== nodeId)
     }
   }
 }
@@ -261,7 +267,8 @@ function clearAll() {
 .eraser-active .vue-flow__pane {
   cursor: not-allowed !important;
 }
-.eraser-active .vue-flow__edge {
+.eraser-active .vue-flow__edge,
+.eraser-active .vue-flow__node {
   cursor: pointer !important;
 }
 .eraser-active .vue-flow__edge-path {
