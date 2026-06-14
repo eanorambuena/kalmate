@@ -34,18 +34,22 @@ const executors: Record<string, NodeExecutor> = {
   },
 
   kalmanFilter: async (ctx) => {
-    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
-    if (!series || !Array.isArray(series) || series.length < 5) {
-      return { smoothed: [], trend: [], signal: 0 }
-    }
-    const params = series.length > 100 ? calibrateMLE(series) : createDefaultParams()
-    const result = runKalmanFilter(series, params, 5)
-    const lastCycle = result.cycle[result.cycle.length - 1] || 0
-    return {
-      smoothed: result.smoothed,
-      trend: result.trend,
-      cycle: result.cycle,
-      signal: lastCycle > 0 ? 1 : -1,
+    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series || ctx.inputs.price
+    if (!series) return { smoothed: [], trend: [], signal: 0, error: 'No series input' }
+    if (!Array.isArray(series)) return { smoothed: [], trend: [], signal: 0, error: 'Series is not an array' }
+    if (series.length < 5) return { smoothed: [], trend: [], signal: 0, error: `Series too short: ${series.length}` }
+    try {
+      const params = series.length > 100 ? calibrateMLE(series) : createDefaultParams()
+      const result = runKalmanFilter(series, params, 5)
+      const lastCycle = result.cycle[result.cycle.length - 1] || 0
+      return {
+        smoothed: result.smoothed,
+        trend: result.trend,
+        cycle: result.cycle,
+        signal: lastCycle > 0 ? 1 : -1,
+      }
+    } catch (e: any) {
+      return { smoothed: [], trend: [], signal: 0, error: e?.message || 'Kalman error' }
     }
   },
 }

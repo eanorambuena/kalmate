@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[calc(100vh-120px)] relative">
+  <div class="h-[calc(100vh-120px)] w-full relative">
     <div class="absolute top-3 left-3 z-10 flex flex-wrap gap-1.5">
       <div class="flex items-center gap-1 text-[10px] text-[#555] mr-1 font-mono">FREE</div>
       <button
@@ -28,13 +28,6 @@
       <div class="w-px h-6 bg-[#333] mx-2 self-center" />
 
       <button
-        class="px-3 py-1.5 bg-[#2979ff] text-white text-[10px] font-bold rounded hover:bg-[#4a9aff] transition-colors"
-        :disabled="running"
-        @click="runPipeline"
-      >
-        {{ running ? 'Running...' : 'Run' }}
-      </button>
-      <button
         class="px-3 py-1.5 bg-[#333] text-[#aaa] text-[10px] font-bold rounded hover:text-white transition-colors"
         @click="clearAll"
       >
@@ -57,11 +50,11 @@
       </button>
     </div>
 
-    <div class="vue-flow-bg h-full" :class="{ 'eraser-active': eraserMode }" @click="onCanvasClick">
+    <div class="w-full h-full" :class="{ 'eraser-active': eraserMode }" @click="onCanvasClick">
       <VueFlow
         v-model:nodes="nodes"
         v-model:edges="edges"
-        :default-viewport="{ x: 100, y: 100, zoom: 0.9 }"
+        :default-viewport="{ x: 200, y: 200, zoom: 0.55 }"
         fit-view-on-init
         :node-types="nodeTypes"
         @connect="onConnect"
