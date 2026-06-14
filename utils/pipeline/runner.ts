@@ -34,7 +34,7 @@ const executors: Record<string, NodeExecutor> = {
   },
 
   kalmanFilter: async (ctx) => {
-    const series = ctx.inputs.series
+    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
     if (!series || !Array.isArray(series) || series.length < 5) {
       return { smoothed: [], trend: [], signal: 0 }
     }
@@ -44,6 +44,7 @@ const executors: Record<string, NodeExecutor> = {
     return {
       smoothed: result.smoothed,
       trend: result.trend,
+      cycle: result.cycle,
       signal: lastCycle > 0 ? 1 : -1,
     }
   },
