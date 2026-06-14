@@ -57,6 +57,7 @@
         fit-view-on-init
         :node-types="nodeTypes"
         @connect="onConnect"
+        @edge-click="onEdgeClick"
       >
         <Background :gap="20" pattern-color="#2a2a2a" />
         <Controls position="bottom-right" />
@@ -123,9 +124,12 @@ function onConnect(connection: any) {
   edges.value = [...edges.value, {
     ...connection,
     id: `e-${connection.source}-${connection.target}`,
-    deletable: true,
     style: { stroke: '#555', strokeWidth: 2 },
   }]
+}
+
+function onEdgeClick(edge: any) {
+  edges.value = edges.value.filter(e => e.id !== edge.id)
 }
 
 function formatResult(val: any): string {
