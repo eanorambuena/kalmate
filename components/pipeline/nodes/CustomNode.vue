@@ -18,6 +18,40 @@
       />
     </div>
 
+    <div v-if="def.type === 'currencyInput'" class="mb-2 space-y-1.5">
+      <div class="flex items-center gap-1">
+        <span class="text-[7px] text-[#555] w-5">De</span>
+        <select
+          v-model="data.from"
+          class="flex-1 bg-[#222] border border-[#444] rounded px-1.5 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"
+        >
+          <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }}</option>
+        </select>
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="text-[7px] text-[#555] w-5">A</span>
+        <select
+          v-model="data.to"
+          class="flex-1 bg-[#222] border border-[#444] rounded px-1.5 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"
+        >
+          <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }}</option>
+        </select>
+      </div>
+      <p class="text-[#555] text-[7px] text-center mt-0.5">{{ data.from }}{{ data.to }}=X</p>
+    </div>
+
+    <div v-if="def.type === 'mathOp'" class="mb-2">
+      <select
+        v-model="data.op"
+        class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer text-center"
+      >
+        <option value="+">+ (suma)</option>
+        <option value="-">- (resta)</option>
+        <option value="*">* (multiplicación)</option>
+        <option value="/">/ (división)</option>
+      </select>
+    </div>
+
     <div class="flex items-start justify-between gap-2 mb-1">
       <div v-for="(inp, i) in def.inputs" :key="'in-' + i" class="flex items-center gap-1">
         <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" />
@@ -37,7 +71,7 @@
 
 <script setup>
 import { Handle, Position } from '@vue-flow/core'
-import { nodeDefinitions } from '../../../utils/pipeline/nodeDefinitions'
+import { nodeDefinitions, currencies } from '../../../utils/pipeline/nodeDefinitions'
 import NodeBody from '../NodeBody.vue'
 
 const props = defineProps({

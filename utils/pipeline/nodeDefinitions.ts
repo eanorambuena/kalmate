@@ -1,6 +1,44 @@
+export const currencies = [
+  { code: 'USD', name: 'US Dollar' },
+  { code: 'CLP', name: 'Chilean Peso' },
+  { code: 'EUR', name: 'Euro' },
+  { code: 'GBP', name: 'British Pound' },
+  { code: 'JPY', name: 'Japanese Yen' },
+  { code: 'AUD', name: 'Australian Dollar' },
+  { code: 'CAD', name: 'Canadian Dollar' },
+  { code: 'CHF', name: 'Swiss Franc' },
+  { code: 'CNY', name: 'Chinese Yuan' },
+  { code: 'BRL', name: 'Brazilian Real' },
+  { code: 'ARS', name: 'Argentine Peso' },
+  { code: 'PEN', name: 'Peruvian Sol' },
+  { code: 'COP', name: 'Colombian Peso' },
+  { code: 'MXN', name: 'Mexican Peso' },
+  { code: 'KRW', name: 'South Korean Won' },
+  { code: 'INR', name: 'Indian Rupee' },
+  { code: 'TRY', name: 'Turkish Lira' },
+  { code: 'ZAR', name: 'South African Rand' },
+  { code: 'NZD', name: 'New Zealand Dollar' },
+  { code: 'SEK', name: 'Swedish Krona' },
+  { code: 'NOK', name: 'Norwegian Krone' },
+  { code: 'DKK', name: 'Danish Krone' },
+  { code: 'HKD', name: 'Hong Kong Dollar' },
+  { code: 'SGD', name: 'Singapore Dollar' },
+]
+
 import type { NodeDefinition } from './types.ts'
 
 export const nodeDefinitions: NodeDefinition[] = [
+  {
+    type: 'currencyInput',
+    label: 'Currency',
+    description: 'Tipo de cambio entre dos monedas (USD → CLP)',
+    category: 'input',
+    color: '#ff6d00',
+    pro: false,
+    inputs: [],
+    outputs: [{ id: 'symbol', label: 'Symbol', type: 'symbol' }],
+    defaultData: { from: 'USD', to: 'CLP' },
+  },
   {
     type: 'symbolInput',
     label: 'Symbol Input',
@@ -125,6 +163,20 @@ export const nodeDefinitions: NodeDefinition[] = [
       { id: 'confidence', label: 'Confidence', type: 'series' },
     ],
     defaultData: { steps: 15 },
+  },
+  {
+    type: 'mathOp',
+    label: 'Math Op',
+    description: 'Operación matemática entre dos valores (+, -, *, /)',
+    category: 'process',
+    color: '#aa00ff',
+    pro: false,
+    inputs: [
+      { id: 'a', label: 'A', type: 'price' },
+      { id: 'b', label: 'B', type: 'price' },
+    ],
+    outputs: [{ id: 'result', label: 'Result', type: 'price' }],
+    defaultData: { op: '+' },
   },
   {
     type: 'newsOutput',

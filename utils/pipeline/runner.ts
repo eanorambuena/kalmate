@@ -3,6 +3,12 @@ import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman.ts
 import { calcSMA, calcRSI } from '../indicators.ts'
 
 export const executors: Record<string, NodeExecutor> = {
+  currencyInput: async (ctx) => {
+    const from = ctx.data.from || 'USD'
+    const to = ctx.data.to || 'CLP'
+    return { symbol: `${from}${to}=X` }
+  },
+
   symbolInput: async (ctx) => {
     return { symbol: ctx.data.symbol || 'AAPL' }
   },
@@ -101,6 +107,23 @@ export const executors: Record<string, NodeExecutor> = {
     } catch (e: any) {
       return { smoothed: [], trend: [], signal: 0, error: e?.message || 'Kalman error' }
     }
+  },
+
+  mathOp: async (ctx) => {
+    const a = ctx.inputs.a ?? ctx.data.a ?? 0
+    const b = ctx.inputs.b ?? ctx.data.b ?? 0
+    const va = typeof a === 'number' ? a : (Array.isArray(a) ? a[a.length - 1] : 0)
+    const vb = typeof b === 'number' ? b : (Array.isArray(b) ? b[b.length - 1] : 0)
+    const op = ctx.data.op || '+'
+    let result: number
+    switch (op) {
+      case '+': result = va + vb; break
+      case '-': result = va - vb; break
+      case '*': result = va * vb; break
+      case '/': result = vb !== 0 ? va / vb : 0; break
+      default: result = va + vb
+    }
+    return { result, a: va, b: vb, op }
   },
 
   newsOutput: async (ctx) => {
