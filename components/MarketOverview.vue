@@ -9,16 +9,13 @@ interface IndexQuote {
   changePercent: number
 }
 
-const indices = ref<IndexQuote[]>([])
-const error = ref(false)
-let intervalId: ReturnType<typeof setInterval>
-
-async function fetchIndices() {
-  try {
+const { data, pending, error: hasError } = await useAsyncData(
+  'market-indices',
+  async () => {
     const symbols = MAJOR_INDICES.map(i => i.symbol).join(',')
-    const data = await $fetch(`/api/quote?symbols=${symbols}`)
-    const arr = Array.isArray(data) ? data : [data]
-    indices.value = arr.map((q: any) => {
+    const result = await $fetch(`/api/quote?symbols=${symbols}`)
+    const arr = Array.isArray(result) ? result : [result]
+    return arr.map((q: any) => {
       const info = MAJOR_INDICES.find(i => i.symbol === q.symbol)
       return {
         symbol: q.symbol,
@@ -28,20 +25,15 @@ async function fetchIndices() {
         changePercent: q.regularMarketChangePercent,
       }
     })
-    error.value = false
-  } catch (e) {
-    console.error(e)
-    error.value = true
-  }
-}
+  },
+  { default: () => [] }
+)
+
+const indices = computed(() => data.value)
 
 onMounted(() => {
-  fetchIndices()
-  intervalId = setInterval(fetchIndices, 60000)
-})
-
-onUnmounted(() => {
-  clearInterval(intervalId)
+  const interval = setInterval(() => refresh(), 60000)
+  onUnmounted(() => clearInterval(interval))
 })
 </script>
 

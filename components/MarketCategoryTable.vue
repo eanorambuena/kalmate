@@ -12,18 +12,13 @@ const props = defineProps<{
   symbols: { symbol: string; name: string }[]
 }>()
 
-const items = ref<CategoryItem[]>([])
-const loading = ref(true)
-const error = ref(false)
-
-async function fetchData() {
-  loading.value = true
-  error.value = false
-  try {
+const { data, pending, error } = await useAsyncData(
+  `market-${props.title}`,
+  async () => {
     const syms = props.symbols.map(s => s.symbol).join(',')
-    const data = await $fetch(`/api/quote?symbols=${syms}`)
-    items.value = props.symbols.map((sym) => {
-      const q = Array.isArray(data) ? (data as any[]).find((d: any) => d.symbol === sym.symbol) : (data as any) || {}
+    const result = await $fetch(`/api/quote?symbols=${syms}`)
+    return props.symbols.map((sym) => {
+      const q = Array.isArray(result) ? (result as any[]).find((d: any) => d.symbol === sym.symbol) : (result as any) || {}
       return {
         symbol: sym.symbol,
         name: sym.name,
@@ -32,16 +27,16 @@ async function fetchData() {
         changePercent: q.regularMarketChangePercent ?? null,
       }
     })
-  } catch {
-    error.value = true
-  } finally {
-    loading.value = false
-  }
-}
+  },
+  { default: () => [] }
+)
+
+const items = computed(() => data.value || [])
+const hasError = computed(() => error.value)
 
 onMounted(() => {
-  fetchData()
-  setInterval(fetchData, 30000)
+  const interval = setInterval(() => refresh(), 30000)
+  onUnmounted(() => clearInterval(interval))
 })
 </script>
 
@@ -49,9 +44,9 @@ onMounted(() => {
   <div>
     <div class="text-xs text-[#aaa] mb-2 tracking-wider flex items-center gap-2 font-sans">
       <span>{{ title }}</span>
-      <span v-if="loading" class="text-[#555] animate-pulse-slow text-[10px] font-sans">updating...</span>
+      <span v-if="pending" class="text-[#555] animate-pulse-slow text-[10px] font-sans">updating...</span>
     </div>
-    <div v-if="error" class="text-[#ff1744] text-xs py-6 text-center bg-[#111] border border-[#333] rounded">
+    <div v-if="hasError" class="text-[#ff1744] text-xs py-6 text-center bg-[#111] border border-[#333] rounded">
       No data available
     </div>
     <div v-else class="bg-[#111] border border-[#333] rounded overflow-hidden">

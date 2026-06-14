@@ -7,8 +7,16 @@ interface NewsItem {
   summary?: string
 }
 
-const news = ref<NewsItem[]>([])
-const loading = ref(true)
+const { data, pending } = await useAsyncData(
+  'market-news',
+  async () => {
+    const result = await $fetch('/api/news')
+    return (result as NewsItem[]).slice(0, 8)
+  },
+  { default: () => [] }
+)
+
+const news = computed(() => data.value)
 
 function timeAgo(dateStr?: string): string {
   if (!dateStr) return ''
@@ -21,21 +29,9 @@ function timeAgo(dateStr?: string): string {
   return `${Math.floor(diff / 86400)}d ago`
 }
 
-async function fetchNews() {
-  loading.value = true
-  try {
-    const data = await $fetch('/api/news')
-    news.value = (data as NewsItem[]).slice(0, 8)
-  } catch {
-    news.value = []
-  } finally {
-    loading.value = false
-  }
-}
-
 onMounted(() => {
-  fetchNews()
-  setInterval(fetchNews, 120000)
+  const interval = setInterval(() => refresh(), 120000)
+  onUnmounted(() => clearInterval(interval))
 })
 </script>
 
@@ -43,7 +39,7 @@ onMounted(() => {
   <div>
     <div class="text-xs text-[#aaa] mb-2 tracking-wider font-sans">MARKET NEWS</div>
     <div class="bg-[#111] border border-[#333] rounded overflow-hidden">
-      <div v-if="loading" class="text-center text-[#aaa] py-8 text-xs animate-pulse-slow">
+      <div v-if="pending" class="text-center text-[#aaa] py-8 text-xs animate-pulse-slow">
         Loading news...
       </div>
       <div v-else class="divide-y divide-[#1a1a1a]">
