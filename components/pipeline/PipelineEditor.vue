@@ -131,12 +131,34 @@ function saveState() {
 
 watch([nodes, edges], () => { saveState() }, { deep: true })
 
+function syncPortfolioInputs() {
+  for (const node of nodes.value) {
+    if (node.data?.type === 'portfolioInput') {
+      const connectedCount = edges.value.filter(e => e.target === node.id).length
+      const neededInputs = Math.max(2, connectedCount + 1)
+      const currentWeights = node.data.weights || [1, 1]
+      if (currentWeights.length < neededInputs) {
+        const toAdd = neededInputs - currentWeights.length
+        for (let i = 0; i < toAdd; i++) {
+          currentWeights.push(1)
+        }
+        node.data.weights = [...currentWeights]
+      }
+    }
+  }
+}
+
 let autoRunTimer: any = null
 watch(edges, () => {
   if (edges.value.length > 0 && nodes.value.some(n => n.data?.type === 'priceFeed' || n.data?.type === 'kalmanFilter')) {
     clearTimeout(autoRunTimer)
     autoRunTimer = setTimeout(() => runPipeline(), 300)
   }
+  syncPortfolioInputs()
+}, { deep: true })
+
+watch(nodes, () => {
+  syncPortfolioInputs()
 }, { deep: true })
 
 const freeNodes = computed(() => nodeDefinitions.filter(n => !n.pro))

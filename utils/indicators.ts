@@ -28,3 +28,15 @@ export function calcRSI(data: number[], period: number): number[] {
   }
   return result
 }
+
+export function calcEMA(data: number[], period: number): number[] {
+  const result: number[] = []
+  const multiplier = 2 / (period + 1)
+  let ema = data[0]
+  for (let i = 0; i < data.length; i++) {
+    if (i === 0) { result.push(ema); continue }
+    ema = data[i] * multiplier + ema * (1 - multiplier)
+    result.push(ema)
+  }
+  return result
+}

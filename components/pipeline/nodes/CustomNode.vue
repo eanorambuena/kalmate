@@ -75,6 +75,17 @@
       </div>
     </div>
 
+    <div v-if="def.type === 'emaIndicator' || def.type === 'smaIndicator' || def.type === 'rsiIndicator'" class="mb-2">
+      <input
+        v-model.number="data.period"
+        type="number"
+        class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853]"
+        placeholder="Period"
+        min="2"
+        max="200"
+      />
+    </div>
+
     <div class="flex items-start justify-between gap-2 mb-1">
       <div v-if="def.type === 'portfolioInput'">
         <div v-for="(weight, idx) in data.weights" :key="'in-' + idx" class="flex items-center gap-1 mb-1">

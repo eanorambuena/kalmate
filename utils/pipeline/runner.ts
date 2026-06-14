@@ -1,6 +1,6 @@
 import type { PipelineSpec, ExecutionContext, NodeExecutor } from './types.ts'
 import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman.ts'
-import { calcSMA, calcRSI } from '../indicators.ts'
+import { calcSMA, calcRSI, calcEMA } from '../indicators.ts'
 
 export const executors: Record<string, NodeExecutor> = {
   currencyInput: async (ctx) => {
@@ -59,6 +59,16 @@ export const executors: Record<string, NodeExecutor> = {
     const rsi = calcRSI(series, period)
     const lastRsi = rsi[rsi.length - 1] ?? 50
     return { rsi: lastRsi, rsi_history: rsi }
+  },
+
+  emaIndicator: async (ctx) => {
+    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
+    if (!Array.isArray(series) || series.length < 2) {
+      return { ema: [], error: 'Need price series' }
+    }
+    const period = ctx.data.period || 20
+    const ema = calcEMA(series, period)
+    return { ema }
   },
 
   forecastNode: async (ctx) => {

@@ -176,6 +176,17 @@ export const nodeDefinitions: NodeDefinition[] = [
     defaultData: { steps: 15 },
   },
   {
+    type: 'emaIndicator',
+    label: 'EMA',
+    description: 'Media móvil exponencial del precio',
+    category: 'process',
+    color: '#00c853',
+    pro: true,
+    inputs: [{ id: 'series', label: 'Price Series', type: 'series' }],
+    outputs: [{ id: 'ema', label: 'EMA', type: 'series' }],
+    defaultData: { period: 20 },
+  },
+  {
     type: 'mathOp',
     label: 'Math Op',
     description: 'Operación matemática entre dos valores (+, -, *, /)',
