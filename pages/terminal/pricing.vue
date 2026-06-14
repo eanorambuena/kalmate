@@ -44,20 +44,20 @@ const methods = [
     icon: '₿',
     color: '#00c853',
     bgColor: '#00c85310',
-    details: 'Manda el equivalente a $9 USD en BTC, ETH o USDC a este link y activamos tu Pro.',
+    details: 'Manda el equivalente a $9.990 CLP en BTC, ETH o USDC a este link y activas Pro para siempre.',
     action: 'https://www.buda.com/link/eanorambuena',
     actionLabel: 'Donar con Buda',
   },
   {
     id: 'mach',
-    name: 'MACH',
-    desc: 'Transferencia desde MACH',
+    name: 'MACH / Transferencia',
+    desc: 'Transferencia desde cualquier banco',
     icon: 'M',
     color: '#00a3ff',
     bgColor: '#00a3ff10',
-    details: 'Transfiere $8.000 CLP (equivalente a ~$9 USD) al MACH asociado a este email.',
+    details: 'Transfiere $9.990 CLP al email asociado a MACH. Recibo transferencias desde cualquier banco (Santander, BCI, BancoEstado, etc.).',
     action: null,
-    actionLabel: 'Enviar a MACH',
+    actionLabel: 'Transferir',
     email: 'eanorambuena@uc.cl',
   },
   {
@@ -67,9 +67,9 @@ const methods = [
     icon: '♥',
     color: '#ff69b4',
     bgColor: '#ff69b410',
-    details: 'Suscríbete como sponsor en GitHub y te activamos Pro automáticamente.',
+    details: 'Donación única de $9.990 CLP (≈ $9 USD) como sponsor en GitHub. Activas Pro para siempre.',
     action: 'https://github.com/sponsors/eanorambuena',
-    actionLabel: 'Sponsor on GitHub',
+    actionLabel: 'Sponsor en GitHub',
   },
 ]
 
@@ -122,7 +122,8 @@ const features = [
               PRO
             </div>
             <p class="text-[#888] text-xs font-mono tracking-widest mb-2">PRO</p>
-            <p class="text-4xl font-bold text-white mb-1">$9<span class="text-lg text-[#555]">/mo</span></p>
+            <p class="text-4xl font-bold text-white mb-1">$9.990</p>
+            <p class="text-[#555] text-sm mb-1">Una vez, para siempre.</p>
             <p class="text-[#555] text-sm mb-6">Unlock all pro nodes and features.</p>
             <button
               v-if="plan !== 'pro'"
@@ -199,7 +200,7 @@ const features = [
           <div v-if="selectedMethod === 'mach'" class="bg-[#0a0a0a] border border-[#333] rounded-xl p-4 mb-6 text-left">
             <p class="text-[#888] text-xs mb-1">Enviar a:</p>
             <p class="text-white font-mono text-sm break-all">eanorambuena@uc.cl</p>
-            <p class="text-[#555] text-xs mt-2">Monto sugerido: $8.000 CLP</p>
+            <p class="text-[#555] text-xs mt-2">Monto: $9.990 CLP (cualquier banco)</p>
           </div>
 
           <a
