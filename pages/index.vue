@@ -92,7 +92,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
       <div class="absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 bg-[#00c853]/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
     </section>
 
-    <section id="features" class="py-32 px-6" :ref="featuresEl">
+    <section id="features" class="py-32 px-6" ref="featuresEl">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-20" :class="featuresVisible ? 'animate-fade-in-up' : 'opacity-0'">
           <p class="text-[#00c853] text-sm font-mono tracking-widest mb-4">FEATURES</p>
@@ -113,7 +113,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
       </div>
     </section>
 
-    <section id="tech" class="py-32 px-6 bg-[#060606]" :ref="techEl">
+    <section id="tech" class="py-32 px-6 bg-[#060606]" ref="techEl">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-20" :class="techVisible ? 'animate-fade-in-up' : 'opacity-0'">
           <p class="text-[#00c853] text-sm font-mono tracking-widest mb-4">TECHNOLOGY</p>
