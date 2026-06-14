@@ -52,6 +52,35 @@
       </select>
     </div>
 
+    <div v-if="def.type === 'scalarInput'" class="mb-2">
+      <input
+        v-model.number="data.value"
+        class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853]"
+        placeholder="1.0"
+        step="0.01"
+      />
+    </div>
+
+    <div v-if="def.type === 'portfolioInput'" class="mb-2">
+      <div v-for="(weight, idx) in data.weights" :key="idx" class="flex items-center gap-1 mb-1">
+        <span class="text-[7px] text-[#555] w-6">In{{ idx + 1 }}</span>
+        <input
+          type="number"
+          v-model.number="data.weights[idx]"
+          class="w-16 bg-[#222] border border-[#444] rounded px-1.5 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853]"
+          step="0.1"
+          min="0"
+        />
+        <span class="text-[7px] text-[#555]">×</span>
+      </div>
+      <button
+        @click="addInput"
+        class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[9px] font-mono outline-none focus:border-[#00c853] cursor-pointer"
+      >
+        + Añadir input
+      </button>
+    </div>
+
     <div class="flex items-start justify-between gap-2 mb-1">
       <div v-for="(inp, i) in def.inputs" :key="'in-' + i" class="flex items-center gap-1">
         <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" />
@@ -73,6 +102,7 @@
 import { Handle, Position } from '@vue-flow/core'
 import { nodeDefinitions, currencies } from '../../../utils/pipeline/nodeDefinitions'
 import NodeBody from '../NodeBody.vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -83,4 +113,14 @@ const def = computed(() => nodeDefinitions.find(n => n.type === props.data.type)
 const label = computed(() => props.data.label || def.value.label)
 const color = computed(() => def.value.color)
 const result = computed(() => props.data.result)
+
+const addInput = () => {
+  if (def.value.dynamicInputs && props.data.weights) {
+    props.data.weights.push(1)
+    if (def.value.inputs) {
+      const newIdx = def.value.inputs.length
+      def.value.inputs.push({ id: `in${newIdx}`, label: `In ${newIdx + 1}`, type: 'scalar' })
+    }
+  }
+}
 </script>

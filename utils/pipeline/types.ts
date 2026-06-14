@@ -21,7 +21,7 @@ export interface PipelineSpec {
 export interface NodePort {
   id: string
   label: string
-  type: 'any' | 'symbol' | 'price' | 'series' | 'signal'
+  type: 'any' | 'symbol' | 'price' | 'series' | 'signal' | 'scalar'
 }
 
 export interface NodeDefinition {

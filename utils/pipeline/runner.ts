@@ -126,6 +126,24 @@ export const executors: Record<string, NodeExecutor> = {
     return { result, a: va, b: vb, op }
   },
 
+  scalarInput: async (ctx) => {
+    return { value: ctx.data.value ?? 1 }
+  },
+
+  portfolioInput: async (ctx) => {
+    const weights = Array.isArray(ctx.data.weights) ? ctx.data.weights : []
+    let sum = 0
+    let totalWeight = 0
+    for (const [key, val] of Object.entries(ctx.inputs)) {
+      const idx = parseInt(key.replace('in', ''))
+      const weight = weights[idx] ?? 1
+      const v = typeof val === 'number' ? val : (Array.isArray(val) ? val[val.length - 1] : 0)
+      sum += v * weight
+      totalWeight += weight
+    }
+    return { result: totalWeight > 0 ? sum / totalWeight : 0 }
+  },
+
   newsOutput: async (ctx) => {
     const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
     try {

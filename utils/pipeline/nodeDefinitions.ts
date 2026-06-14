@@ -40,6 +40,17 @@ export const nodeDefinitions: NodeDefinition[] = [
     defaultData: { from: 'USD', to: 'CLP' },
   },
   {
+    type: 'scalarInput',
+    label: 'Scalar',
+    description: 'Ingresa un número constante',
+    category: 'input',
+    color: '#00c853',
+    pro: false,
+    inputs: [],
+    outputs: [{ id: 'value', label: 'Value', type: 'scalar' }],
+    defaultData: { value: 1 },
+  },
+  {
     type: 'symbolInput',
     label: 'Symbol Input',
     description: 'Escribe el ticker a analizar (ej: AAPL, GOOGL)',
@@ -172,10 +183,10 @@ export const nodeDefinitions: NodeDefinition[] = [
     color: '#aa00ff',
     pro: false,
     inputs: [
-      { id: 'a', label: 'A', type: 'price' },
-      { id: 'b', label: 'B', type: 'price' },
+      { id: 'a', label: 'A', type: 'scalar' },
+      { id: 'b', label: 'B', type: 'scalar' },
     ],
-    outputs: [{ id: 'result', label: 'Result', type: 'price' }],
+    outputs: [{ id: 'result', label: 'Result', type: 'scalar' }],
     defaultData: { op: '+' },
   },
   {
@@ -199,6 +210,21 @@ export const nodeDefinitions: NodeDefinition[] = [
     inputs: [{ id: 'signal', label: 'Signal', type: 'signal' }],
     outputs: [],
     defaultData: { chatId: '' },
+  },
+  {
+    type: 'portfolioInput',
+    label: 'Portfolio',
+    description: 'Suma ponderada de múltiples inputs con pesos',
+    category: 'process',
+    color: '#ff6d00',
+    pro: false,
+    inputs: [
+      { id: 'in0', label: 'In 1', type: 'scalar' },
+      { id: 'in1', label: 'In 2', type: 'scalar' },
+    ],
+    outputs: [{ id: 'result', label: 'Weighted Sum', type: 'scalar' }],
+    defaultData: { weights: [1, 1] },
+    dynamicInputs: true,
   },
   {
     type: 'emailOutput',
