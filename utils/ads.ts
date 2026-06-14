@@ -1,7 +1,7 @@
 export const ads = {
   googleAdSense: {
-    enabled: false,
-    publisherId: '',
+    enabled: true,
+    publisherId: 'ca-pub-5127016522335908',
     autoAds: true,
   },
   other: {

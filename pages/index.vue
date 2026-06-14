@@ -137,7 +137,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
           <span>Data: Yahoo Finance</span>
           <span>Deploy: Cloudflare Pages</span>
         </div>
-        <AdBanner ad-unit-id="1234567890" />
+        <AdBanner />
 
         <div class="mt-8 pt-8 border-t border-[#1a1a1a]">
           <p class="text-[#555] text-xs mb-3">Kalmate is free and open source.</p>
