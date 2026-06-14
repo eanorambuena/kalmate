@@ -112,7 +112,28 @@ let nodeCounter = 0
 
 onMounted(() => {
   isPro.value = (localStorage.getItem('kalmate-plan') || 'free') === 'pro'
+  const saved = localStorage.getItem('kalmate-pipeline')
+  if (saved) {
+    try {
+      const p = JSON.parse(saved)
+      nodes.value = p.nodes || []
+      edges.value = p.edges || []
+      results.value = p.results || {}
+      nodeCounter = p.counter || 0
+    } catch {}
+  }
 })
+
+function saveState() {
+  localStorage.setItem('kalmate-pipeline', JSON.stringify({
+    nodes: nodes.value,
+    edges: edges.value,
+    results: results.value,
+    counter: nodeCounter,
+  }))
+}
+
+watch([nodes, edges], () => { saveState() }, { deep: true })
 
 let autoRunTimer: any = null
 watch(edges, () => {
@@ -209,6 +230,7 @@ function clearAll() {
   nodes.value = []
   edges.value = []
   results.value = {}
+  localStorage.removeItem('kalmate-pipeline')
 }
 </script>
 
