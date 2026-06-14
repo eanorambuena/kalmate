@@ -57,7 +57,7 @@
       </button>
     </div>
 
-    <div class="vue-flow-bg h-full">
+    <div class="vue-flow-bg h-full" :class="{ 'eraser-active': eraserMode }" @click="onCanvasClick">
       <VueFlow
         v-model:nodes="nodes"
         v-model:edges="edges"
@@ -65,7 +65,6 @@
         fit-view-on-init
         :node-types="nodeTypes"
         @connect="onConnect"
-        @edge-click="onEdgeClick"
       >
         <Background :gap="20" pattern-color="#2a2a2a" />
         <Controls position="bottom-right" />
@@ -142,9 +141,16 @@ function onConnect(connection: any) {
   }]
 }
 
-function onEdgeClick(edge: any) {
-  if (eraserMode.value) {
-    edges.value = edges.value.filter(e => e.id !== edge.id)
+function onCanvasClick(e: MouseEvent) {
+  if (!eraserMode.value) return
+  const target = e.target as HTMLElement
+  const path = target.closest('.vue-flow__edge-path, .vue-flow__edge')
+  if (path) {
+    const edgeEl = path.closest('.vue-flow__edge')
+    const edgeId = edgeEl?.getAttribute('data-id')
+    if (edgeId) {
+      edges.value = edges.value.filter(ed => ed.id !== edgeId)
+    }
   }
 }
 
@@ -224,5 +230,15 @@ function clearAll() {
 }
 .vue-flow__controls-button:hover {
   background: #2a2a2a !important;
+}
+.eraser-active,
+.eraser-active .vue-flow__pane {
+  cursor: not-allowed !important;
+}
+.eraser-active .vue-flow__edge {
+  cursor: pointer !important;
+}
+.eraser-active .vue-flow__edge-path {
+  pointer-events: stroke;
 }
 </style>
