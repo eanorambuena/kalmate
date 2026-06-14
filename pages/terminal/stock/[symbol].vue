@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { QuoteData, HistoryData } from '../../utils/types'
+import KalmanAnalysis from '../../../components/KalmanAnalysis.vue'
 
 const route = useRoute()
 const symbol = route.params.symbol as string
@@ -139,6 +140,10 @@ watch(range, () => {
           <div v-else class="h-[400px] flex items-center justify-center text-[#aaa] text-sm" aria-label="No chart data">
             No chart data available
           </div>
+        </div>
+
+        <div class="mt-4">
+          <KalmanAnalysis :symbol="symbol" />
         </div>
       </template>
 </template>
