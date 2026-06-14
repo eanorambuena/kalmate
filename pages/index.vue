@@ -186,6 +186,15 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
             >
               Trade on Binance
             </a>
+            <a
+              v-if="m.buda.enabled"
+              :href="m.buda.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00c853]/10 text-[#00c853] border border-[#00c853]/20 rounded-lg text-sm font-medium hover:bg-[#00c853]/20 transition-all"
+            >
+              {{ m.buda.label }}
+            </a>
           </div>
         </div>
       </div>

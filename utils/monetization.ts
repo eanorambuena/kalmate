@@ -29,4 +29,9 @@ export const monetization = {
     eth: '',
     sol: '',
   },
+  buda: {
+    enabled: true,
+    url: 'https://www.buda.com/link/eanorambuena',
+    label: 'Donar con Buda (cripto en Chile)',
+  },
 }
