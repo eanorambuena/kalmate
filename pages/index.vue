@@ -198,6 +198,15 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
             >
               {{ m.buda.label }}
             </a>
+            <a
+              v-if="m.fintual.enabled"
+              :href="m.fintual.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#6366f1]/10 text-[#6366f1] border border-[#6366f1]/20 rounded-lg text-sm font-medium hover:bg-[#6366f1]/20 transition-all"
+            >
+              {{ m.fintual.label }}
+            </a>
           </div>
         </div>
       </div>

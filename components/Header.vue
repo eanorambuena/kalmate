@@ -106,6 +106,7 @@ const navLinks = [
   { to: '/terminal/portfolio', label: 'PORTFOLIO', key: '2', icon: '💼' },
   { to: '/terminal/screener', label: 'SCREENER', key: '4', icon: '🔍' },
   { to: '/terminal/alerts', label: 'ALERTS', key: '3', icon: '🔔' },
+  { to: '/terminal/pipeline', label: 'PIPELINE', key: '5', icon: '🔀' },
 ]
 
 function isActive(to: string) {
