@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { canonicalUrl } from '../../utils/seo'
+
+const canonical = canonicalUrl('/terminal/screener')
+
 interface QuoteItem {
   symbol: string
   shortName?: string
@@ -23,6 +27,21 @@ const presets = [
   { label: 'Dividend', q: 'dividend stocks', sort: 'regularMarketChangePercent', dir: 'desc' },
   { label: 'Growth', q: 'growth stocks', sort: 'regularMarketChangePercent', dir: 'desc' },
 ]
+
+useHead({
+  title: 'Stock Screener | Kalmate',
+  meta: [
+    { name: 'description', content: 'Filter and sort thousands of instruments with the Kalmate stock screener.' },
+    { property: 'og:title', content: 'Stock Screener | Kalmate' },
+    { property: 'og:description', content: 'Filter and sort thousands of instruments with the Kalmate stock screener.' },
+    { property: 'og:url', content: canonical },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: 'Stock Screener | Kalmate' },
+    { name: 'twitter:description', content: 'Filter and sort thousands of instruments with the Kalmate stock screener.' },
+  ],
+  link: [{ rel: 'canonical', href: canonical }],
+})
 
 async function search() {
   loading.value = true

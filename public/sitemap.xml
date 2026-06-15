@@ -22,4 +22,12 @@
     <loc>https://kalmate.pages.dev/terminal/alerts</loc>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://kalmate.pages.dev/terminal/pricing</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://kalmate.pages.dev/terminal/pipeline</loc>
+    <priority>0.6</priority>
+  </url>
 </urlset>

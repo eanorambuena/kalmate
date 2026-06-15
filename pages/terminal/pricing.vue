@@ -1,4 +1,23 @@
 <script setup lang="ts">
+import { canonicalUrl } from '../../utils/seo'
+
+const canonical = canonicalUrl('/terminal/pricing')
+
+useHead({
+  title: 'Pricing | Kalmate',
+  meta: [
+    { name: 'description', content: 'Compare Kalmate free and pro plans.' },
+    { property: 'og:title', content: 'Pricing | Kalmate' },
+    { property: 'og:description', content: 'Compare Kalmate free and pro plans.' },
+    { property: 'og:url', content: canonical },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: 'Pricing | Kalmate' },
+    { name: 'twitter:description', content: 'Compare Kalmate free and pro plans.' },
+  ],
+  link: [{ rel: 'canonical', href: canonical }],
+})
+
 const plan = ref<'free' | 'pro'>(getPlan())
 const step = ref<'plans' | 'methods' | 'activate'>('plans')
 const selectedMethod = ref('')

@@ -14,7 +14,6 @@ export default defineNuxtConfig({
       link: [
         { rel: 'manifest', href: '/manifest.json' },
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-        { rel: 'canonical', href: 'https://kalmate.pages.dev' },
       ],
       meta: [
         { charset: 'utf-8' },

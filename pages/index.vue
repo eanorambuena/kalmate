@@ -1,16 +1,25 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'landing' })
 
+import { canonicalUrl } from '../utils/seo'
+
+const canonical = canonicalUrl('/')
+
 useHead({
   title: 'Kalmate — Bloomberg-Style Financial Terminal',
   meta: [
     { name: 'description', content: 'Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts. Powered by Yahoo Finance.' },
     { name: 'keywords', content: 'financial terminal, bloomberg alternative, stock market, real-time quotes, portfolio tracker, yahoo finance, chile' },
+    { property: 'og:url', content: canonical },
     { property: 'og:title', content: 'Kalmate — Bloomberg-Style Financial Terminal' },
     { property: 'og:description', content: 'Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.' },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: 'Kalmate — Bloomberg-Style Financial Terminal' },
+    { name: 'twitter:description', content: 'Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.' },
+  ],
+  link: [
+    { rel: 'canonical', href: canonical },
   ],
   script: [
     {
@@ -19,7 +28,7 @@ useHead({
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Kalmate",
-        "url": "https://kalmate.pages.dev",
+        "url": canonical,
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "Web",
         "description": "Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.",

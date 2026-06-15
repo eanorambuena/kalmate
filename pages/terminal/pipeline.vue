@@ -1,6 +1,24 @@
 <script setup lang="ts">
+import { canonicalUrl } from '../../utils/seo'
 import PipelineEditor from '../../components/pipeline/PipelineEditor.vue'
 import PipelineTutorial from '../../components/pipeline/PipelineTutorial.vue'
+
+const canonical = canonicalUrl('/terminal/pipeline')
+
+useHead({
+  title: 'Pipeline | Kalmate',
+  meta: [
+    { name: 'description', content: 'Build and run visual trading pipelines in Kalmate.' },
+    { property: 'og:title', content: 'Pipeline | Kalmate' },
+    { property: 'og:description', content: 'Build and run visual trading pipelines in Kalmate.' },
+    { property: 'og:url', content: canonical },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: 'Pipeline | Kalmate' },
+    { name: 'twitter:description', content: 'Build and run visual trading pipelines in Kalmate.' },
+  ],
+  link: [{ rel: 'canonical', href: canonical }],
+})
 
 const tutorialKey = ref(0)
 

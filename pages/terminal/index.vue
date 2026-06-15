@@ -1,5 +1,23 @@
 <script setup lang="ts">
+import { canonicalUrl } from '../../utils/seo'
 import { ALL_MARKETS } from '../../utils/constants'
+
+const canonical = canonicalUrl('/terminal')
+
+useHead({
+  title: 'Market Dashboard | Kalmate',
+  meta: [
+    { name: 'description', content: 'Browse real-time quotes for equities, forex, bonds, commodities, and crypto in Kalmate.' },
+    { property: 'og:title', content: 'Market Dashboard | Kalmate' },
+    { property: 'og:description', content: 'Browse real-time quotes for equities, forex, bonds, commodities, and crypto in Kalmate.' },
+    { property: 'og:url', content: canonical },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: 'Market Dashboard | Kalmate' },
+    { name: 'twitter:description', content: 'Browse real-time quotes for equities, forex, bonds, commodities, and crypto in Kalmate.' },
+  ],
+  link: [{ rel: 'canonical', href: canonical }],
+})
 
 const categories = Object.entries(ALL_MARKETS).map(([title, symbols]) => ({
   title,
