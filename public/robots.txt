@@ -11,4 +11,4 @@ Allow: /
 User-agent: ClaudeBot
 Allow: /
 
-Sitemap: https://kalmate.app/sitemap.xml
+Sitemap: https://kalmate.pages.dev/sitemap.xml

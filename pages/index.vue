@@ -19,7 +19,7 @@ useHead({
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Kalmate",
-        "url": "https://kalmate.app",
+        "url": "https://kalmate.pages.dev",
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "Web",
         "description": "Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.",
