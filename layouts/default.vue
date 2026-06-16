@@ -7,7 +7,7 @@
     <main id="main-content" class="max-w-7xl mx-auto px-4 py-4 pb-24 md:pb-6" role="main" aria-label="Market data">
       <slot />
     </main>
-    <MonetizationFooter />
+    <AppFooter />
     <Toast />
   </div>
 </template>

@@ -61,19 +61,7 @@
       </div>
     </main>
 
-    <footer class="py-12 px-6 border-t border-[#1a1a1a]">
-      <div class="max-w-6xl mx-auto text-center">
-        <span class="text-[#00c853] font-bold text-lg tracking-wider">KALMATE⌘</span>
-        <div class="flex justify-center gap-4 mt-6 text-xs text-[#888]">
-          <NuxtLink to="/about" class="hover:text-white transition-colors">About</NuxtLink>
-          <NuxtLink to="/contact" class="hover:text-white transition-colors">Contact</NuxtLink>
-          <NuxtLink to="/blog" class="hover:text-white transition-colors">Blog</NuxtLink>
-          <NuxtLink to="/privacy" class="hover:text-white transition-colors">Privacy</NuxtLink>
-          <NuxtLink to="/terms" class="hover:text-white transition-colors">Terms</NuxtLink>
-          <NuxtLink to="/disclaimer" class="hover:text-white transition-colors">Disclaimer</NuxtLink>
-        </div>
-      </div>
-    </footer>
+    <AppFooter />
   </div>
 </template>
 

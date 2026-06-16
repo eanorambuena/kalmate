@@ -42,10 +42,6 @@ useHead({
 const { el: featuresEl, visible: featuresVisible } = useScrollReveal(0.1, 100)
 const { el: techEl, visible: techVisible } = useScrollReveal(0.2, 200)
 
-import AdBanner from '../components/AdBanner.vue'
-import { monetization as m } from '../utils/monetization'
-
-const showFintualModal = ref(false)
 const features = [
   { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>', title: 'Market Dashboard', desc: 'Real-time quotes for equities, forex, bonds, commodities, and crypto. Organized by category with instant search.' },
   { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>', title: 'Portfolio Tracking', desc: 'Track your holdings with real-time P&L. Add positions, monitor performance, and make informed decisions.' },
@@ -146,124 +142,8 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
       </div>
     </section>
 
-    <footer class="py-16 px-6 border-t border-[#1a1a1a]">
-      <div class="max-w-6xl mx-auto text-center">
-        <span class="text-[#00c853] font-bold text-lg tracking-wider">KALMATE⌘</span>
-        <p class="text-[#ccc] text-sm mt-4">Real-time financial data at your fingertips.</p>
-        <div class="flex justify-center gap-6 mt-8 text-xs text-[#ccc]">
-          <span>Data: Yahoo Finance</span>
-          <span>Deploy: Cloudflare Pages</span>
-        </div>
-        <div class="flex justify-center gap-4 mt-3 text-xs">
-          <NuxtLink to="/about" class="text-[#888] hover:text-white transition-colors">About</NuxtLink>
-          <NuxtLink to="/contact" class="text-[#888] hover:text-white transition-colors">Contact</NuxtLink>
-          <NuxtLink to="/privacy" class="text-[#888] hover:text-white transition-colors">Privacy</NuxtLink>
-          <NuxtLink to="/terms" class="text-[#888] hover:text-white transition-colors">Terms</NuxtLink>
-          <NuxtLink to="/disclaimer" class="text-[#888] hover:text-white transition-colors">Disclaimer</NuxtLink>
-          <NuxtLink to="/blog" class="text-[#888] hover:text-white transition-colors">Blog</NuxtLink>
-        </div>
-        <AdBanner />
-
-        <div class="mt-8 pt-8 border-t border-[#1a1a1a]">
-          <p class="text-[#ccc] text-xs mb-3">Kalmate is free and open source.</p>
-          <div class="flex flex-wrap items-center justify-center gap-3">
-            <a
-              v-if="m.githubSponsors.enabled"
-              :href="m.githubSponsors.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#ff69b4]/10 text-[#ff69b4] border border-[#ff69b4]/20 rounded-lg text-sm font-medium hover:bg-[#ff69b4]/20 transition-all"
-            >
-              <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="m8 14.25-.345.666a.75.75 0 0 0 .69 0l-.345-.666Zm0 0 .345.666a.75.75 0 0 1-.69 0L8 14.25ZM4.268 2.47a3.72 3.72 0 0 0-3.31 1.34c-1.27 1.7-1 4.04.64 5.78l.02.02.02.02L8 14.25l6.37-4.62.02-.02.02-.02c1.64-1.74 1.91-4.08.64-5.78a3.72 3.72 0 0 0-3.31-1.34 4.9 4.9 0 0 0-3.3 1.73L8 4.69l-.44-.49a4.9 4.9 0 0 0-3.3-1.73h.02Z"/></svg>
-              Sponsor on GitHub
-            </a>
-            <a
-              v-if="m.tradingView.enabled"
-              :href="m.tradingView.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1a1a1a] text-[#ccc] border border-[#333] rounded-lg text-sm font-medium hover:bg-[#2a2a2a] transition-all"
-            >
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l5.59-5.59L18 10l-7 7z"/></svg>
-              Trade on TradingView
-            </a>
-            <a
-              v-if="m.interactiveBrokers.enabled"
-              :href="m.interactiveBrokers.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1a1a1a] text-[#ccc] border border-[#333] rounded-lg text-sm font-medium hover:bg-[#2a2a2a] transition-all"
-            >
-              Open IBKR Account
-            </a>
-            <a
-              v-if="m.coinbase.enabled"
-              :href="m.coinbase.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1a1a1a] text-[#ccc] border border-[#333] rounded-lg text-sm font-medium hover:bg-[#2a2a2a] transition-all"
-            >
-              Buy Crypto on Coinbase
-            </a>
-            <a
-              v-if="m.binance.enabled"
-              :href="m.binance.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1a1a1a] text-[#ccc] border border-[#333] rounded-lg text-sm font-medium hover:bg-[#2a2a2a] transition-all"
-            >
-              Trade on Binance
-            </a>
-            <a
-              v-if="m.buda.enabled"
-              :href="m.buda.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00c853]/10 text-[#00c853] border border-[#00c853]/20 rounded-lg text-sm font-medium hover:bg-[#00c853]/20 transition-all"
-            >
-              {{ m.buda.label }}
-            </a>
-            <button
-              v-if="m.fintual.enabled"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#6366f1]/10 text-[#6366f1] border border-[#6366f1]/20 rounded-lg text-sm font-medium hover:bg-[#6366f1]/20 transition-all cursor-pointer"
-              @click="showFintualModal = true"
-            >
-              {{ m.fintual.label }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </footer>
+    <AppFooter />
   </div>
-
-  <!-- Fintual Modal -->
-  <Teleport to="body">
-    <div v-if="showFintualModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4" @click.self="showFintualModal = false">
-      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div class="relative bg-[#111] border border-[#333] rounded-2xl p-8 max-w-md w-full shadow-2xl">
-        <button class="absolute top-4 right-4 text-[#ccc] hover:text-white text-lg cursor-pointer" @click="showFintualModal = false">✕</button>
-        <div class="text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-4 bg-[#6366f1]/10 text-[#6366f1]">F</div>
-          <h3 class="text-white font-bold text-lg mb-3">{{ m.fintual.label }}</h3>
-          <p class="text-[#ccc] text-sm leading-relaxed mb-4">
-            Esta web fue hecha por <strong class="text-white">Emmanuel Norambuena</strong>.
-          </p>
-          <p class="text-[#ccc] text-sm leading-relaxed mb-6">
-            Si quieres apoyarme con este referido, cuando Fintual te pregunte si alguien te recomendó, indica que me conoces. Eso me ayuda a seguir desarrollando herramientas gratis como esta.
-          </p>
-          <a
-            :href="m.fintual.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-[#6366f1] text-white rounded-xl text-sm font-bold hover:bg-[#6366f1]/90 transition-all no-underline"
-            @click="showFintualModal = false"
-          >
-            Ir a {{ m.fintual.label }} →
-          </a>
-        </div>
-      </div>
-    </div>
-  </Teleport>
 </template>
 
 <style scoped>
