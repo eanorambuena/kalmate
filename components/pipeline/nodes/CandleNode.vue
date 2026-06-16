@@ -8,7 +8,7 @@
     <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
     <div v-if="candles.length > 0" class="w-full h-[120px] relative">
       <svg viewBox="0 0 260 110" class="w-full h-full" preserveAspectRatio="none">
-        <g v-for="(c, i) in visibleCandles" :key="i">
+        <g v-for="(c, i) in visibleCandles.items" :key="i">
           <line :x1="c.x" :y1="c.highY" :x2="c.x" :y2="c.lowY" :stroke="c.color" stroke-width="1" />
           <rect :x="c.x - c.w / 2" :y="c.bodyTop" :width="c.w" :height="c.bodyH" :fill="c.color" />
         </g>
