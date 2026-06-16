@@ -61,6 +61,9 @@
           </button>
         </div>
       </div>
+      <div class="mt-6 text-[10px] text-[#555]">
+        &copy; 2026 Kalmate. Open source under MIT License.
+      </div>
     </div>
   </footer>
 
