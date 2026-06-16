@@ -97,7 +97,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
               VIEW SAMPLE
             </a>
             <a href="/terminal/pipeline" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm whitespace-nowrap">
-              Try Pipelines →
+              TRY PIPELINES →
             </a>
           </div>
         </div>
