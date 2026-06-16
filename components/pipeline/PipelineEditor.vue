@@ -118,6 +118,14 @@
         >
           <BarChart3 class="w-3.5 h-3.5" />
         </button>
+        <button
+          class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
+          :class="showAI ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
+          @click="showAI = !showAI"
+          title="Generar pipeline con IA"
+        >
+          <Zap class="w-3.5 h-3.5" />
+        </button>
       </div>
 
       <div ref="flowContainer" class="w-full h-full" :class="{ 'eraser-active': eraserMode }" @click="onCanvasClick">
@@ -154,6 +162,7 @@
     </div>
 
     <ProModal v-if="showProModal" @close="showProModal = false" />
+    <PipelineAI v-if="showAI" @apply="onAIApply" @close="showAI = false" />
   </div>
 </template>
 
@@ -167,7 +176,8 @@ import CustomNode from './nodes/CustomNode.vue'
 import ChartNode from './nodes/ChartNode.vue'
 import CandleNode from './nodes/CandleNode.vue'
 import ProModal from './ProModal.vue'
-import { Trash2, BarChart3, Play, Pause, MousePointer2 } from '@lucide/vue'
+import PipelineAI from './PipelineAI.vue'
+import { Trash2, BarChart3, Play, Pause, MousePointer2, Zap } from '@lucide/vue'
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode, candle: CandleNode }
 const flowContainer = ref<HTMLElement | null>(null)
@@ -184,6 +194,7 @@ const isPro = ref(false)
 const eraserMode = ref(false)
 const showProModal = ref(false)
 const showResults = ref(true)
+const showAI = ref(false)
 let nodeCounter = 0
 
 onMounted(() => {
@@ -366,6 +377,37 @@ function clearAll() {
   edges.value = []
   results.value = {}
   localStorage.removeItem('kalmate-pipeline')
+}
+
+function onAIApply(plan: { nodes: any[]; edges: any[] }) {
+  const idMap = new Map<number, string>()
+  const newNodes: any[] = []
+  for (let i = 0; i < plan.nodes.length; i++) {
+    const spec = plan.nodes[i]
+    const def = nodeDefinitions.find(n => n.type === spec.type)
+    if (!def) continue
+    nodeCounter++
+    const id = `${spec.type}-${nodeCounter}`
+    idMap.set(i, id)
+    const nodeType = spec.type === 'chartOutput' ? 'chart' : spec.type === 'candleChart' ? 'candle' : 'custom'
+    newNodes.push({
+      id,
+      type: nodeType,
+      position: spec.position || { x: 50 + i * 200, y: 150 },
+      zIndex: 10,
+      data: { ...def.defaultData, ...spec.data, label: `${def.label} ${nodeCounter}`, type: spec.type, pro: def.pro },
+    })
+  }
+  const newEdges = plan.edges.map(e => ({
+    id: `e-${idMap.get(e.source)}-${idMap.get(e.target)}`,
+    source: idMap.get(e.source) || '',
+    target: idMap.get(e.target) || '',
+    sourceHandle: e.sourceHandle,
+    targetHandle: e.targetHandle,
+  })).filter(e => e.source && e.target)
+  nodes.value = [...nodes.value, ...newNodes]
+  edges.value = [...edges.value, ...newEdges]
+  setTimeout(runPipeline, 300)
 }
 </script>
 
