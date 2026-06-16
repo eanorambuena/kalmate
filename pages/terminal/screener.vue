@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { canonicalUrl } from '../../utils/seo'
+import { useCurrency } from '~/composables/useCurrency'
+const { formatPrice, formatChange, formatChangePercent } = useCurrency()
 
 const canonical = canonicalUrl('/terminal/screener')
 
@@ -193,19 +195,19 @@ onMounted(search)
                 {{ item.shortName ?? '-' }}
               </td>
               <td class="px-3 py-2 text-right font-mono">
-                {{ '$' + (item.regularMarketPrice?.toFixed(2) ?? '...') }}
+                {{ formatPrice(item.regularMarketPrice) }}
               </td>
               <td
                 class="px-3 py-2 text-right font-mono"
                 :class="(item.regularMarketChange ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
               >
-                {{ item.regularMarketChange >= 0 ? '+' : '' }}{{ item.regularMarketChange?.toFixed(2) ?? '...' }}
+                {{ formatChange(item.regularMarketChange) }}
               </td>
               <td
                 class="px-3 py-2 text-right font-mono hidden sm:table-cell"
                 :class="(item.regularMarketChangePercent ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
               >
-                {{ item.regularMarketChangePercent >= 0 ? '+' : '' }}{{ item.regularMarketChangePercent?.toFixed(2) ?? '...' }}%
+                {{ formatChangePercent(item.regularMarketChangePercent) }}
               </td>
               <td class="px-3 py-2 text-right font-mono text-[#ccc] hidden md:table-cell">
                 {{ item.regularMarketVolume?.toLocaleString() ?? '-' }}

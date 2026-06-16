@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { MAJOR_INDICES } from '../utils/constants'
+import { useCurrency } from '~/composables/useCurrency'
+const { formatPrice } = useCurrency()
 
 interface IndexQuote {
   symbol: string
@@ -62,7 +64,7 @@ onMounted(() => {
       >
         <div class="text-xs text-[#bbb] font-sans font-medium">{{ idx.name }}</div>
         <div class="text-lg font-mono font-bold mt-0.5 tracking-tight">
-          {{ idx.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+          {{ formatPrice(idx.price) }}
         </div>
         <div
           class="text-xs font-mono font-medium mt-0.5"

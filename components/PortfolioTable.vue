@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { PortfolioHolding, QuoteData } from '../utils/types'
 import { useToast } from '../composables/useToast'
+import { useCurrency } from '~/composables/useCurrency'
 
 const { add: addToast } = useToast()
+const { formatPrice, formatChange, formatChangePercent } = useCurrency()
 
 const holdings = ref<PortfolioHolding[]>([])
 const quotes = ref<Record<string, QuoteData>>({})
@@ -222,7 +224,7 @@ function selectSearchResult(symbol: string) {
         <div class="bg-[#1a1a1a] rounded-lg p-3">
           <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">Total Value</div>
           <div class="text-lg font-mono font-bold mt-1 animate-count-up">
-            {{ calcTotalPnL() ? '$' + calcTotalPnL()!.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '...' }}
+            {{ calcTotalPnL() ? formatPrice(calcTotalPnL()!.totalValue) : '...' }}
           </div>
         </div>
         <div class="bg-[#1a1a1a] rounded-lg p-3">
@@ -231,7 +233,7 @@ function selectSearchResult(symbol: string) {
             class="text-lg font-mono font-bold mt-1"
             :class="calcTotalPnL() ? (calcTotalPnL()!.pnl >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]') : ''"
           >
-            {{ calcTotalPnL() ? '$' + calcTotalPnL()!.pnl.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '...' }}
+            {{ calcTotalPnL() ? formatPrice(calcTotalPnL()!.pnl) : '...' }}
           </div>
         </div>
         <div class="bg-[#1a1a1a] rounded-lg p-3">
@@ -240,7 +242,7 @@ function selectSearchResult(symbol: string) {
             class="text-lg font-mono font-bold mt-1"
             :class="calcTotalPnL() ? (calcTotalPnL()!.pnlPercent >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]') : ''"
           >
-            {{ calcTotalPnL() ? calcTotalPnL()!.pnlPercent.toFixed(2) + '%' : '...' }}
+            {{ calcTotalPnL() ? formatChangePercent(calcTotalPnL()!.pnlPercent) : '...' }}
           </div>
         </div>
       </div>
@@ -272,10 +274,10 @@ function selectSearchResult(symbol: string) {
           >
             <td class="px-3 py-2.5 font-mono text-[#00c853] font-bold">{{ h.symbol }}</td>
             <td class="px-3 py-2.5 text-right font-mono">{{ h.shares }}</td>
-            <td class="px-3 py-2.5 text-right font-mono">{{ '$' + h.avgPrice.toFixed(2) }}</td>
+            <td class="px-3 py-2.5 text-right font-mono">{{ formatPrice(h.avgPrice) }}</td>
             <td class="px-3 py-2.5 text-right font-mono font-medium">
               <span v-if="quotes[h.symbol]" class="animate-count-up" :style="{ animationDelay: `${i * 50}ms` }">
-                {{ '$' + (quotes[h.symbol].regularMarketPrice ?? 0).toFixed(2) }}
+                {{ formatPrice(quotes[h.symbol].regularMarketPrice ?? 0) }}
               </span>
               <span v-else class="text-[#888]">...</span>
             </td>
@@ -284,13 +286,13 @@ function selectSearchResult(symbol: string) {
               :class="calcPnL(h) ? (calcPnL(h)!.pnl >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]') : ''"
             >
               <span v-if="calcPnL(h)" class="animate-count-up" :style="{ animationDelay: `${i * 50}ms` }">
-                {{ calcPnL(h)!.pnl >= 0 ? '+' : '' }}{{ '$' + calcPnL(h)!.pnl.toFixed(2) }} ({{ calcPnL(h)!.pnlPercent.toFixed(2) }}%)
+                {{ formatChange(calcPnL(h)!.pnl) }} ({{ formatChangePercent(calcPnL(h)!.pnlPercent) }})
               </span>
               <span v-else class="text-[#888]">...</span>
             </td>
             <td class="px-3 py-2.5 text-right font-mono font-medium">
               <span v-if="calcPnL(h)" class="animate-count-up" :style="{ animationDelay: `${i * 50}ms` }">
-                {{ '$' + calcPnL(h)!.currentValue.toFixed(2) }}
+                {{ formatPrice(calcPnL(h)!.currentValue) }}
               </span>
               <span v-else class="text-[#888]">...</span>
             </td>

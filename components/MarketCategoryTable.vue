@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useCurrency } from '~/composables/useCurrency'
+const { formatPrice, formatChange, formatChangePercent } = useCurrency()
+
 interface CategoryItem {
   symbol: string
   name: string
@@ -88,25 +91,25 @@ onMounted(() => {
             </td>
             <td class="px-3 py-2.5 text-[#bbb] text-xs hidden sm:table-cell font-sans truncate max-w-[160px]">{{ item.name }}</td>
             <td class="px-3 py-2.5 text-right font-mono font-medium" aria-label="Price">
-              {{ typeof item.price === 'number' ? '$' + item.price.toFixed(2) : '...' }}
+              {{ typeof item.price === 'number' ? formatPrice(item.price) : '...' }}
             </td>
             <td
               class="px-3 py-2.5 text-right font-mono font-medium"
               :class="(item.change ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
-              :aria-label="`Change: ${typeof item.change === 'number' ? (item.change >= 0 ? '+' : '') + item.change.toFixed(2) : '...'}`"
+              :aria-label="`Change: ${typeof item.change === 'number' ? formatChange(item.change) : '...'}`"
             >
               <span v-if="typeof item.change === 'number'" class="animate-count-up">
-                {{ item.change >= 0 ? '+' : '' }}{{ item.change.toFixed(2) }}
+                {{ formatChange(item.change) }}
               </span>
               <span v-else>...</span>
             </td>
             <td
               class="px-3 py-2.5 text-right font-mono font-medium hidden sm:table-cell"
               :class="(item.changePercent ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
-              :aria-label="`Percent change: ${typeof item.changePercent === 'number' ? (item.changePercent >= 0 ? '+' : '') + item.changePercent.toFixed(2) + '%' : '...'}`"
+              :aria-label="`Percent change: ${typeof item.changePercent === 'number' ? formatChangePercent(item.changePercent) : '...'}`"
             >
               <span v-if="typeof item.changePercent === 'number'">
-                {{ item.changePercent >= 0 ? '+' : '' }}{{ item.changePercent.toFixed(2) }}%
+                {{ formatChangePercent(item.changePercent) }}
               </span>
               <span v-else>...</span>
             </td>

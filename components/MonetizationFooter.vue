@@ -10,6 +10,19 @@
 
       <div class="mt-8 pt-8 border-t border-[#1a1a1a]">
         <p class="text-[#888] text-xs mb-3">Kalmate is free and open source.</p>
+        <div class="flex items-center justify-center gap-2 mb-4">
+          <span class="text-[9px] text-[#666]">Moneda:</span>
+          <button
+            class="text-[10px] font-mono px-2 py-0.5 rounded transition-colors"
+            :class="currency === 'CLP' ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-[#333] hover:text-white'"
+            @click="setCurrency('CLP')"
+          >CLP</button>
+          <button
+            class="text-[10px] font-mono px-2 py-0.5 rounded transition-colors"
+            :class="currency === 'USD' ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-[#333] hover:text-white'"
+            @click="setCurrency('USD')"
+          >USD</button>
+        </div>
         <div class="flex flex-wrap items-center justify-center gap-3">
           <a
             v-if="m.githubSponsors.enabled"
@@ -47,4 +60,10 @@
 
 <script setup lang="ts">
 import { monetization as m } from '../utils/monetization'
+import { useCurrency } from '~/composables/useCurrency'
+
+const { currency, toggleCurrency } = useCurrency()
+function setCurrency(c: 'CLP' | 'USD') {
+  if (currency.value !== c) toggleCurrency()
+}
 </script>

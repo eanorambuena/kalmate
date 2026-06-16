@@ -126,6 +126,14 @@
         >
           <Zap class="w-3.5 h-3.5" />
         </button>
+        <button
+          class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
+          :class="showSaver ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
+          @click="showSaver = !showSaver"
+          title="Guardar/Cargar pipelines"
+        >
+          <Folder class="w-3.5 h-3.5" />
+        </button>
       </div>
 
       <div ref="flowContainer" class="w-full h-full" :class="{ 'eraser-active': eraserMode }" @click="onCanvasClick">
@@ -163,6 +171,7 @@
 
     <ProModal v-if="showProModal" @close="showProModal = false" />
     <PipelineAI v-if="showAI" @apply="onAIApply" @close="showAI = false" />
+    <PipelineSaver v-if="showSaver" @load="onPipelineLoad" @close="showSaver = false" />
   </div>
 </template>
 
@@ -177,7 +186,8 @@ import ChartNode from './nodes/ChartNode.vue'
 import CandleNode from './nodes/CandleNode.vue'
 import ProModal from './ProModal.vue'
 import PipelineAI from './PipelineAI.vue'
-import { Trash2, BarChart3, Play, Pause, MousePointer2, Zap } from '@lucide/vue'
+import PipelineSaver from './PipelineSaver.vue'
+import { Trash2, BarChart3, Play, Pause, MousePointer2, Zap, Folder } from '@lucide/vue'
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode, candle: CandleNode }
 const flowContainer = ref<HTMLElement | null>(null)
@@ -195,6 +205,7 @@ const eraserMode = ref(false)
 const showProModal = ref(false)
 const showResults = ref(true)
 const showAI = ref(false)
+const showSaver = ref(false)
 let nodeCounter = 0
 
 onMounted(() => {
@@ -377,6 +388,15 @@ function clearAll() {
   edges.value = []
   results.value = {}
   localStorage.removeItem('kalmate-pipeline')
+}
+
+function onPipelineLoad(data: { nodes: any[]; edges: any[]; results: any; counter: number; autorun: boolean }) {
+  nodes.value = (data.nodes || []).map((n: any) => ({ ...n, zIndex: n.zIndex ?? 10 }))
+  edges.value = data.edges || []
+  results.value = data.results || {}
+  nodeCounter = data.counter || 0
+  if (data.autorun !== undefined) autorun.value = data.autorun
+  setTimeout(runPipeline, 300)
 }
 
 function onAIApply(plan: { nodes: any[]; edges: any[] }) {
