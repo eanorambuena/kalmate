@@ -54,6 +54,7 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#0a0a0a' },
         { name: 'msapplication-TileColor', content: '#0a0a0a' },
         { name: 'google-adsense-account', content: 'ca-pub-5127016522335908' },
+        { name: 'google-site-verification', content: 'ETMJGDCplFUTbulIfX35-4WKsisdvvdKkhR_TZNkeb8' },
       ],
       script: [
         {
