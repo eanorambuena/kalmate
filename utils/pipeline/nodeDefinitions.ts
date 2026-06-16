@@ -72,6 +72,7 @@ export const nodeDefinitions: NodeDefinition[] = [
     outputs: [
       { id: 'source', label: 'Price', type: 'price' },
       { id: 'history', label: 'History', type: 'series' },
+      { id: 'ohlc', label: 'OHLC', type: 'series' },
     ],
     defaultData: {},
   },
