@@ -100,6 +100,9 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
             <a href="/terminal/pricing" class="inline-flex items-center gap-2 border border-[#ff69b4]/30 text-[#ff69b4] px-8 py-3.5 rounded-lg hover:bg-[#ff69b4]/10 transition-colors text-sm">
               PRICING
             </a>
+            <a href="/terminal/pipeline" class="inline-flex items-center gap-2 bg-[#aa00ff]/20 text-[#aa00ff] border border-[#aa00ff]/30 px-8 py-3.5 rounded-lg hover:bg-[#aa00ff]/30 transition-colors text-sm whitespace-nowrap">
+              Try Pipelines →
+            </a>
           </div>
         </div>
       </div>

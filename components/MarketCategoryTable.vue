@@ -88,14 +88,14 @@ onMounted(() => {
             </td>
             <td class="px-3 py-2.5 text-[#bbb] text-xs hidden sm:table-cell font-sans truncate max-w-[160px]">{{ item.name }}</td>
             <td class="px-3 py-2.5 text-right font-mono font-medium" aria-label="Price">
-              {{ item.price != null ? '$' + item.price.toFixed(2) : '...' }}
+              {{ typeof item.price === 'number' ? '$' + item.price.toFixed(2) : '...' }}
             </td>
             <td
               class="px-3 py-2.5 text-right font-mono font-medium"
               :class="(item.change ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
-              :aria-label="`Change: ${item.change != null ? (item.change >= 0 ? '+' : '') + item.change.toFixed(2) : '...'}`"
+              :aria-label="`Change: ${typeof item.change === 'number' ? (item.change >= 0 ? '+' : '') + item.change.toFixed(2) : '...'}`"
             >
-              <span v-if="item.change != null" class="animate-count-up">
+              <span v-if="typeof item.change === 'number'" class="animate-count-up">
                 {{ item.change >= 0 ? '+' : '' }}{{ item.change.toFixed(2) }}
               </span>
               <span v-else>...</span>
@@ -103,9 +103,9 @@ onMounted(() => {
             <td
               class="px-3 py-2.5 text-right font-mono font-medium hidden sm:table-cell"
               :class="(item.changePercent ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
-              :aria-label="`Percent change: ${item.changePercent != null ? (item.changePercent >= 0 ? '+' : '') + item.changePercent.toFixed(2) + '%' : '...'}`"
+              :aria-label="`Percent change: ${typeof item.changePercent === 'number' ? (item.changePercent >= 0 ? '+' : '') + item.changePercent.toFixed(2) + '%' : '...'}`"
             >
-              <span v-if="item.changePercent != null">
+              <span v-if="typeof item.changePercent === 'number'">
                 {{ item.changePercent >= 0 ? '+' : '' }}{{ item.changePercent.toFixed(2) }}%
               </span>
               <span v-else>...</span>

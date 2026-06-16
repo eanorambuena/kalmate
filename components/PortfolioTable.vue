@@ -275,7 +275,7 @@ function selectSearchResult(symbol: string) {
             <td class="px-3 py-2.5 text-right font-mono">{{ '$' + h.avgPrice.toFixed(2) }}</td>
             <td class="px-3 py-2.5 text-right font-mono font-medium">
               <span v-if="quotes[h.symbol]" class="animate-count-up" :style="{ animationDelay: `${i * 50}ms` }">
-                {{ '$' + quotes[h.symbol].regularMarketPrice.toFixed(2) }}
+                {{ '$' + (quotes[h.symbol].regularMarketPrice ?? 0).toFixed(2) }}
               </span>
               <span v-else class="text-[#555]">...</span>
             </td>

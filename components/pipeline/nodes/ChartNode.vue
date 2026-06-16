@@ -83,7 +83,7 @@ const seriesToPlot = computed(() => {
 
 const price = computed(() => {
   const p = result.value?.source ?? result.value?.price
-  return p != null ? p.toFixed(2) : null
+  return typeof p === 'number' ? p.toFixed(2) : null
 })
 
 const svgW = 260, svgH = 110, pad = 5

@@ -28,7 +28,7 @@ async function fetchCurrentPrice() {
     const q = data as { regularMarketPrice: number }
     currentPrice.value = q.regularMarketPrice
     if (!targetPrice.value) {
-      targetPrice.value = String(q.regularMarketPrice.toFixed(2))
+      targetPrice.value = typeof q.regularMarketPrice === 'number' ? String(q.regularMarketPrice.toFixed(2)) : ''
     }
   } catch (e) {
     console.error(e)
