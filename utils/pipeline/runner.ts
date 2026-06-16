@@ -37,9 +37,9 @@ export const executors: Record<string, NodeExecutor> = {
       history: arr,
       series: arr,
       seriesA: arr,
-      seriesB: ctx.inputs.seriesB ?? null,
-      seriesC: ctx.inputs.seriesC ?? null,
-      seriesD: ctx.inputs.seriesD ?? null,
+      seriesB: ctx.inputs.seriesB ?? ctx.inputs.overlay1 ?? null,
+      seriesC: ctx.inputs.seriesC ?? ctx.inputs.overlay2 ?? null,
+      seriesD: ctx.inputs.seriesD ?? ctx.inputs.overlay3 ?? null,
     }
   },
 
@@ -131,9 +131,29 @@ export const executors: Record<string, NodeExecutor> = {
   mathOp: async (ctx) => {
     const a = ctx.inputs.sourceA ?? ctx.data.sourceA ?? 0
     const b = ctx.inputs.sourceB ?? ctx.data.sourceB ?? 0
+    const op = ctx.data.op || '+'
+    const isArrayA = Array.isArray(a)
+    const isArrayB = Array.isArray(b)
+    if (isArrayA || isArrayB) {
+      const arrA = isArrayA ? a : []
+      const arrB = isArrayB ? b : []
+      const len = Math.max(arrA.length, arrB.length)
+      const result: number[] = []
+      for (let i = 0; i < len; i++) {
+        const va = i < arrA.length ? arrA[i] : arrB[arrB.length - 1]
+        const vb = i < arrB.length ? arrB[i] : arrA[arrA.length - 1]
+        switch (op) {
+          case '+': result.push(va + vb); break
+          case '-': result.push(va - vb); break
+          case '*': result.push(va * vb); break
+          case '/': result.push(vb !== 0 ? va / vb : 0); break
+          default: result.push(va + vb)
+        }
+      }
+      return { source: result, seriesA: result, a: arrA[arrA.length - 1], b: arrB[arrB.length - 1], op }
+    }
     const va = typeof a === 'number' ? a : (Array.isArray(a) ? a[a.length - 1] : 0)
     const vb = typeof b === 'number' ? b : (Array.isArray(b) ? b[b.length - 1] : 0)
-    const op = ctx.data.op || '+'
     let result: number
     switch (op) {
       case '+': result = va + vb; break
