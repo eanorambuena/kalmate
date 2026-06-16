@@ -69,6 +69,8 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
           <a href="/terminal" class="text-[#ccc] hover:text-white transition-colors text-sm">Terminal</a>
           <a href="#features" class="text-[#ccc] hover:text-white transition-colors text-sm">Features</a>
           <a href="#tech" class="text-[#ccc] hover:text-white transition-colors text-sm">Tech</a>
+          <NuxtLink to="/about" class="text-[#ccc] hover:text-white transition-colors text-sm">About</NuxtLink>
+          <NuxtLink to="/contact" class="text-[#ccc] hover:text-white transition-colors text-sm">Contact</NuxtLink>
         </div>
       </div>
     </header>
