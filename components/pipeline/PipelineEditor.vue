@@ -274,12 +274,13 @@ function addNode(type: string) {
   nodeCounter++
   const id = `${type}-${nodeCounter}`
   const nodeType = type === 'chartOutput' ? 'chart' : 'custom'
-  let x = 200 + nodeCounter * 30
-  let y = 200 + nodeCounter * 40
+  let x = 250
+  let y = 200
   if (flowContainer.value) {
     const rect = flowContainer.value.getBoundingClientRect()
-    x = (rect.width / 2 - 200) / 0.55 + nodeCounter * 15
-    y = (rect.height / 2 - 200) / 0.55 + nodeCounter * 20
+    const zoom = 0.55
+    x = rect.width / 2 / zoom - 100 + nodeCounter * 10
+    y = rect.height / 2 / zoom - 100
   }
   nodes.value = [...nodes.value, {
     id,
