@@ -27,19 +27,19 @@
     <div class="flex items-start justify-between gap-2 mb-1">
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-1">
-          <Handle type="target" :position="Position.Left" id="seriesA" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ left: '-12px', top: '20px' }" />
+          <Handle type="target" :position="Position.Left" id="seriesA" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ left: '0', top: '20px' }" />
           <span class="text-[9px] text-[#aaa] w-20">Main Series</span>
         </div>
         <div class="flex items-center gap-1">
-          <Handle type="target" :position="Position.Left" id="seriesB" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ left: '-12px', top: '44px' }" />
+          <Handle type="target" :position="Position.Left" id="seriesB" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ left: '0', top: '44px' }" />
           <span class="text-[9px] text-[#aaa] w-20">Overlay A (series)</span>
         </div>
         <div class="flex items-center gap-1">
-          <Handle type="target" :position="Position.Left" id="seriesC" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ left: '-12px', top: '68px' }" />
+          <Handle type="target" :position="Position.Left" id="seriesC" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ left: '0', top: '68px' }" />
           <span class="text-[9px] text-[#aaa] w-20">Overlay B (series)</span>
         </div>
         <div class="flex items-center gap-1">
-          <Handle type="target" :position="Position.Left" id="seriesD" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ left: '-12px', top: '92px' }" />
+          <Handle type="target" :position="Position.Left" id="seriesD" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ left: '0', top: '92px' }" />
           <span class="text-[9px] text-[#aaa] w-20">Overlay C (series)</span>
         </div>
       </div>
