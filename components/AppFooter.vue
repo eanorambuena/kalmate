@@ -1,68 +1,90 @@
 <template>
-  <footer class="py-12 px-6 border-t border-[#1a1a1a] bg-[#0a0a0a]">
-    <div class="max-w-6xl mx-auto text-center">
-      <div class="text-[#00c853] font-bold text-lg tracking-wider">KALMATE⌘</div>
-      <p class="text-[#888] text-xs mt-3">Real-time financial data at your fingertips.</p>
-      <div class="flex justify-center gap-4 mt-4 text-[10px] text-[#666]">
-        <span>Data: Yahoo Finance</span>
-        <span>Deploy: Cloudflare Pages</span>
-      </div>
-      <div class="flex justify-center gap-3 mt-4 text-xs">
-        <NuxtLink to="/about" class="text-[#888] hover:text-white transition-colors">About</NuxtLink>
-        <NuxtLink to="/contact" class="text-[#888] hover:text-white transition-colors">Contact</NuxtLink>
-        <NuxtLink to="/blog" class="text-[#888] hover:text-white transition-colors">Blog</NuxtLink>
-        <NuxtLink to="/privacy" class="text-[#888] hover:text-white transition-colors">Privacy</NuxtLink>
-        <NuxtLink to="/terms" class="text-[#888] hover:text-white transition-colors">Terms</NuxtLink>
-        <NuxtLink to="/disclaimer" class="text-[#888] hover:text-white transition-colors">Disclaimer</NuxtLink>
+  <footer class="py-16 px-6 border-t border-[#1a1a1a] bg-[#0a0a0a]">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
+        <div>
+          <div class="text-[#00c853] font-bold text-lg tracking-wider">KALMATE⌘</div>
+          <p class="text-[#888] text-sm mt-3 leading-relaxed">
+            Real-time financial data at your fingertips. Free open-source financial terminal.
+          </p>
+          <a href="mailto:a25.eanorambuena@gmail.com" class="inline-block text-[#888] text-xs mt-3 hover:text-white transition-colors">
+            a25.eanorambuena@gmail.com
+          </a>
+        </div>
+
+        <div>
+          <h4 class="text-white text-xs font-bold tracking-widest uppercase mb-4">Links</h4>
+          <ul class="space-y-2.5">
+            <li><NuxtLink to="/terminal" class="text-[#888] text-sm hover:text-white transition-colors">Terminal</NuxtLink></li>
+            <li><NuxtLink to="/about" class="text-[#888] text-sm hover:text-white transition-colors">About</NuxtLink></li>
+            <li><NuxtLink to="/contact" class="text-[#888] text-sm hover:text-white transition-colors">Contact</NuxtLink></li>
+            <li><NuxtLink to="/blog" class="text-[#888] text-sm hover:text-white transition-colors">Blog</NuxtLink></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-white text-xs font-bold tracking-widest uppercase mb-4">Legal</h4>
+          <ul class="space-y-2.5">
+            <li><NuxtLink to="/privacy" class="text-[#888] text-sm hover:text-white transition-colors">Privacy Policy</NuxtLink></li>
+            <li><NuxtLink to="/terms" class="text-[#888] text-sm hover:text-white transition-colors">Terms of Service</NuxtLink></li>
+            <li><NuxtLink to="/disclaimer" class="text-[#888] text-sm hover:text-white transition-colors">Disclaimer</NuxtLink></li>
+          </ul>
+        </div>
       </div>
 
       <AdBanner />
 
-      <div class="mt-6 pt-6 border-t border-[#1a1a1a]">
-        <div class="flex items-center justify-center gap-2 mb-4">
-          <span class="text-[9px] text-[#666]">Moneda:</span>
-          <button
-            class="text-[10px] font-mono px-2 py-0.5 rounded transition-colors"
-            :class="currency === 'CLP' ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-[#333] hover:text-white'"
-            @click="setCurrency('CLP')"
-          >CLP</button>
-          <button
-            class="text-[10px] font-mono px-2 py-0.5 rounded transition-colors"
-            :class="currency === 'USD' ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-[#333] hover:text-white'"
-            @click="setCurrency('USD')"
-          >USD</button>
+      <div class="mt-10 pt-8 border-t border-[#1a1a1a]">
+        <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-[#666]">
+          <span>Data: Yahoo Finance</span>
+          <span>Deploy: Cloudflare Pages</span>
+          <span class="flex items-center gap-2">
+            Moneda:
+            <button
+              class="font-mono px-2 py-0.5 rounded transition-colors"
+              :class="currency === 'CLP' ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-[#333] hover:text-white'"
+              @click="setCurrency('CLP')"
+            >CLP</button>
+            <button
+              class="font-mono px-2 py-0.5 rounded transition-colors"
+              :class="currency === 'USD' ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-[#333] hover:text-white'"
+              @click="setCurrency('USD')"
+            >USD</button>
+          </span>
         </div>
-        <div class="flex flex-wrap items-center justify-center gap-3">
+
+        <div class="flex flex-wrap items-center justify-center gap-3 mt-4">
           <a
             v-if="m.githubSponsors.enabled"
             :href="m.githubSponsors.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#ff69b4]/10 text-[#ff69b4] border border-[#ff69b4]/20 rounded-lg text-sm font-medium hover:bg-[#ff69b4]/20 transition-all"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-[#ff69b4]/10 text-[#ff69b4] border border-[#ff69b4]/20 rounded-lg text-xs font-medium hover:bg-[#ff69b4]/20 transition-all"
           >
-            <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="m8 14.25-.345.666a.75.75 0 0 0 .69 0l-.345-.666Zm0 0 .345.666a.75.75 0 0 1-.69 0L8 14.25ZM4.268 2.47a3.72 3.72 0 0 0-3.31 1.34c-1.27 1.7-1 4.04.64 5.78l.02.02.02.02L8 14.25l6.37-4.62.02-.02.02-.02c1.64-1.74 1.91-4.08.64-5.78a3.72 3.72 0 0 0-3.31-1.34 4.9 4.9 0 0 0-3.3 1.73L8 4.69l-.44-.49a4.9 4.9 0 0 0-3.3-1.73h.02Z"/></svg>
-            Sponsor on GitHub
+            <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="m8 14.25-.345.666a.75.75 0 0 0 .69 0l-.345-.666Zm0 0 .345.666a.75.75 0 0 1-.69 0L8 14.25ZM4.268 2.47a3.72 3.72 0 0 0-3.31 1.34c-1.27 1.7-1 4.04.64 5.78l.02.02.02.02L8 14.25l6.37-4.62.02-.02.02-.02c1.64-1.74 1.91-4.08.64-5.78a3.72 3.72 0 0 0-3.31-1.34 4.9 4.9 0 0 0-3.3 1.73L8 4.69l-.44-.49a4.9 4.9 0 0 0-3.3-1.73h.02Z"/></svg>
+            Sponsor
           </a>
           <a
             v-if="m.buda.enabled"
             :href="m.buda.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00c853]/10 text-[#00c853] border border-[#00c853]/20 rounded-lg text-sm font-medium hover:bg-[#00c853]/20 transition-all"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-[#00c853]/10 text-[#00c853] border border-[#00c853]/20 rounded-lg text-xs font-medium hover:bg-[#00c853]/20 transition-all"
           >
             {{ m.buda.label }}
           </a>
           <button
             v-if="m.fintual.enabled"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#6366f1]/10 text-[#6366f1] border border-[#6366f1]/20 rounded-lg text-sm font-medium hover:bg-[#6366f1]/20 transition-all cursor-pointer"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-[#6366f1]/10 text-[#6366f1] border border-[#6366f1]/20 rounded-lg text-xs font-medium hover:bg-[#6366f1]/20 transition-all cursor-pointer"
             @click="showFintualModal = true"
           >
             {{ m.fintual.label }}
           </button>
         </div>
-      </div>
-      <div class="mt-6 text-[10px] text-[#555]">
-        &copy; 2026 Kalmate. Open source under MIT License.
+
+        <div class="mt-8 text-center text-[10px] text-[#555]">
+          &copy; 2026 Kalmate. Open source under MIT License.
+        </div>
       </div>
     </div>
   </footer>
