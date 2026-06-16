@@ -88,16 +88,18 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
           <p class="text-[#aaa] text-lg md:text-xl leading-relaxed mb-8 max-w-xl animate-fade-in-up" style="animation-delay: 0.5s">
             Free Bloomberg-style terminal powered by Yahoo Finance. Track equities, forex, bonds, commodities, and crypto with real-time data and professional-grade charts.
           </p>
-          <div class="flex items-center gap-4 animate-fade-in-up" style="animation-delay: 0.7s">
-            <a href="/terminal" class="inline-flex items-center gap-2 bg-[#00c853] text-black font-bold px-8 py-3.5 rounded-lg hover:bg-[#00e060] transition-colors text-sm tracking-wide">
-              LAUNCH TERMINAL
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-            </a>
-            <a href="/terminal/stock/AAPL" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm">
-              VIEW SAMPLE
-            </a>
-            <a href="/terminal/pipeline" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm whitespace-nowrap">
-              TRY PIPELINES →
+          <div class="animate-fade-in-up flex flex-col items-start gap-3" style="animation-delay: 0.7s">
+            <div class="flex items-center gap-4">
+              <a href="/terminal" class="inline-flex items-center gap-2 bg-[#00c853] text-black font-bold px-8 py-3.5 rounded-lg hover:bg-[#00e060] transition-colors text-sm tracking-wide">
+                LAUNCH TERMINAL
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+              </a>
+              <a href="/terminal/pipeline" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm whitespace-nowrap">
+                TRY PIPELINES →
+              </a>
+            </div>
+            <a href="/terminal/stock/AAPL" class="text-[#555] hover:text-[#aaa] transition-colors text-xs font-mono tracking-wider no-underline">
+              Or view a sample →
             </a>
           </div>
         </div>
