@@ -158,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { VueFlow } from '@vue-flow/core'
+import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { nodeDefinitions } from '../../utils/pipeline/nodeDefinitions'
@@ -170,6 +170,7 @@ import { Trash2, BarChart3, Play, Pause, MousePointer2 } from '@lucide/vue'
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode }
 const flowContainer = ref<HTMLElement | null>(null)
+const { screenToFlowCoordinate } = useVueFlow()
 
 const emit = defineEmits<{ help: [] }>()
 
@@ -278,9 +279,9 @@ function addNode(type: string) {
   let y = 200
   if (flowContainer.value) {
     const rect = flowContainer.value.getBoundingClientRect()
-    const zoom = 0.55
-    x = rect.width / 2 / zoom - 100 + nodeCounter * 10
-    y = rect.height / 2 / zoom - 100
+    const center = screenToFlowCoordinate({ x: rect.width / 2, y: rect.height / 2 })
+    x = center.x - 100 + nodeCounter * 10
+    y = center.y - 100
   }
   nodes.value = [...nodes.value, {
     id,

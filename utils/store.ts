@@ -7,8 +7,12 @@ const PORTFOLIO_FILE = path.join(DATA_DIR, 'portfolio.json')
 const ALERTS_FILE = path.join(DATA_DIR, 'alerts.json')
 
 function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true })
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true })
+    }
+  } catch {
+    // fs not available (Cloudflare Workers, etc.)
   }
 }
 
@@ -16,7 +20,6 @@ function readJSON<T>(filePath: string, defaultValue: T): T {
   try {
     ensureDataDir()
     if (!fs.existsSync(filePath)) {
-      writeJSON(filePath, defaultValue)
       return defaultValue
     }
     const raw = fs.readFileSync(filePath, 'utf-8')
@@ -27,8 +30,12 @@ function readJSON<T>(filePath: string, defaultValue: T): T {
 }
 
 function writeJSON<T>(filePath: string, data: T) {
-  ensureDataDir()
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8')
+  try {
+    ensureDataDir()
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8')
+  } catch {
+    // fs not available — silently skip persistence
+  }
 }
 
 // Portfolio
