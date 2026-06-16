@@ -116,6 +116,9 @@ export const nodeDefinitions: NodeDefinition[] = [
     pro: false,
     inputs: [
       { id: 'seriesA', label: 'Candles', type: 'series' },
+      { id: 'seriesB', label: 'Overlay A', type: 'series' },
+      { id: 'seriesC', label: 'Overlay B', type: 'series' },
+      { id: 'seriesD', label: 'Overlay C', type: 'series' },
     ],
     outputs: [],
     defaultData: {},

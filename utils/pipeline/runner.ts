@@ -45,7 +45,12 @@ export const executors: Record<string, NodeExecutor> = {
 
   candleChart: async (ctx) => {
     const ohlc = ctx.inputs.ohlc || ctx.inputs.history || ctx.inputs.seriesA || null
-    return { ohlc }
+    return {
+      ohlc,
+      seriesB: ctx.inputs.seriesB ?? null,
+      seriesC: ctx.inputs.seriesC ?? null,
+      seriesD: ctx.inputs.seriesD ?? null,
+    }
   },
 
   priceDisplay: async (ctx) => {

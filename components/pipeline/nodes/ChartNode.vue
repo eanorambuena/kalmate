@@ -4,7 +4,8 @@
       <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: '#ff69b4' }" />
       <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">OUTPUT</span>
     </div>
-    <p class="text-white text-xs font-medium mb-2">Chart</p>
+    <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
+    <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
     <div v-if="seriesToPlot.length > 0" class="w-full h-[120px] relative">
       <svg viewBox="0 0 260 110" class="w-full h-full" preserveAspectRatio="none">
         <path v-for="(s, idx) in seriesToPlot" :key="idx" :d="areaPath(s.values)" :fill="s.color" opacity="0.1" />
@@ -35,7 +36,7 @@
 
 <script setup lang="ts">
 import { Handle, Position } from '@vue-flow/core'
-import { computed } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
 
 const props = defineProps({
@@ -45,6 +46,28 @@ const props = defineProps({
 
 const def = nodeDefinitions.find(n => n.type === 'chartOutput')
 const inputs = def?.inputs ?? []
+const displayLabel = computed(() => props.data?.label || 'Chart')
+
+const editing = ref(false)
+const editLabel = ref('')
+const inputEl = ref<HTMLInputElement>()
+
+function startEdit() {
+  editLabel.value = displayLabel.value
+  editing.value = true
+  nextTick(() => inputEl.value?.focus())
+}
+
+function saveLabel() {
+  if (editLabel.value.trim()) {
+    props.data.label = editLabel.value.trim()
+  }
+  editing.value = false
+}
+
+function cancelLabel() {
+  editing.value = false
+}
 
 const result = computed(() => props.data?.result)
 

@@ -7,7 +7,8 @@
       <span class="text-[10px] font-bold text-[#bbb] uppercase tracking-wider">{{ def.category }}</span>
     </div>
 
-    <p class="text-white text-xs font-medium mb-0.5">{{ label }}</p>
+    <p class="text-white text-xs font-medium mb-0.5 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ label }}</p>
+    <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-0.5 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
     <p class="text-[#bbb] text-[10px] mb-2">{{ def.description }}</p>
 
     <div v-if="def.type === 'symbolInput'" class="mb-2">
@@ -114,7 +115,7 @@
 <script setup>
 import { Handle, Position } from '@vue-flow/core'
 import { nodeDefinitions, currencies } from '../../../utils/pipeline/nodeDefinitions'
-import { computed, onMounted } from 'vue'
+import { computed, ref, onMounted, nextTick } from 'vue'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -124,6 +125,27 @@ const props = defineProps({
 const def = computed(() => nodeDefinitions.find(n => n.type === props.data.type) || nodeDefinitions[0])
 const label = computed(() => props.data.label || def.value.label)
 const color = computed(() => def.value.color)
+
+const editing = ref(false)
+const editLabel = ref('')
+const inputEl = ref<HTMLInputElement>()
+
+function startEdit() {
+  editLabel.value = label.value
+  editing.value = true
+  nextTick(() => inputEl.value?.focus())
+}
+
+function saveLabel() {
+  if (editLabel.value.trim()) {
+    props.data.label = editLabel.value.trim()
+  }
+  editing.value = false
+}
+
+function cancelLabel() {
+  editing.value = false
+}
 
 onMounted(() => {
   if (def.value.type === 'portfolioInput' && (!props.data.weights || props.data.weights.length === 0)) {
