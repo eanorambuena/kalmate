@@ -202,7 +202,7 @@ onMounted(() => {
           if (oldToNew[e.targetHandle]) e.targetHandle = oldToNew[e.targetHandle]
         }
       }
-      nodes.value = p.nodes || []
+      nodes.value = (p.nodes || []).map((n: any) => ({ ...n, zIndex: n.zIndex ?? 10 }))
       edges.value = p.edges || []
       results.value = p.results || {}
       nodeCounter = p.counter || 0
@@ -287,6 +287,7 @@ function addNode(type: string) {
     id,
     type: nodeType,
     position: { x, y },
+    zIndex: 10,
     data: { ...def.defaultData, label: `${def.label} ${nodeCounter}`, type, pro: def.pro },
   }]
 }
