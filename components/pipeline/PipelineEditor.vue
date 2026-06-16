@@ -48,6 +48,25 @@
       >
         🗑
       </button>
+
+      <div class="w-px h-6 bg-[#333] mx-2 self-center" />
+
+      <button
+        class="px-3 py-1.5 rounded text-[10px] font-bold transition-colors"
+        :class="autorun ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#222] text-[#555] hover:text-white border border-transparent'"
+        @click="autorun = !autorun"
+        title="Toggle autorun"
+      >
+        {{ autorun ? '⏵ Autorun ON' : '⏸ Autorun OFF' }}
+      </button>
+      <button
+        class="px-4 py-1.5 rounded text-[10px] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        :class="autorun ? 'bg-[#333] text-[#555]' : 'bg-[#00c853] text-black hover:bg-[#00e863]'"
+        :disabled="nodes.length === 0 || running || autorun"
+        @click="runPipeline"
+      >
+        {{ running ? 'Running...' : '▶ Run' }}
+      </button>
     </div>
 
     <div class="w-full h-full" :class="{ 'eraser-active': eraserMode }" @click="onCanvasClick">
@@ -100,6 +119,7 @@ const emit = defineEmits<{ help: [] }>()
 const nodes = ref<any[]>([])
 const edges = ref<any[]>([])
 const running = ref(false)
+const autorun = ref(true)
 const results = ref({})
 const isPro = ref(false)
 const eraserMode = ref(false)
@@ -116,6 +136,7 @@ onMounted(() => {
       edges.value = p.edges || []
       results.value = p.results || {}
       nodeCounter = p.counter || 0
+      if (p.autorun !== undefined) autorun.value = p.autorun
     } catch {}
   }
 })
@@ -126,6 +147,7 @@ function saveState() {
     edges: edges.value,
     results: results.value,
     counter: nodeCounter,
+    autorun: autorun.value,
   }))
 }
 
@@ -149,17 +171,28 @@ function syncPortfolioInputs() {
 }
 
 let autoRunTimer: any = null
-watch(edges, () => {
+function scheduleAutoRun() {
+  if (!autorun.value) return
   if (edges.value.length > 0 && nodes.value.some(n => n.data?.type === 'priceFeed' || n.data?.type === 'kalmanFilter')) {
     clearTimeout(autoRunTimer)
     autoRunTimer = setTimeout(() => runPipeline(), 300)
   }
+}
+
+watch(edges, () => {
+  scheduleAutoRun()
   syncPortfolioInputs()
 }, { deep: true })
 
 watch(nodes, () => {
   syncPortfolioInputs()
+  scheduleAutoRun()
 }, { deep: true })
+
+watch(autorun, () => {
+  saveState()
+  if (autorun.value) scheduleAutoRun()
+})
 
 const freeNodes = computed(() => nodeDefinitions.filter(n => !n.pro))
 const proNodes = computed(() => nodeDefinitions.filter(n => n.pro))

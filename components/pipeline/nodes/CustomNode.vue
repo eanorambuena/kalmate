@@ -110,7 +110,7 @@
 <script setup>
 import { Handle, Position } from '@vue-flow/core'
 import { nodeDefinitions, currencies } from '../../../utils/pipeline/nodeDefinitions'
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted } from 'vue'
 
 const props = defineProps({
   id: { type: String, required: true },

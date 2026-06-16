@@ -93,7 +93,10 @@ const seriesToPlot = computed(() => {
   return series
 })
 
-const price = computed(() => result.value?.price)
+const price = computed(() => {
+  const p = result.value?.price
+  return p != null ? p.toFixed(2) : null
+})
 
 const svgW = 260, svgH = 110, pad = 5
 

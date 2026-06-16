@@ -29,10 +29,13 @@ export const executors: Record<string, NodeExecutor> = {
   },
 
   chartOutput: async (ctx) => {
+    const history = ctx.inputs.history ?? ctx.inputs.series ?? null
+    const series = Array.isArray(history) ? history : null
+    const lastPrice = series && series.length > 0 ? series[series.length - 1] : null
     return {
-      price: ctx.inputs.price ?? null,
-      history: ctx.inputs.history ?? ctx.inputs.series ?? null,
-      series: ctx.inputs.series ?? ctx.inputs.history ?? null,
+      price: ctx.inputs.price ?? lastPrice,
+      history: series,
+      series: series,
       smoothed: ctx.inputs.smoothed ?? null,
       trend: ctx.inputs.trend ?? null,
       overlay1: ctx.inputs.overlay1 ?? ctx.inputs.sma ?? ctx.inputs.ema ?? ctx.inputs.smoothed ?? null,
@@ -94,8 +97,6 @@ export const executors: Record<string, NodeExecutor> = {
       const result = runKalmanFilter(series, params, steps)
       const lastPrices = series.slice(-10)
       const avgStep = lastPrices.reduce((s, v, i, a) => i > 0 ? s + (v - a[i - 1]) : s, 0) / (lastPrices.length - 1)
-      const trend = result.trend
-      const lastTrend = trend[trend.length - 1] || series[series.length - 1]
       const lastSmoothed = result.smoothed[result.smoothed.length - 1] || series[series.length - 1]
       const forecast: number[] = []
       const confidence: number[] = []
@@ -216,13 +217,13 @@ export async function executePipeline(spec: PipelineSpec): Promise<Record<string
     const inputs: Record<string, any> = {}
     for (const edge of spec.edges) {
       if (edge.target === id) {
-        const fromType = nodeMap.get(edge.source)?.type
-        if (fromType === 'symbolInput') {
-          inputs.symbol = nodeMap.get(edge.source)?.data?.symbol
-        }
         const srcResult = results[edge.source]
         if (srcResult) {
-          Object.assign(inputs, srcResult)
+          if (edge.sourceHandle && edge.targetHandle) {
+            inputs[edge.targetHandle] = srcResult[edge.sourceHandle]
+          } else {
+            Object.assign(inputs, srcResult)
+          }
         }
       }
     }
