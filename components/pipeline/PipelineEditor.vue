@@ -65,7 +65,7 @@
         :disabled="nodes.length === 0 || running || autorun"
         @click="runPipeline"
       >
-        {{ running ? 'Running...' : '▶ Run' }}
+        ▶ Run
       </button>
     </div>
 
