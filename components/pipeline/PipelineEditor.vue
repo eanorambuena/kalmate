@@ -163,9 +163,9 @@
 
       <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[10px] text-[#bbb] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
         <MousePointer2 class="w-3 h-3 text-[#00c853]" />
-          <span>Arrastra de salida a entrada para conectar</span>
+          <span>Drag from output to input to connect</span>
           <span class="w-px h-3 bg-[#333]" />
-          <span>Click en flecha para borrar</span>
+          <span>Click arrow to delete</span>
       </div>
     </div>
 
