@@ -93,15 +93,17 @@
           <span class="text-[7px] text-[#555]">In{{ idx + 1 }}</span>
         </div>
       </div>
-      <div v-else>
-        <div v-for="(inp, i) in def.inputs" :key="'in-' + i" class="flex items-center gap-1">
+      <div v-else class="flex flex-col gap-2">
+        <div v-for="(inp, i) in def.inputs" :key="'in-' + i" class="flex items-center gap-1 relative">
           <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" />
           <span class="text-[7px] text-[#555]">{{ inp.label }}</span>
         </div>
       </div>
-      <div v-for="(out, i) in def.outputs" :key="'out-' + i" class="flex items-center gap-1">
-        <span class="text-[7px] text-[#555]">{{ out.label }}</span>
-        <Handle type="source" :position="Position.Right" :id="out.id" class="w-2 h-2 !bg-[#00c853] !border-0" />
+      <div class="flex flex-col gap-2">
+        <div v-for="(out, i) in def.outputs" :key="'out-' + i" class="flex items-center gap-1 relative">
+          <span class="text-[7px] text-[#555]">{{ out.label }}</span>
+          <Handle type="source" :position="Position.Right" :id="out.id" class="w-2 h-2 !bg-[#00c853] !border-0" />
+        </div>
       </div>
     </div>
   </div>
