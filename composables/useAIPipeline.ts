@@ -32,13 +32,13 @@ function buildPrompt(query: string): string {
     })
     .join('\n')
 
-  return `Eres un asistente que genera pipelines financieros. Tienes estos nodos disponibles:
+  return `You are an assistant that generates financial pipelines. You have these nodes available:
 ${nodeList}
-Cada nodo se identifica por su "type". Los nodos "input" entregan datos, los "process" transforman, los "output" muestran.
+Each node is identified by its "type". "Input" nodes provide data, "process" nodes transform it, "output" nodes display it.
 
-Genera un pipeline para: "${query}"
+Generate a pipeline for: "${query}"
 
-Devuelve SOLO un JSON valido sin markdown, sin explicaciones, con esta estructura:
+Return ONLY valid JSON without markdown, without explanations, with this structure:
 {
   "nodes": [
     { "type": "symbolInput", "data": { "symbol": "AAPL" } },
@@ -51,13 +51,13 @@ Devuelve SOLO un JSON valido sin markdown, sin explicaciones, con esta estructur
   ]
 }
 
-REGLAS:
-- source y target en edges son indices del array nodes (0, 1, 2...)
-- sourceHandle debe coincidir con un output id del nodo fuente
-- targetHandle debe coincidir con un input id del nodo destino
-- Los nodos siempre se conectan en orden logico: inputs -> process -> outputs
-- Un nodo symbolInput siempre necesita conectarse a un priceFeed
-- Un priceFeed puede conectarse a varios nodos`
+RULES:
+- source and target in edges are indices of the nodes array (0, 1, 2...)
+- sourceHandle must match an output id of the source node
+- targetHandle must match an input id of the target node
+- Nodes must connect in logical order: inputs -> process -> outputs
+- A symbolInput node must always connect to a priceFeed
+- A priceFeed can connect to multiple nodes`
 }
 
 function parseKeywords(query: string): PipelinePlan {

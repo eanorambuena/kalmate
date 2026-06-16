@@ -219,9 +219,9 @@ const features = [
 
           <div v-if="selectedMethod === 'mach'" class="bg-[#0a0a0a] border border-[#333] rounded-xl p-4 mb-6">
             <img src="/qr-mach.jpg" alt="QR MACH" class="w-48 h-48 mx-auto rounded-lg mb-4">
-            <p class="text-[#aaa] text-xs mb-1 text-center">O transfiere manualmente a:</p>
+            <p class="text-[#aaa] text-xs mb-1 text-center">Or transfer manually to:</p>
             <p class="text-white font-mono text-sm break-all text-center">eanorambuena@uc.cl</p>
-            <p class="text-[#aaa] text-xs mt-2 text-center">Monto: $9.990 CLP (cualquier banco)</p>
+            <p class="text-[#aaa] text-xs mt-2 text-center">Amount: $9.990 CLP (any bank)</p>
           </div>
 
           <a
