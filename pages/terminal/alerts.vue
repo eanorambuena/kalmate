@@ -18,7 +18,7 @@ useHead({
   link: [{ rel: 'canonical', href: canonical }],
 })
 
-const { startPolling, isPolling } = useAlerts()
+const { startPolling, isPolling, refreshKey } = useAlerts()
 onMounted(() => startPolling(30000))
 </script>
 
@@ -30,5 +30,5 @@ onMounted(() => startPolling(30000))
       {{ isPolling ? 'LIVE' : 'OFF' }}
     </span>
   </div>
-  <AlertForm />
+  <AlertForm :refresh-key="refreshKey" />
 </template>

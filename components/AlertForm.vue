@@ -4,6 +4,8 @@ import { useToast } from '../composables/useToast'
 
 const { add: addToast } = useToast()
 
+const props = defineProps<{ refreshKey?: number }>()
+
 const alerts = ref<AlertCondition[]>([])
 const symbol = ref('')
 const type = ref<'above' | 'below'>('above')
@@ -92,8 +94,8 @@ async function addAlert() {
     targetPrice.value = ''
     await fetchAlerts()
     addToast('Alert created', 'success')
-  } catch (e) {
-    addToast('Failed to create alert', 'error')
+  } catch (e: any) {
+    addToast(e?.data?.statusMessage || e?.message || 'Failed to create alert', 'error')
     console.error(e)
   }
 }
@@ -112,13 +114,32 @@ async function deleteAlert(id: string) {
     deletingId.value = null
     await fetchAlerts()
     addToast('Alert deleted', 'success')
-  } catch (e) {
-    addToast('Failed to delete', 'error')
+  } catch (e: any) {
+    addToast(e?.data?.statusMessage || e?.message || 'Failed to delete', 'error')
+    console.error(e)
+  }
+}
+
+async function rearmAlert(id: string) {
+  try {
+    await $fetch(`/api/alerts/${id}`, {
+      method: 'PATCH',
+      body: { triggered: false },
+    })
+    await fetchAlerts()
+    addToast('Alert re-armed', 'success')
+  } catch (e: any) {
+    addToast(e?.data?.statusMessage || e?.message || 'Failed to re-arm alert', 'error')
     console.error(e)
   }
 }
 
 onMounted(fetchAlerts)
+
+watch(() => props.refreshKey, () => {
+  if (loading.value) return
+  fetchAlerts()
+})
 </script>
 
 <template>
@@ -210,18 +231,32 @@ onMounted(fetchAlerts)
             class="text-[#ffd600] text-[10px] font-bold animate-pulse px-2 py-0.5 rounded-full bg-[#ffd600]/10 font-sans"
           >TRIGGERED</span>
         </div>
-        <button
-          v-if="deletingId !== a.id"
-          class="text-[#888] hover:text-[#ff1744] text-xs transition-colors px-1"
-          @click="confirmDelete(a.id)"
-          title="Delete"
-        >
-          ✕
-        </button>
-        <span v-else class="flex gap-1 text-xs">
-          <button class="text-[#ff1744] font-bold px-1.5 hover:text-[#ff5252] transition-colors font-sans" @click="deleteAlert(a.id)">DEL</button>
-          <button class="text-[#999] hover:text-[#ccc] px-1.5 transition-colors font-sans" @click="cancelDelete">X</button>
-        </span>
+        <div class="flex gap-1">
+          <div v-if="a.triggered" class="flex gap-1">
+            <button
+              class="text-[#2979ff] font-bold text-xs px-2 py-1 rounded hover:bg-[#2979ff]/10 transition-colors font-sans"
+              @click="rearmAlert(a.id)"
+              title="Re-arm alert"
+            >RE-ARM</button>
+            <button
+              class="text-[#888] hover:text-[#ff1744] text-xs transition-colors px-1"
+              @click="deleteAlert(a.id)"
+              title="Delete"
+            >✕</button>
+          </div>
+          <template v-else>
+            <button
+              v-if="deletingId !== a.id"
+              class="text-[#888] hover:text-[#ff1744] text-xs transition-colors px-1"
+              @click="confirmDelete(a.id)"
+              title="Delete"
+            >✕</button>
+            <span v-else class="flex gap-1 text-xs">
+              <button class="text-[#ff1744] font-bold px-1.5 hover:text-[#ff5252] transition-colors font-sans" @click="deleteAlert(a.id)">DEL</button>
+              <button class="text-[#999] hover:text-[#ccc] px-1.5 transition-colors font-sans" @click="cancelDelete">X</button>
+            </span>
+          </template>
+        </div>
       </div>
     </div>
   </div>

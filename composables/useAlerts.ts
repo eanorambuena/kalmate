@@ -4,11 +4,14 @@ export function useAlerts() {
   const triggeredAlerts = ref<Set<string>>(new Set())
   const pollingInterval = ref<ReturnType<typeof setInterval> | null>(null)
   const isPolling = ref(false)
+  const refreshKey = ref(0)
 
   async function checkAlerts() {
     try {
       const data = await $fetch('/api/alerts/check', { method: 'POST' })
-      const result = data as { checked: number; triggered: number; results: Array<{ alert: AlertCondition; triggered: boolean }> }
+      const result = data as { checked: number; triggered: number; results: Array<{ alert: AlertCondition; triggered: boolean; currentPrice: number }> }
+
+      refreshKey.value++
 
       const newTriggered = result.results
         ?.filter(r => r.triggered)
@@ -21,18 +24,18 @@ export function useAlerts() {
 
         if (typeof window !== 'undefined' && 'Notification' in window) {
           if (Notification.permission === 'granted') {
-            newTriggered.forEach(() => {
+            newTriggered.forEach(alertId => {
+              const triggered = result.results.find(r => r.alert.id === alertId)
+              if (!triggered) return
               try {
-                const notification = new Notification('🚨 Alert Triggered', {
-                  body: `${result.results.find(r => r.triggered)?.alert.symbol} hit target price!`,
+                const notification = new Notification('Alert Triggered', {
+                  body: `${triggered.alert.symbol} ${triggered.alert.type === 'above' ? '>' : '<'} $${triggered.alert.targetPrice} at $${triggered.currentPrice}`,
                 })
                 setTimeout(() => notification.close(), 5000)
               } catch {
                 // Notifications not supported
               }
             })
-          } else if (Notification.permission !== 'denied') {
-            Notification.requestPermission()
           }
         }
       }
@@ -66,6 +69,7 @@ export function useAlerts() {
   return {
     triggeredAlerts,
     isPolling,
+    refreshKey,
     checkAlerts,
     startPolling,
     stopPolling,
