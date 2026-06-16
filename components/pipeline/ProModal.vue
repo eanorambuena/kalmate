@@ -11,9 +11,9 @@
         <div class="text-center mt-4">
           <p class="text-[#ff69b4] text-xs font-mono tracking-[0.2em] mb-2 animate-fade-in">PRO FEATURE</p>
           <h2 class="text-3xl font-bold text-white mb-2 animate-fade-in" style="animation-delay: 0.1s">
-            Desbloquea <span class="bg-gradient-to-r from-[#ff69b4] via-[#ffd700] to-[#00c853] bg-clip-text text-transparent">Pro</span>
+            Unlock <span class="bg-gradient-to-r from-[#ff69b4] via-[#ffd700] to-[#00c853] bg-clip-text text-transparent">Pro</span>
           </h2>
-          <p class="text-[#aaa] text-sm mb-6 animate-fade-in" style="animation-delay: 0.2s">Lleva tu análisis al siguiente nivel</p>
+          <p class="text-[#aaa] text-sm mb-6 animate-fade-in" style="animation-delay: 0.2s">Take your analysis to the next level</p>
         </div>
 
         <div class="space-y-2.5 mb-8 animate-fade-in" style="animation-delay: 0.3s">
@@ -28,7 +28,7 @@
             <span class="text-[#aaa] line-through text-xl">$0</span>
             <span class="bg-gradient-to-r from-[#ff69b4] to-[#ffd700] bg-clip-text text-transparent"> $9.990</span>
           </p>
-          <p class="text-[#aaa] text-xs">Una vez, para siempre. Sin suscripción.</p>
+          <p class="text-[#aaa] text-xs">Once, forever. No subscription.</p>
         </div>
 
         <button
@@ -39,7 +39,7 @@
           <span class="absolute inset-0 bg-gradient-to-r from-[#ff69b4] via-[#ffd700] to-[#00c853] bg-[length:200%_100%] animate-gradient-shift" />
           <span class="absolute inset-0 bg-[rgba(255,255,255,0.1)] opacity-0 group-hover:opacity-100 transition-opacity" />
           <span class="relative z-10 flex items-center justify-center gap-2">
-            <span>Activar Pro Ahora</span>
+            <span>Activate Pro Now</span>
             <span class="text-lg group-hover:translate-x-1 transition-transform">→</span>
           </span>
         </button>
@@ -58,12 +58,12 @@ import { TrendingUp, BarChart3, Sparkles, Link2, Mail, Zap } from '@lucide/vue'
 const emit = defineEmits(['close'])
 
 const proFeatures = [
-  { icon: TrendingUp, label: 'RSI — Fuerza relativa del mercado' },
-  { icon: BarChart3, label: 'SMA — Medias móviles personalizables' },
-  { icon: Sparkles, label: 'Forecast — Predicción Kalman' },
-  { icon: Link2, label: 'Multi Symbol — Análisis batch' },
-  { icon: Mail, label: 'Telegram & Email alerts automáticas' },
-  { icon: Zap, label: 'Ejecuciones ilimitadas del pipeline' },
+  { icon: TrendingUp, label: 'RSI — Relative market strength' },
+  { icon: BarChart3, label: 'SMA — Customizable moving averages' },
+  { icon: Sparkles, label: 'Forecast — Kalman prediction' },
+  { icon: Link2, label: 'Multi Symbol — Batch analysis' },
+  { icon: Mail, label: 'Telegram & Email alerts' },
+  { icon: Zap, label: 'Unlimited pipeline runs' },
 ]
 
 function goPricing() {

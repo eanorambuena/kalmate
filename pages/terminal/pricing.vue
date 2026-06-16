@@ -60,36 +60,36 @@ const methods = [
   {
     id: 'buda',
     name: 'Buda (cripto)',
-    desc: 'Donación en crypto vía Buda',
+    desc: 'Donate in crypto via Buda',
     icon: '₿',
     color: '#00c853',
     bgColor: '#00c85310',
-    details: 'Manda el equivalente a $9.990 CLP en BTC, ETH o USDC a este link y activas Pro para siempre.',
+    details: 'Send $9.990 CLP in BTC, ETH or USDC to this link and activate Pro forever.',
     action: 'https://www.buda.com/link/eanorambuena',
-    actionLabel: 'Donar con Buda',
+    actionLabel: 'Donate with Buda',
   },
   {
     id: 'mach',
     name: 'MACH / Transferencia',
-    desc: 'Transferencia desde cualquier banco',
+    desc: 'Transfer from any Chilean bank',
     icon: 'M',
     color: '#00a3ff',
     bgColor: '#00a3ff10',
-    details: 'Paga $9.990 CLP con MACH desde cualquier banco (Santander, BCI, BancoEstado, etc.).',
+    details: 'Pay $9.990 CLP with MACH from any bank (Santander, BCI, BancoEstado, etc.).',
     action: 'https://app.soymach.com/rF2V/vv4l7jpk',
-    actionLabel: 'Pagar con MACH',
+    actionLabel: 'Pay with MACH',
     email: 'eanorambuena@uc.cl',
   },
   {
     id: 'github',
     name: 'GitHub Sponsors',
-    desc: 'Sponsoreame en GitHub',
+    desc: 'Sponsor me on GitHub',
     icon: '♥',
     color: '#ff69b4',
     bgColor: '#ff69b410',
-    details: 'Donación única de $9.990 CLP (≈ $9 USD) como sponsor en GitHub. Activas Pro para siempre.',
+    details: 'One-time donation of $9.990 CLP (≈ $9 USD) as a GitHub sponsor. Pro activated forever.',
     action: 'https://github.com/sponsors/eanorambuena',
-    actionLabel: 'Sponsor en GitHub',
+    actionLabel: 'Sponsor on GitHub',
   },
 ]
 
@@ -236,14 +236,14 @@ const features = [
           </a>
 
           <div class="border-t border-[#222] pt-5 mt-5">
-            <p class="text-[#aaa] text-xs mb-3">¿Ya donaste? Activa tu Pro:</p>
+            <p class="text-[#aaa] text-xs mb-3">Already donated? Activate your Pro:</p>
             <button
               class="w-full py-3 rounded-xl text-sm font-bold bg-[#ff69b4] text-black hover:bg-[#ff85c8] transition-all"
               @click="activatePro"
             >
-              Ya doné, activar Pro 🎉
+              I donated, activate Pro 🎉
             </button>
-            <p class="text-[#aaa] text-[10px] mt-3">Honor system por ahora. Pronto pagos automáticos.</p>
+            <p class="text-[#aaa] text-[10px] mt-3">Honor system for now. Automated payments coming soon.</p>
           </div>
         </div>
       </div>

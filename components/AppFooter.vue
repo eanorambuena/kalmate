@@ -98,10 +98,10 @@
           <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-4 bg-[#6366f1]/10 text-[#6366f1]">F</div>
           <h3 class="text-white font-bold text-lg mb-3">{{ m.fintual.label }}</h3>
           <p class="text-[#ccc] text-sm leading-relaxed mb-4">
-            Esta web fue hecha por <strong class="text-white">Emmanuel Norambuena</strong>.
+            This site was built by <strong class="text-white">Emmanuel Norambuena</strong>.
           </p>
           <p class="text-[#ccc] text-sm leading-relaxed mb-6">
-            Si quieres apoyarme con este referido, cuando Fintual te pregunte si alguien te recomendó, indica que me conoces. Eso me ayuda a seguir desarrollando herramientas gratis como esta.
+            If you want to support me with this referral, when Fintual asks if someone recommended you, just say you know me. It helps me keep building free tools like this one.
           </p>
           <a
             :href="m.fintual.url"
@@ -110,7 +110,7 @@
             class="inline-flex items-center gap-2 px-6 py-3 bg-[#6366f1] text-white rounded-xl text-sm font-bold hover:bg-[#6366f1]/90 transition-all no-underline"
             @click="showFintualModal = false"
           >
-            Ir a {{ m.fintual.label }} →
+            Go to {{ m.fintual.label }} →
           </a>
         </div>
       </div>

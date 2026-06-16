@@ -1,12 +1,9 @@
-Built an open-source financial terminal in my spare time — Kalmate ⌘
+Built an open-source financial terminal — Kalmate ⌘
 
-Key feature: visual data pipeline — drag & drop nodes to build custom market analysis. Connect SMA, Kalman filters, RSI, and chart outputs in real time.
+Visual pipeline: drag nodes (Kalman, SMA, RSI) to build custom market analysis in real time.
 
-• Real-time markets (equities, forex, bonds, commodities, crypto)
-• Visual pipeline editor with 18 node types
-• Portfolio tracker, stock screener, price alerts
-• Free, no sign-up, open source
+Plus real-time markets, portfolio tracker, screener, alerts. Free, no sign-up.
 
 https://kalmate.pages.dev
 
-#buildinpublic #opensource #fintwit
+#buildinpublic #opensource

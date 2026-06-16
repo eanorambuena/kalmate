@@ -48,8 +48,8 @@
       >
         <option value="+">+ (suma)</option>
         <option value="-">- (resta)</option>
-        <option value="*">* (multiplicación)</option>
-        <option value="/">/ (división)</option>
+        <option value="*">* (multiply)</option>
+        <option value="/">/ (divide)</option>
       </select>
     </div>
 

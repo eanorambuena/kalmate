@@ -53,7 +53,7 @@ import { Shuffle, Plus, Link2, Package, Diamond, Play } from '@lucide/vue'
 const show = ref(false)
 
 const steps = [
-  { icon: Shuffle, color: '#2979ff', title: 'Welcome to Pipeline Builder', text: 'Visual pipeline builder para análisis financiero. Conecta nodos para crear estrategias sin código.' },
+  { icon: Shuffle, color: '#2979ff', title: 'Welcome to Pipeline Builder', text: 'Visual pipeline builder for financial analysis. Connect nodes to create strategies without code.' },
   { icon: Plus, color: '#2979ff', title: 'Add Nodes', text: 'Haz clic en los botones FREE/Pro del toolbar para agregar nodos al canvas. Cada nodo tiene entradas (azul) y salidas (verde).' },
   { icon: Link2, color: '#00c853', title: 'Connect Nodes', text: 'Arrastra desde un puerto de salida (verde) a un puerto de entrada (azul) para conectar nodos. El flujo va de izquierda a derecha.' },
   { icon: Package, color: '#2979ff', title: 'Available Nodes', text: 'Input: Symbol Input, Price Feed. Process: Kalman Filter. Output: Chart, Price Display, Alert.' },
