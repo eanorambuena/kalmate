@@ -151,9 +151,12 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
           <span>Data: Yahoo Finance</span>
           <span>Deploy: Cloudflare Pages</span>
         </div>
-        <div class="flex justify-center gap-6 mt-3 text-xs">
+        <div class="flex justify-center gap-4 mt-3 text-xs">
           <NuxtLink to="/about" class="text-[#888] hover:text-white transition-colors">About</NuxtLink>
           <NuxtLink to="/contact" class="text-[#888] hover:text-white transition-colors">Contact</NuxtLink>
+          <NuxtLink to="/privacy" class="text-[#888] hover:text-white transition-colors">Privacy</NuxtLink>
+          <NuxtLink to="/terms" class="text-[#888] hover:text-white transition-colors">Terms</NuxtLink>
+          <NuxtLink to="/disclaimer" class="text-[#888] hover:text-white transition-colors">Disclaimer</NuxtLink>
         </div>
         <AdBanner />
 
