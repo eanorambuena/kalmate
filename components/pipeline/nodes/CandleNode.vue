@@ -15,7 +15,7 @@
         <polyline v-for="(ov, idx) in overlays" :key="'ov-'+idx" :points="ov.points" fill="none" :stroke="ov.color" stroke-width="1.5" vector-effect="non-scaling-stroke" />
       </svg>
       <div class="absolute top-2 right-2 flex flex-col gap-1 text-[9px]">
-        <span class="text-[#aaa] font-mono">{{ candles.length }} velas</span>
+        <span class="text-[#aaa] font-mono">{{ candles.length }} candles</span>
         <span v-for="(ov, idx) in overlays" :key="idx" class="flex items-center gap-1" :style="{ color: ov.color }">
           <span class="w-2 h-0.5 rounded" :style="{ backgroundColor: ov.color }" />
           {{ ov.label }}

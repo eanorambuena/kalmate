@@ -39,7 +39,7 @@ function formatPrice(v: number): string {
 }
 
 function formatSignal(s: string): string {
-  return s === 'overpriced' ? 'Sobrevalorado' : s === 'underpriced' ? 'Infravalorado' : '-'
+  return s === 'overpriced' ? 'Overvalued' : s === 'underpriced' ? 'Undervalued' : '-'
 }
 
 function signalColor(s: string): string {

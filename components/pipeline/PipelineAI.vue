@@ -11,14 +11,14 @@
       </div>
 
       <div v-if="generating" class="mb-2 text-[9px] text-[#666] flex items-center gap-1">
-        <span class="animate-pulse">Generando pipeline...</span>
+        <span class="animate-pulse">Generating pipeline...</span>
       </div>
 
       <div class="flex gap-1 mb-2">
         <input
           v-model="query"
           type="text"
-          placeholder="Ej: grafica AAPL con velas y SMA20"
+          placeholder="e.g. chart AAPL with candles and SMA20"
           class="flex-1 bg-[#222] border border-[#444] rounded px-2 py-1.5 text-white text-[10px] font-mono outline-none focus:border-[#00c853]"
           @keydown.enter="doGenerate"
           :disabled="generating"
@@ -36,7 +36,7 @@
       <div v-if="error" class="text-[#ff1744] text-[9px] mb-1">{{ error }}</div>
 
       <div v-if="result" class="text-[#00c853] text-[9px] mb-1">
-        Plan generado: {{ result.nodes.length }} nodos, {{ result.edges.length }} conexiones
+        Plan generated: {{ result.nodes.length }} nodes, {{ result.edges.length }} connections
       </div>
     </div>
   </div>

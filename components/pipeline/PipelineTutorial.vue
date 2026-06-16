@@ -58,7 +58,7 @@ const steps = [
   { icon: Link2, color: '#00c853', title: 'Connect Nodes', text: 'Drag from an output port (green) to an input port (blue) to connect nodes. The flow goes from left to right.' },
   { icon: Package, color: '#2979ff', title: 'Available Nodes', text: 'Input: Symbol Input, Price Feed. Process: Kalman Filter. Output: Chart, Price Display, Alert.' },
   { icon: Diamond, color: '#ff69b4', title: 'Pro Nodes', text: 'SMA, RSI, Price Forecast, Multi Symbol, Telegram, Email. Upgrade on Pricing to unlock.' },
-  { icon: Play, color: '#2979ff', title: 'Run Pipeline', text: 'Presiona Run para ejecutar el pipeline. Los resultados aparecen en cada nodo y en el panel lateral.' },
+  { icon: Play, color: '#2979ff', title: 'Run Pipeline', text: 'Press Run to execute the pipeline. Results appear on each node and in the side panel.' },
 ]
 
 const currentStep = ref(0)

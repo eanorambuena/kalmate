@@ -10,17 +10,17 @@
         <input
           v-model="newName"
           type="text"
-          placeholder="Nombre del pipeline..."
+          placeholder="Pipeline name..."
           class="flex-1 bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#2979ff]"
           @keydown.enter="saveCurrent"
         />
         <button class="bg-[#2979ff] hover:bg-[#2962ff] text-white text-[10px] font-bold px-2 py-1 rounded-lg transition-colors disabled:opacity-40" :disabled="!newName.trim()" @click="saveCurrent">
-          Guardar
+          Save
         </button>
       </div>
 
       <div v-if="savedPipelines.length === 0" class="text-[#666] text-[10px] text-center py-4">
-        No hay pipelines guardados
+        No saved pipelines
       </div>
 
       <div v-for="(p, idx) in savedPipelines" :key="p.name" class="flex items-center gap-1 py-1.5 border-b border-[#222] last:border-0 group">
@@ -45,7 +45,7 @@
 
       <div v-if="savedPipelines.length > 0" class="mt-2 pt-2 border-t border-[#222] flex gap-1">
         <button class="flex-1 text-[9px] text-[#bbb] hover:text-white py-1 rounded bg-[#1a1a1a] hover:bg-[#222] transition-colors" @click="importPipeline">
-          Importar
+          Import
         </button>
         <input ref="fileInput" type="file" accept=".json" class="hidden" @change="onFileSelected" />
       </div>

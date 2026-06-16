@@ -21,7 +21,7 @@
 
     <div v-if="def.type === 'currencyInput'" class="mb-2 space-y-1.5">
       <div class="flex items-center gap-1">
-        <span class="text-[9px] text-[#bbb] w-5">De</span>
+        <span class="text-[9px] text-[#bbb] w-6">From</span>
         <select
           v-model="data.from"
           class="flex-1 bg-[#222] border border-[#444] rounded px-1.5 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"
@@ -30,7 +30,7 @@
         </select>
       </div>
       <div class="flex items-center gap-1">
-        <span class="text-[9px] text-[#bbb] w-5">A</span>
+        <span class="text-[9px] text-[#bbb] w-6">To</span>
         <select
           v-model="data.to"
           class="flex-1 bg-[#222] border border-[#444] rounded px-1.5 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"

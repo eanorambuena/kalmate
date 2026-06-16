@@ -59,7 +59,7 @@ function back() {
 const methods = [
   {
     id: 'buda',
-    name: 'Buda (cripto)',
+    name: 'Buda (crypto)',
     desc: 'Donate in crypto via Buda',
     icon: '₿',
     color: '#00c853',
@@ -70,7 +70,7 @@ const methods = [
   },
   {
     id: 'mach',
-    name: 'MACH / Transferencia',
+    name: 'MACH / Transfer',
     desc: 'Transfer from any Chilean bank',
     icon: 'M',
     color: '#00a3ff',

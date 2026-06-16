@@ -32,11 +32,11 @@ export const monetization = {
   buda: {
     enabled: true,
     url: 'https://www.buda.com/link/eanorambuena',
-    label: 'Donar con Buda (cripto en Chile)',
+    label: 'Donate with Buda (crypto in Chile)',
   },
   fintual: {
     enabled: true,
     url: 'https://fintual.cl/r/emmanueln24',
-    label: 'Invertir en Fintual (regulado CMF)',
+    label: 'Invest with Fintual (CMF regulated)',
   },
 }

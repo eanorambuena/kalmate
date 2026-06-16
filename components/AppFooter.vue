@@ -39,7 +39,7 @@
           <span>Data: Yahoo Finance</span>
           <span>Deploy: Cloudflare Pages</span>
           <span class="flex items-center gap-2">
-            Moneda:
+            Currency:
             <button
               class="font-mono px-2 py-0.5 rounded transition-colors"
               :class="currency === 'CLP' ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-[#333] hover:text-white'"

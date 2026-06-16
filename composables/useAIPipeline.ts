@@ -64,12 +64,12 @@ function parseKeywords(query: string): PipelinePlan {
   const q = query.toLowerCase()
   const symbols = q.match(/[A-Z]{1,5}(?:-[A-Z]{1,5})?/g) || ['AAPL']
   const ticker = symbols[0]
-  const useCandles = q.includes('vela') || q.includes('candle') || q.includes('candlestick')
-  const useSma = q.includes('sma') || q.includes('media') || q.includes('moving')
-  const useEma = q.includes('ema') || q.includes('exponencial')
-  const useKalman = q.includes('kalman') || q.includes('filtro')
-  const useRsi = q.includes('rsi') || q.includes('relativa')
-  const useChart = q.includes('chart') || q.includes('grafic') || q.includes('linea')
+  const useCandles = q.includes('candle') || q.includes('candlestick')
+  const useSma = q.includes('sma') || q.includes('moving')
+  const useEma = q.includes('ema')
+  const useKalman = q.includes('kalman')
+  const useRsi = q.includes('rsi') || q.includes('relative')
+  const useChart = q.includes('chart')
 
   const nodes: NodeSpec[] = []
   const edges: EdgeSpec[] = []

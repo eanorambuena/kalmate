@@ -122,7 +122,7 @@
           class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="showAI ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="showAI = !showAI"
-          title="Generar pipeline con IA"
+          title="Generate pipeline with AI"
         >
           <Zap class="w-3.5 h-3.5" />
         </button>
@@ -130,7 +130,7 @@
           class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="showSaver ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="showSaver = !showSaver"
-          title="Guardar/Cargar pipelines"
+          title="Save/Load pipelines"
         >
           <Folder class="w-3.5 h-3.5" />
         </button>
