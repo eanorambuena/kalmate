@@ -62,39 +62,27 @@ const seriesToPlot = computed(() => {
   const r = result.value
   if (!r) return []
   const series: Array<{ label: string; values: number[]; color: string }> = []
-  const mainSeries = r.history || r.series || r.price
+  const mainSeries = r.seriesA || r.history || r.series || r.price
   if (Array.isArray(mainSeries) && mainSeries.length > 0) {
     series.push({ label: 'Main', values: mainSeries.map((d: any) => d.close ?? d), color: '#00c853' })
   }
-  if (Array.isArray(r.overlay1) && r.overlay1.length > 0) {
-    series.push({ label: 'Overlay 1', values: r.overlay1, color: '#2979ff' })
+  const overlayA = r.seriesB || r.overlay1 || r.sma || r.smoothed
+  if (Array.isArray(overlayA) && overlayA.length > 0) {
+    series.push({ label: 'Overlay A', values: overlayA, color: '#2979ff' })
   }
-  if (Array.isArray(r.overlay2) && r.overlay2.length > 0) {
-    series.push({ label: 'Overlay 2', values: r.overlay2, color: '#aa00ff' })
+  const overlayB = r.seriesC || r.overlay2 || r.ema || r.forecast
+  if (Array.isArray(overlayB) && overlayB.length > 0) {
+    series.push({ label: 'Overlay B', values: overlayB, color: '#aa00ff' })
   }
-  if (Array.isArray(r.overlay3) && r.overlay3.length > 0) {
-    series.push({ label: 'Overlay 3', values: r.overlay3, color: '#ff6d00' })
-  }
-  if (Array.isArray(r.sma) && r.sma.length > 0) {
-    series.push({ label: 'SMA', values: r.sma, color: '#2979ff' })
-  }
-  if (Array.isArray(r.ema) && r.ema.length > 0) {
-    series.push({ label: 'EMA', values: r.ema, color: '#aa00ff' })
-  }
-  if (Array.isArray(r.forecast) && r.forecast.length > 0) {
-    series.push({ label: 'Forecast', values: r.forecast, color: '#ff9100' })
-  }
-  if (Array.isArray(r.smoothed) && r.smoothed.length > 0) {
-    series.push({ label: 'Smoothed', values: r.smoothed, color: '#ff69b4' })
-  }
-  if (Array.isArray(r.trend) && r.trend.length > 0) {
-    series.push({ label: 'Trend', values: r.trend, color: '#ff6d00' })
+  const overlayC = r.seriesD || r.overlay3 || r.trend
+  if (Array.isArray(overlayC) && overlayC.length > 0) {
+    series.push({ label: 'Overlay C', values: overlayC, color: '#ff6d00' })
   }
   return series
 })
 
 const price = computed(() => {
-  const p = result.value?.price
+  const p = result.value?.source ?? result.value?.price
   return p != null ? p.toFixed(2) : null
 })
 

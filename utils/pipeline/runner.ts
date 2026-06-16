@@ -6,49 +6,45 @@ export const executors: Record<string, NodeExecutor> = {
   currencyInput: async (ctx) => {
     const from = ctx.data.from || 'USD'
     const to = ctx.data.to || 'CLP'
-    return { symbol: `${from}${to}=X` }
+    return { source: `${from}${to}=X` }
   },
 
   symbolInput: async (ctx) => {
-    return { symbol: ctx.data.symbol || 'AAPL' }
+    return { source: ctx.data.symbol || 'AAPL' }
   },
 
   priceFeed: async (ctx) => {
-    const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
+    const symbol = ctx.inputs.source || ctx.data.symbol || 'AAPL'
     try {
       const res = await fetch(`/api/history?symbol=${symbol}&range=1y&interval=1d`)
       const data = await res.json()
-      if (!res.ok) return { price: 0, history: [], error: data?.statusMessage || `HTTP ${res.status}`, symbol }
-      if (!Array.isArray(data)) return { price: 0, history: [], error: 'Unexpected response format', symbol }
+      if (!res.ok) return { source: 0, history: [], error: data?.statusMessage || `HTTP ${res.status}`, symbol }
+      if (!Array.isArray(data)) return { source: 0, history: [], error: 'Unexpected response format', symbol }
       const prices = data.map(h => h.close).filter(p => p > 0)
       const currentPrice = prices[prices.length - 1]
-      return { price: currentPrice, history: prices, symbol }
+      return { source: currentPrice, history: prices, symbol }
     } catch (e: any) {
-      return { price: 0, history: [], error: e?.message || 'Fetch failed', symbol }
+      return { source: 0, history: [], error: e?.message || 'Fetch failed', symbol }
     }
   },
 
   chartOutput: async (ctx) => {
-    const history = ctx.inputs.history ?? ctx.inputs.series ?? null
-    const series = Array.isArray(history) ? history : null
-    const lastPrice = series && series.length > 0 ? series[series.length - 1] : null
+    const main = ctx.inputs.seriesA || ctx.inputs.history || ctx.inputs.series || null
+    const arr = Array.isArray(main) ? main : null
+    const lastPrice = arr && arr.length > 0 ? arr[arr.length - 1] : null
     return {
-      price: ctx.inputs.price ?? lastPrice,
-      history: series,
-      series: series,
-      smoothed: ctx.inputs.smoothed ?? null,
-      trend: ctx.inputs.trend ?? null,
-      overlay1: ctx.inputs.overlay1 ?? ctx.inputs.sma ?? ctx.inputs.ema ?? ctx.inputs.smoothed ?? null,
-      overlay2: ctx.inputs.overlay2 ?? ctx.inputs.forecast ?? null,
-      overlay3: ctx.inputs.overlay3 ?? ctx.inputs.trend ?? null,
-      sma: ctx.inputs.sma ?? null,
-      ema: ctx.inputs.ema ?? null,
-      forecast: ctx.inputs.forecast ?? null,
+      source: ctx.inputs.source ?? ctx.inputs.price ?? lastPrice,
+      history: arr,
+      series: arr,
+      seriesA: arr,
+      seriesB: ctx.inputs.seriesB ?? null,
+      seriesC: ctx.inputs.seriesC ?? null,
+      seriesD: ctx.inputs.seriesD ?? null,
     }
   },
 
   priceDisplay: async (ctx) => {
-    return { price: ctx.inputs.price ?? null }
+    return { source: ctx.inputs.source ?? null }
   },
 
   alertOutput: async (ctx) => {
@@ -56,40 +52,40 @@ export const executors: Record<string, NodeExecutor> = {
   },
 
   smaIndicator: async (ctx) => {
-    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
+    const series = ctx.inputs.history || ctx.inputs.source || ctx.data.source || ctx.data.series
     if (!Array.isArray(series) || series.length < 2) {
-      return { sma: [], error: 'Need price series' }
+      return { seriesA: [], error: 'Need price series' }
     }
     const period = ctx.data.period || 20
     const sma = calcSMA(series, period)
-    return { sma }
+    return { seriesA: sma }
   },
 
   rsiIndicator: async (ctx) => {
-    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
+    const series = ctx.inputs.history || ctx.inputs.source || ctx.data.source || ctx.data.series
     if (!Array.isArray(series) || series.length < 2) {
-      return { rsi: [], error: 'Need price series' }
+      return { seriesA: [], error: 'Need price series' }
     }
     const period = ctx.data.period || 14
     const rsi = calcRSI(series, period)
     const lastRsi = rsi[rsi.length - 1] ?? 50
-    return { rsi: lastRsi, rsi_history: rsi }
+    return { seriesA: lastRsi, rsi_history: rsi }
   },
 
   emaIndicator: async (ctx) => {
-    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
+    const series = ctx.inputs.history || ctx.inputs.source || ctx.data.source || ctx.data.series
     if (!Array.isArray(series) || series.length < 2) {
-      return { ema: [], error: 'Need price series' }
+      return { seriesA: [], error: 'Need price series' }
     }
     const period = ctx.data.period || 20
     const ema = calcEMA(series, period)
-    return { ema }
+    return { seriesA: ema }
   },
 
   forecastNode: async (ctx) => {
-    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series
+    const series = ctx.inputs.history || ctx.inputs.source || ctx.data.source || ctx.data.series
     if (!Array.isArray(series) || series.length < 10) {
-      return { forecast: [], error: 'Need at least 10 price points' }
+      return { seriesA: [], error: 'Need at least 10 price points' }
     }
     try {
       const steps = ctx.data.steps || 15
@@ -106,35 +102,35 @@ export const executors: Record<string, NodeExecutor> = {
         const band = val * (0.01 + 0.015 * i)
         confidence.push(band)
       }
-      return { forecast, confidence }
+      return { seriesA: forecast, seriesB: confidence }
     } catch (e: any) {
-      return { forecast: [], error: e?.message || 'Forecast error' }
+      return { seriesA: [], error: e?.message || 'Forecast error' }
     }
   },
 
   kalmanFilter: async (ctx) => {
-    const series = ctx.inputs.series || ctx.inputs.history || ctx.data.series || ctx.inputs.price
-    if (!series) return { smoothed: [], trend: [], signal: 0, error: 'No series input' }
-    if (!Array.isArray(series)) return { smoothed: [], trend: [], signal: 0, error: 'Series is not an array' }
-    if (series.length < 5) return { smoothed: [], trend: [], signal: 0, error: `Series too short: ${series.length}` }
+    const series = ctx.inputs.history || ctx.inputs.source || ctx.data.source || ctx.inputs.price
+    if (!series) return { seriesA: [], seriesB: [], signal: 0, error: 'No series input' }
+    if (!Array.isArray(series)) return { seriesA: [], seriesB: [], signal: 0, error: 'Series is not an array' }
+    if (series.length < 5) return { seriesA: [], seriesB: [], signal: 0, error: `Series too short: ${series.length}` }
     try {
       const params = series.length > 100 ? calibrateMLE(series) : createDefaultParams()
       const result = runKalmanFilter(series, params, 5)
       const lastCycle = result.cycle[result.cycle.length - 1] || 0
       return {
-        smoothed: result.smoothed,
-        trend: result.trend,
+        seriesA: result.smoothed,
+        seriesB: result.trend,
         cycle: result.cycle,
         signal: lastCycle > 0 ? 1 : -1,
       }
     } catch (e: any) {
-      return { smoothed: [], trend: [], signal: 0, error: e?.message || 'Kalman error' }
+      return { seriesA: [], seriesB: [], signal: 0, error: e?.message || 'Kalman error' }
     }
   },
 
   mathOp: async (ctx) => {
-    const a = ctx.inputs.a ?? ctx.data.a ?? 0
-    const b = ctx.inputs.b ?? ctx.data.b ?? 0
+    const a = ctx.inputs.sourceA ?? ctx.data.sourceA ?? 0
+    const b = ctx.inputs.sourceB ?? ctx.data.sourceB ?? 0
     const va = typeof a === 'number' ? a : (Array.isArray(a) ? a[a.length - 1] : 0)
     const vb = typeof b === 'number' ? b : (Array.isArray(b) ? b[b.length - 1] : 0)
     const op = ctx.data.op || '+'
@@ -146,11 +142,11 @@ export const executors: Record<string, NodeExecutor> = {
       case '/': result = vb !== 0 ? va / vb : 0; break
       default: result = va + vb
     }
-    return { result, a: va, b: vb, op }
+    return { source: result, a: va, b: vb, op }
   },
 
   scalarInput: async (ctx) => {
-    return { value: ctx.data.value ?? 1 }
+    return { source: ctx.data.value ?? 1 }
   },
 
   portfolioInput: async (ctx) => {
@@ -158,17 +154,17 @@ export const executors: Record<string, NodeExecutor> = {
     let sum = 0
     let totalWeight = 0
     for (const [key, val] of Object.entries(ctx.inputs)) {
-      const idx = parseInt(key.replace('in', ''))
+      const idx = parseInt(key.replace('source', ''))
       const weight = weights[idx] ?? 1
       const v = typeof val === 'number' ? val : (Array.isArray(val) ? val[val.length - 1] : 0)
       sum += v * weight
       totalWeight += weight
     }
-    return { result: totalWeight > 0 ? sum / totalWeight : 0 }
+    return { source: totalWeight > 0 ? sum / totalWeight : 0 }
   },
 
   newsOutput: async (ctx) => {
-    const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
+    const symbol = ctx.inputs.source || ctx.data.symbol || 'AAPL'
     try {
       const res = await fetch(`/api/news?symbol=${symbol}`)
       if (!res.ok) return { news: [], latest: '-', count: 0, error: `HTTP ${res.status}` }
