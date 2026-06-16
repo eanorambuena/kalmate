@@ -15,13 +15,10 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install pnpm
         run: corepack enable && corepack prepare pnpm@latest --activate
-
-      - name: Install Chromium
-        run: sudo apt-get update -q && sudo apt-get install -yq chromium-browser
 
       - name: Install dependencies
         run: pnpm install
@@ -31,16 +28,24 @@ jobs:
 
       - name: Run Lighthouse
         run: |
+          CHROME_PATH=$(which chromium-browser 2>/dev/null || which google-chrome 2>/dev/null || which chromium 2>/dev/null || echo "")
+          if [ -z "$CHROME_PATH" ]; then
+            npx @puppeteer/browsers install chrome@latest
+            CHROME_PATH=$(find ~/.cache -name "chrome" -type f 2>/dev/null | head -1)
+          fi
+          echo "Using Chrome: $CHROME_PATH"
           mkdir -p reports
           npx lighthouse https://kalmate.pages.dev \
             --output=html \
             --output=json \
             --output-path=./reports/lighthouse \
-            --chrome-flags="--headless --no-sandbox --disable-gpu"
+            --chrome-path="$CHROME_PATH" \
+            --chrome-flags="--headless=new --no-sandbox --disable-gpu"
           npx lighthouse https://kalmate.pages.dev/terminal \
             --output=html \
             --output-path=./reports/lighthouse-terminal \
-            --chrome-flags="--headless --no-sandbox --disable-gpu"
+            --chrome-path="$CHROME_PATH" \
+            --chrome-flags="--headless=new --no-sandbox --disable-gpu"
 
       - name: Upload reports
         uses: actions/upload-artifact@v4

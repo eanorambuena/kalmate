@@ -1,18 +1,8 @@
 <template>
   <div class="min-h-screen bg-[#0a0a0a]">
-    <header class="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-[#1a1a1a]">
-      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <NuxtLink to="/" class="text-[#00c853] font-bold text-xl tracking-wider">KALMATE⌘</NuxtLink>
-        <div class="flex items-center gap-6">
-          <NuxtLink to="/terminal" class="text-[#ccc] hover:text-white transition-colors text-sm">Terminal</NuxtLink>
-          <NuxtLink to="/blog" class="text-white text-sm">Blog</NuxtLink>
-          <NuxtLink to="/about" class="text-[#ccc] hover:text-white transition-colors text-sm">About</NuxtLink>
-          <NuxtLink to="/contact" class="text-[#ccc] hover:text-white transition-colors text-sm">Contact</NuxtLink>
-        </div>
-      </div>
-    </header>
+    <Header />
 
-    <main class="max-w-4xl mx-auto px-6 pt-32 pb-24">
+    <main class="max-w-4xl mx-auto px-6 pt-24 pb-24">
       <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Blog</h1>
       <p class="text-[#888] text-lg mb-12">Market insights, tutorials, and financial education.</p>
 

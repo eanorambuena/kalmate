@@ -58,19 +58,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
 
 <template>
   <div class="min-h-screen bg-[#0a0a0a]">
-    <header class="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-[#1a1a1a]">
-      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <span class="text-[#00c853] font-bold text-xl tracking-wider">KALMATE⌘</span>
-        <div class="flex items-center gap-6">
-          <a href="/terminal" class="text-[#ccc] hover:text-white transition-colors text-sm">Terminal</a>
-          <a href="#features" class="text-[#ccc] hover:text-white transition-colors text-sm">Features</a>
-          <a href="#tech" class="text-[#ccc] hover:text-white transition-colors text-sm">Tech</a>
-          <NuxtLink to="/about" class="text-[#ccc] hover:text-white transition-colors text-sm">About</NuxtLink>
-          <NuxtLink to="/contact" class="text-[#ccc] hover:text-white transition-colors text-sm">Contact</NuxtLink>
-          <NuxtLink to="/blog" class="text-[#ccc] hover:text-white transition-colors text-sm">Blog</NuxtLink>
-        </div>
-      </div>
-    </header>
+    <Header />
 
     <section class="min-h-screen flex items-center relative overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-br from-[#00c853]/5 via-transparent to-[#2979ff]/5" />

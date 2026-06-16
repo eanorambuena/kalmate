@@ -35,6 +35,9 @@
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",
-    "lighthouse": "^13.4.0"
+    "lighthouse": "^13.4.0",
+    "@oxc-parser/binding-linux-x64-gnu": "0.133.0",
+    "@oxc-transform/binding-linux-x64-gnu": "0.133.0",
+    "@oxc-minify/binding-linux-x64-gnu": "0.133.0"
   }
 }

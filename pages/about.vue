@@ -1,18 +1,8 @@
 <template>
   <div class="min-h-screen bg-[#0a0a0a]">
-    <header class="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-[#1a1a1a]">
-      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <NuxtLink to="/" class="text-[#00c853] font-bold text-xl tracking-wider">KALMATE⌘</NuxtLink>
-        <div class="flex items-center gap-6">
-          <NuxtLink to="/terminal" class="text-[#ccc] hover:text-white transition-colors text-sm">Terminal</NuxtLink>
-          <NuxtLink to="/about" class="text-white text-sm">About</NuxtLink>
-          <NuxtLink to="/contact" class="text-[#ccc] hover:text-white transition-colors text-sm">Contact</NuxtLink>
-          <NuxtLink to="/blog" class="text-[#ccc] hover:text-white transition-colors text-sm">Blog</NuxtLink>
-        </div>
-      </div>
-    </header>
+    <Header />
 
-    <main class="max-w-3xl mx-auto px-6 pt-32 pb-24">
+    <main class="max-w-3xl mx-auto px-6 pt-24 pb-24">
       <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">About Kalmate</h1>
       <p class="text-[#ccc] text-lg leading-relaxed mb-8">
         Kalmate is a free, professional financial terminal built for modern web. It provides real-time market data, professional charts, portfolio tracking, and advanced tools — all at zero cost.
