@@ -22,7 +22,7 @@ export const executors: Record<string, NodeExecutor> = {
       if (!Array.isArray(data)) return { source: 0, history: [], error: 'Unexpected response format', symbol }
       const prices = data.map(h => h.close).filter(p => p > 0)
       const currentPrice = prices[prices.length - 1]
-      return { source: currentPrice, history: prices, symbol }
+      return { source: currentPrice, history: prices, ohlc: data, symbol }
     } catch (e: any) {
       return { source: 0, history: [], error: e?.message || 'Fetch failed', symbol }
     }
@@ -41,6 +41,11 @@ export const executors: Record<string, NodeExecutor> = {
       seriesC: ctx.inputs.seriesC ?? ctx.inputs.overlay2 ?? null,
       seriesD: ctx.inputs.seriesD ?? ctx.inputs.overlay3 ?? null,
     }
+  },
+
+  candleChart: async (ctx) => {
+    const ohlc = ctx.inputs.ohlc || ctx.inputs.history || ctx.inputs.seriesA || null
+    return { ohlc }
   },
 
   priceDisplay: async (ctx) => {

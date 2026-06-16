@@ -165,10 +165,11 @@ import { nodeDefinitions } from '../../utils/pipeline/nodeDefinitions'
 import { executePipeline } from '../../utils/pipeline/runner'
 import CustomNode from './nodes/CustomNode.vue'
 import ChartNode from './nodes/ChartNode.vue'
+import CandleNode from './nodes/CandleNode.vue'
 import ProModal from './ProModal.vue'
 import { Trash2, BarChart3, Play, Pause, MousePointer2 } from '@lucide/vue'
 
-const nodeTypes = { custom: CustomNode, chart: ChartNode }
+const nodeTypes = { custom: CustomNode, chart: ChartNode, candle: CandleNode }
 const flowContainer = ref<HTMLElement | null>(null)
 const { screenToFlowCoordinate } = useVueFlow()
 
@@ -274,7 +275,7 @@ function addNode(type: string) {
   if (!def) return
   nodeCounter++
   const id = `${type}-${nodeCounter}`
-  const nodeType = type === 'chartOutput' ? 'chart' : 'custom'
+  const nodeType = type === 'chartOutput' ? 'chart' : type === 'candleChart' ? 'candle' : 'custom'
   let x = 250
   let y = 200
   if (flowContainer.value) {
@@ -332,7 +333,6 @@ function formatResult(val: any): string {
 
 async function runPipeline() {
   running.value = true
-  results.value = {}
   try {
     const spec = {
       nodes: nodes.value.map((n: any) => ({

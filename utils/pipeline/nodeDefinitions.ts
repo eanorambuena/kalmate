@@ -107,6 +107,19 @@ export const nodeDefinitions: NodeDefinition[] = [
     defaultData: {},
   },
   {
+    type: 'candleChart',
+    label: 'Candle Chart',
+    description: 'Gráfico de velas japonesas OHLC',
+    category: 'output',
+    color: '#ff69b4',
+    pro: false,
+    inputs: [
+      { id: 'seriesA', label: 'Candles', type: 'series' },
+    ],
+    outputs: [],
+    defaultData: {},
+  },
+  {
     type: 'priceDisplay',
     label: 'Price Display',
     description: 'Muestra el precio actual del activo',
