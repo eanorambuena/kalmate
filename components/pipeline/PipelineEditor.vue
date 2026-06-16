@@ -106,6 +106,17 @@
         >
           ▶ Run
         </button>
+
+        <div class="w-px h-4 bg-[#333] mx-1" />
+
+        <button
+          class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
+          :class="showResults ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#555] border border-transparent hover:text-white'"
+          @click="showResults = !showResults"
+          title="Toggle results panel"
+        >
+          📊
+        </button>
       </div>
 
       <div ref="flowContainer" class="w-full h-full" :class="{ 'eraser-active': eraserMode }" @click="onCanvasClick">
@@ -123,7 +134,7 @@
       </div>
 
       <div
-        v-if="results && Object.keys(results).length > 0"
+        v-if="showResults && results && Object.keys(results).length > 0"
         class="absolute bottom-3 right-3 z-10 bg-[#111] border border-[#333] rounded-xl p-3 max-w-xs text-[10px]"
       >
         <p class="text-[#00c853] font-bold mb-1">Results</p>
@@ -166,6 +177,7 @@ const results = ref({})
 const isPro = ref(false)
 const eraserMode = ref(false)
 const showProModal = ref(false)
+const showResults = ref(true)
 let nodeCounter = 0
 
 onMounted(() => {
