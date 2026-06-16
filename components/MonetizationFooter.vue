@@ -7,6 +7,10 @@
         <span>Data: Yahoo Finance</span>
         <span>Deploy: Cloudflare Pages</span>
       </div>
+      <div class="flex justify-center gap-6 mt-3 text-xs">
+        <NuxtLink to="/about" class="text-[#888] hover:text-white transition-colors">About</NuxtLink>
+        <NuxtLink to="/contact" class="text-[#888] hover:text-white transition-colors">Contact</NuxtLink>
+      </div>
 
       <div class="mt-8 pt-8 border-t border-[#1a1a1a]">
         <p class="text-[#888] text-xs mb-3">Kalmate is free and open source.</p>
