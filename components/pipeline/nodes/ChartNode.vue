@@ -24,24 +24,10 @@
       <span class="text-white font-mono text-sm font-bold">${{ price }}</span>
     </div>
 
-    <div class="flex items-start justify-between gap-2 mb-1">
-      <div class="flex flex-col gap-1">
-        <div class="flex items-center gap-1">
-          <Handle type="target" :position="Position.Left" id="seriesA" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: '20px' }" />
-          <span class="text-[9px] text-[#aaa] w-20">Main Series</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <Handle type="target" :position="Position.Left" id="seriesB" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: '44px' }" />
-          <span class="text-[9px] text-[#aaa] w-20">Overlay A (series)</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <Handle type="target" :position="Position.Left" id="seriesC" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: '68px' }" />
-          <span class="text-[9px] text-[#aaa] w-20">Overlay B (series)</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <Handle type="target" :position="Position.Left" id="seriesD" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: '92px' }" />
-          <span class="text-[9px] text-[#aaa] w-20">Overlay C (series)</span>
-        </div>
+    <div class="flex flex-col gap-1 mt-2">
+      <div v-for="inp in inputs" :key="inp.id" class="flex items-center gap-1 relative pl-3">
+        <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ position:'absolute', left:'0px', top:'50%' }" />
+        <span class="text-[9px] text-[#aaa]">{{ inp.label }}</span>
       </div>
     </div>
   </div>
@@ -50,11 +36,15 @@
 <script setup lang="ts">
 import { Handle, Position } from '@vue-flow/core'
 import { computed } from 'vue'
+import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
 
 const props = defineProps({
   id: { type: String, required: true },
   data: { type: Object, default: () => ({}) },
 })
+
+const def = nodeDefinitions.find(n => n.type === 'chartOutput')
+const inputs = def?.inputs ?? []
 
 const result = computed(() => props.data?.result)
 
