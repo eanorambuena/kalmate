@@ -10,7 +10,7 @@
         <path v-for="(s, idx) in seriesToPlot" :key="idx" :d="areaPath(s.values)" :fill="s.color" opacity="0.1" />
         <polyline v-for="(s, idx) in seriesToPlot" :key="idx + 100" :points="linePoints(s.values)" fill="none" :stroke="s.color" stroke-width="2" vector-effect="non-scaling-stroke" />
       </svg>
-      <div class="absolute top-2 right-2 flex flex-col gap-1 text-[7px]">
+      <div class="absolute top-2 right-2 flex flex-col gap-1 text-[9px]">
         <span v-for="(s, idx) in seriesToPlot" :key="idx" class="flex items-center gap-1" :style="{ color: s.color }">
           <span class="w-2 h-2 rounded" :style="{ backgroundColor: s.color }" />
           {{ s.label }}
@@ -28,19 +28,19 @@
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-1">
           <Handle type="target" :position="Position.Left" id="series" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-          <span class="text-[7px] text-[#aaa] w-20">series (price[])</span>
+          <span class="text-[9px] text-[#aaa] w-20">series (price[])</span>
         </div>
         <div class="flex items-center gap-1">
           <Handle type="target" :position="Position.Left" id="overlay1" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-          <span class="text-[7px] text-[#aaa] w-20">overlay 1 (series)</span>
+          <span class="text-[9px] text-[#aaa] w-20">overlay 1 (series)</span>
         </div>
         <div class="flex items-center gap-1">
           <Handle type="target" :position="Position.Left" id="overlay2" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-          <span class="text-[7px] text-[#aaa] w-20">overlay 2 (series)</span>
+          <span class="text-[9px] text-[#aaa] w-20">overlay 2 (series)</span>
         </div>
         <div class="flex items-center gap-1">
           <Handle type="target" :position="Position.Left" id="overlay3" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-          <span class="text-[7px] text-[#aaa] w-20">overlay 3 (series)</span>
+          <span class="text-[9px] text-[#aaa] w-20">overlay 3 (series)</span>
         </div>
       </div>
     </div>

@@ -1,14 +1,14 @@
 <template>
   <div class="bg-[#111] border border-[#333] rounded-xl p-3 min-w-[180px] cursor-grab active:cursor-grabbing relative" :style="{ borderLeft: '3px solid ' + color }">
-    <span v-if="props.data?.pro" class="absolute -top-2 -right-2 bg-[#ff69b4] text-black text-[7px] font-bold px-1.5 py-0.5 rounded">PRO</span>
+    <span v-if="props.data?.pro" class="absolute -top-2 -right-2 bg-[#ff69b4] text-black text-[9px] font-bold px-1.5 py-0.5 rounded">PRO</span>
 
     <div class="flex items-center gap-2 mb-1">
       <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: color }" />
-      <span class="text-[9px] font-bold text-[#bbb] uppercase tracking-wider">{{ def.category }}</span>
+      <span class="text-[10px] font-bold text-[#bbb] uppercase tracking-wider">{{ def.category }}</span>
     </div>
 
     <p class="text-white text-xs font-medium mb-0.5">{{ label }}</p>
-    <p class="text-[#bbb] text-[8px] mb-2">{{ def.description }}</p>
+    <p class="text-[#bbb] text-[10px] mb-2">{{ def.description }}</p>
 
     <div v-if="def.type === 'symbolInput'" class="mb-2">
       <input
@@ -20,7 +20,7 @@
 
     <div v-if="def.type === 'currencyInput'" class="mb-2 space-y-1.5">
       <div class="flex items-center gap-1">
-        <span class="text-[7px] text-[#bbb] w-5">De</span>
+        <span class="text-[9px] text-[#bbb] w-5">De</span>
         <select
           v-model="data.from"
           class="flex-1 bg-[#222] border border-[#444] rounded px-1.5 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"
@@ -29,7 +29,7 @@
         </select>
       </div>
       <div class="flex items-center gap-1">
-        <span class="text-[7px] text-[#bbb] w-5">A</span>
+        <span class="text-[9px] text-[#bbb] w-5">A</span>
         <select
           v-model="data.to"
           class="flex-1 bg-[#222] border border-[#444] rounded px-1.5 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"
@@ -37,7 +37,7 @@
           <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }}</option>
         </select>
       </div>
-      <p class="text-[#bbb] text-[7px] text-center mt-0.5">{{ data.from }}{{ data.to }}=X</p>
+      <p class="text-[#bbb] text-[9px] text-center mt-0.5">{{ data.from }}{{ data.to }}=X</p>
     </div>
 
     <div v-if="def.type === 'mathOp'" class="mb-2">
@@ -63,7 +63,7 @@
 
     <div v-if="def.type === 'portfolioInput'" class="mb-2">
       <div v-for="(weight, idx) in data.weights" :key="idx" class="flex items-center gap-1 mb-1">
-        <span class="text-[7px] text-[#bbb] w-6">In{{ idx + 1 }}</span>
+        <span class="text-[9px] text-[#bbb] w-6">In{{ idx + 1 }}</span>
         <input
           type="number"
           v-model.number="data.weights[idx]"
@@ -71,7 +71,7 @@
           step="0.1"
           min="0"
         />
-        <span class="text-[7px] text-[#bbb]">×</span>
+        <span class="text-[9px] text-[#bbb]">×</span>
       </div>
     </div>
 
@@ -90,18 +90,18 @@
       <div v-if="def.type === 'portfolioInput'">
         <div v-for="(weight, idx) in data.weights" :key="'in-' + idx" class="flex items-center gap-1 mb-1">
           <Handle type="target" :position="Position.Left" :id="`in${idx}`" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: `${20 + idx * 24}px` }" />
-          <span class="text-[7px] text-[#bbb]">In{{ idx + 1 }}</span>
+          <span class="text-[9px] text-[#bbb]">In{{ idx + 1 }}</span>
         </div>
       </div>
       <div v-else class="flex flex-col gap-2">
         <div v-for="(inp, i) in def.inputs" :key="'in-' + i" class="flex items-center gap-1">
           <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: `${20 + i * 24}px` }" />
-          <span class="text-[7px] text-[#bbb]">{{ inp.label }}</span>
+          <span class="text-[9px] text-[#bbb]">{{ inp.label }}</span>
         </div>
       </div>
       <div class="flex flex-col gap-2">
         <div v-for="(out, i) in def.outputs" :key="'out-' + i" class="flex items-center gap-1">
-          <span class="text-[7px] text-[#bbb]">{{ out.label }}</span>
+          <span class="text-[9px] text-[#bbb]">{{ out.label }}</span>
           <Handle type="source" :position="Position.Right" :id="out.id" class="w-2 h-2 !bg-[#00c853] !border-0" :style="{ top: `${20 + i * 24}px` }" />
         </div>
       </div>

@@ -3,7 +3,7 @@
     <div class="w-52 flex-shrink-0 bg-[#0d0d0d] border-r border-[#222] overflow-y-auto z-10 flex flex-col">
       <div class="p-2 space-y-2">
         <div>
-          <div class="text-[9px] font-mono text-[#bbb] tracking-wider px-2 mb-1 uppercase">Input</div>
+          <div class="text-[10px]">Input</div>
           <div class="space-y-0.5">
             <button
               v-for="n in inputNodes" :key="n.type"
@@ -17,7 +17,7 @@
           </div>
         </div>
         <div>
-          <div class="text-[9px] font-mono text-[#bbb] tracking-wider px-2 mb-1 uppercase">Process</div>
+          <div class="text-[10px]">Process</div>
           <div class="space-y-0.5">
             <button
               v-for="n in processNodes" :key="n.type"
@@ -31,7 +31,7 @@
           </div>
         </div>
         <div>
-          <div class="text-[9px] font-mono text-[#bbb] tracking-wider px-2 mb-1 uppercase">Output</div>
+          <div class="text-[10px]">Output</div>
           <div class="space-y-0.5">
             <button
               v-for="n in outputNodes" :key="n.type"
@@ -45,7 +45,7 @@
           </div>
         </div>
         <div>
-          <div class="text-[9px] font-mono text-[#ff69b4] tracking-wider px-2 mb-1 uppercase flex items-center gap-1">
+          <div class="text-[10px] font-mono text-[#ff69b4] tracking-wider px-2 mb-1 uppercase flex items-center gap-1">
             Pro
             <svg v-if="!isPro" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
           </div>
@@ -68,7 +68,7 @@
     <div class="flex-1 relative">
       <div class="absolute top-2 right-2 z-10 flex items-center gap-1.5 bg-[#0d0d0d]/80 backdrop-blur-sm border border-[#222] rounded-lg px-2 py-1.5">
         <button
-          class="px-2 py-1 rounded text-[9px] font-bold transition-all"
+          class="px-2 py-1 rounded text-[10px] font-bold transition-all"
           :class="eraserMode ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-[#1a1a1a] text-[#bbb] hover:text-white border border-transparent'"
           @click="eraserMode = !eraserMode"
           title="Eraser mode: click edges to delete"
@@ -76,13 +76,13 @@
           🗑
         </button>
         <button
-          class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[9px] font-bold rounded hover:text-white transition-colors border border-transparent"
+          class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[10px] font-bold rounded hover:text-white transition-colors border border-transparent"
           @click="clearAll"
         >
           Clear
         </button>
         <button
-          class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[9px] font-bold rounded hover:text-white transition-colors border border-transparent"
+          class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[10px] font-bold rounded hover:text-white transition-colors border border-transparent"
           @click="$emit('help')"
           title="Show tutorial"
         >
@@ -92,14 +92,14 @@
         <div class="w-px h-4 bg-[#333] mx-1" />
 
         <button
-          class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
+          class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="autorun ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="autorun = !autorun"
         >
           {{ autorun ? '⏵ Auto' : '⏸ Auto' }}
         </button>
         <button
-          class="px-3 py-1 rounded text-[9px] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          class="px-3 py-1 rounded text-[10px] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           :class="autorun ? 'bg-[#222] text-[#bbb]' : 'bg-[#00c853] text-black hover:bg-[#00e863]'"
           :disabled="nodes.length === 0 || running || autorun"
           @click="runPipeline"
@@ -110,7 +110,7 @@
         <div class="w-px h-4 bg-[#333] mx-1" />
 
         <button
-          class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
+          class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="showResults ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="showResults = !showResults"
           title="Toggle results panel"
@@ -144,7 +144,7 @@
         </div>
       </div>
 
-      <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[9px] text-[#bbb] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
+      <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[10px] text-[#bbb] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
         <span>🖱 Arrastra de salida a entrada para conectar</span>
         <span>🖱 Click en flecha para borrar</span>
       </div>
