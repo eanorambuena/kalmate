@@ -220,13 +220,13 @@ function selectSearchResult(symbol: string) {
       <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">PORTFOLIO SUMMARY</div>
       <div class="grid grid-cols-3 gap-4 text-center">
         <div class="bg-[#1a1a1a] rounded-lg p-3">
-          <div class="text-[10px] text-[#666] font-sans uppercase tracking-wider">Total Value</div>
+          <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">Total Value</div>
           <div class="text-lg font-mono font-bold mt-1 animate-count-up">
             {{ calcTotalPnL() ? '$' + calcTotalPnL()!.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '...' }}
           </div>
         </div>
         <div class="bg-[#1a1a1a] rounded-lg p-3">
-          <div class="text-[10px] text-[#666] font-sans uppercase tracking-wider">P&amp;L</div>
+          <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">P&amp;L</div>
           <div
             class="text-lg font-mono font-bold mt-1"
             :class="calcTotalPnL() ? (calcTotalPnL()!.pnl >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]') : ''"
@@ -235,7 +235,7 @@ function selectSearchResult(symbol: string) {
           </div>
         </div>
         <div class="bg-[#1a1a1a] rounded-lg p-3">
-          <div class="text-[10px] text-[#666] font-sans uppercase tracking-wider">Return</div>
+          <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">Return</div>
           <div
             class="text-lg font-mono font-bold mt-1"
             :class="calcTotalPnL() ? (calcTotalPnL()!.pnlPercent >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]') : ''"
@@ -277,7 +277,7 @@ function selectSearchResult(symbol: string) {
               <span v-if="quotes[h.symbol]" class="animate-count-up" :style="{ animationDelay: `${i * 50}ms` }">
                 {{ '$' + (quotes[h.symbol].regularMarketPrice ?? 0).toFixed(2) }}
               </span>
-              <span v-else class="text-[#555]">...</span>
+              <span v-else class="text-[#888]">...</span>
             </td>
             <td
               class="px-3 py-2.5 text-right font-mono font-medium"
@@ -286,18 +286,18 @@ function selectSearchResult(symbol: string) {
               <span v-if="calcPnL(h)" class="animate-count-up" :style="{ animationDelay: `${i * 50}ms` }">
                 {{ calcPnL(h)!.pnl >= 0 ? '+' : '' }}{{ '$' + calcPnL(h)!.pnl.toFixed(2) }} ({{ calcPnL(h)!.pnlPercent.toFixed(2) }}%)
               </span>
-              <span v-else class="text-[#555]">...</span>
+              <span v-else class="text-[#888]">...</span>
             </td>
             <td class="px-3 py-2.5 text-right font-mono font-medium">
               <span v-if="calcPnL(h)" class="animate-count-up" :style="{ animationDelay: `${i * 50}ms` }">
                 {{ '$' + calcPnL(h)!.currentValue.toFixed(2) }}
               </span>
-              <span v-else class="text-[#555]">...</span>
+              <span v-else class="text-[#888]">...</span>
             </td>
             <td class="px-3 py-2.5 text-right">
               <button
                 v-if="deletingId !== h.id"
-                class="text-[#555] hover:text-[#ff1744] text-xs transition-colors px-1"
+                class="text-[#888] hover:text-[#ff1744] text-xs transition-colors px-1"
                 @click="confirmDelete(h.id)"
                 title="Delete"
               >
@@ -305,7 +305,7 @@ function selectSearchResult(symbol: string) {
               </button>
               <span v-else class="flex gap-1 text-xs">
                 <button class="text-[#ff1744] font-bold px-1 hover:text-[#ff5252] transition-colors" @click="deleteHolding(h.id)">DEL</button>
-                <button class="text-[#666] hover:text-[#aaa] px-1 transition-colors" @click="cancelDelete">X</button>
+                <button class="text-[#999] hover:text-[#aaa] px-1 transition-colors" @click="cancelDelete">X</button>
               </span>
             </td>
           </tr>

@@ -2,14 +2,14 @@
   <footer class="py-12 px-6 border-t border-[#1a1a1a] bg-[#0a0a0a]">
     <div class="max-w-6xl mx-auto text-center">
       <span class="text-[#00c853] font-bold text-lg tracking-wider">KALMATE⌘</span>
-      <p class="text-[#555] text-sm mt-4">Real-time financial data at your fingertips.</p>
-      <div class="flex justify-center gap-6 mt-6 text-xs text-[#555]">
+      <p class="text-[#888] text-sm mt-4">Real-time financial data at your fingertips.</p>
+      <div class="flex justify-center gap-6 mt-6 text-xs text-[#888]">
         <span>Data: Yahoo Finance</span>
         <span>Deploy: Cloudflare Pages</span>
       </div>
 
       <div class="mt-8 pt-8 border-t border-[#1a1a1a]">
-        <p class="text-[#555] text-xs mb-3">Kalmate is free and open source.</p>
+        <p class="text-[#888] text-xs mb-3">Kalmate is free and open source.</p>
         <div class="flex flex-wrap items-center justify-center gap-3">
           <a
             v-if="m.githubSponsors.enabled"

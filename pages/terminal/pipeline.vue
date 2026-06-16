@@ -42,7 +42,7 @@ main#main-content {
     <PipelineTutorial :key="tutorialKey" />
     <template #fallback>
       <div class="flex items-center justify-center h-96">
-        <p class="text-[#555] text-sm">Loading editor...</p>
+        <p class="text-[#888] text-sm">Loading editor...</p>
       </div>
     </template>
   </ClientOnly>

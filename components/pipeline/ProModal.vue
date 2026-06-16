@@ -6,14 +6,14 @@
         <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-[#ff69b4] via-[#ffd700] to-[#00c853] flex items-center justify-center text-3xl shadow-[0_0_40px_rgba(255,105,180,0.4)] animate-pulse-slow">
           <span class="text-black font-bold text-2xl">✦</span>
         </div>
-        <button class="absolute top-4 right-4 text-[#555] hover:text-white text-xl transition-colors" @click="$emit('close')">✕</button>
+        <button class="absolute top-4 right-4 text-[#aaa] hover:text-white text-xl transition-colors" @click="$emit('close')">✕</button>
 
         <div class="text-center mt-4">
           <p class="text-[#ff69b4] text-xs font-mono tracking-[0.2em] mb-2 animate-fade-in">PRO FEATURE</p>
           <h2 class="text-3xl font-bold text-white mb-2 animate-fade-in" style="animation-delay: 0.1s">
             Desbloquea <span class="bg-gradient-to-r from-[#ff69b4] via-[#ffd700] to-[#00c853] bg-clip-text text-transparent">Pro</span>
           </h2>
-          <p class="text-[#888] text-sm mb-6 animate-fade-in" style="animation-delay: 0.2s">Lleva tu análisis al siguiente nivel</p>
+          <p class="text-[#aaa] text-sm mb-6 animate-fade-in" style="animation-delay: 0.2s">Lleva tu análisis al siguiente nivel</p>
         </div>
 
         <div class="space-y-2.5 mb-8 animate-fade-in" style="animation-delay: 0.3s">
@@ -25,10 +25,10 @@
 
         <div class="text-center mb-6 animate-fade-in" style="animation-delay: 0.4s">
           <p class="text-3xl font-bold text-white">
-            <span class="text-[#555] line-through text-xl">$0</span>
+            <span class="text-[#aaa] line-through text-xl">$0</span>
             <span class="bg-gradient-to-r from-[#ff69b4] to-[#ffd700] bg-clip-text text-transparent"> $9.990</span>
           </p>
-          <p class="text-[#555] text-xs">Una vez, para siempre. Sin suscripción.</p>
+          <p class="text-[#aaa] text-xs">Una vez, para siempre. Sin suscripción.</p>
         </div>
 
         <button
@@ -44,7 +44,7 @@
           </span>
         </button>
 
-        <p class="text-[#555] text-[10px] text-center mt-4 animate-fade-in" style="animation-delay: 0.6s">
+        <p class="text-[#aaa] text-[10px] text-center mt-4 animate-fade-in" style="animation-delay: 0.6s">
           MACH · Buda · GitHub Sponsors · Honor system
         </p>
       </div>

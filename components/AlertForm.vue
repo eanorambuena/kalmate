@@ -135,7 +135,7 @@ onMounted(fetchAlerts)
             class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm w-24 text-white uppercase placeholder-[#555] focus:border-[#2979ff] focus:outline-none transition-colors font-sans"
           />
           <div class="mt-1">
-            <div v-if="loadingPrice" class="text-[#666] text-[10px] animate-pulse">Loading price...</div>
+            <div v-if="loadingPrice" class="text-[#999] text-[10px] animate-pulse">Loading price...</div>
             <div v-else-if="currentPrice" class="text-[#00c853] text-[10px] font-mono">${{ currentPrice.toFixed(2) }}</div>
           </div>
           <div
@@ -188,7 +188,7 @@ onMounted(fetchAlerts)
           </div>
         </div>
       </div>
-      <div v-else-if="alerts.length === 0" class="text-center text-[#555] py-12 text-sm bg-[#111] border border-[#2a2a2a] rounded-xl">
+      <div v-else-if="alerts.length === 0" class="text-center text-[#888] py-12 text-sm bg-[#111] border border-[#2a2a2a] rounded-xl">
         No alerts configured.
       </div>
       <div
@@ -212,7 +212,7 @@ onMounted(fetchAlerts)
         </div>
         <button
           v-if="deletingId !== a.id"
-          class="text-[#555] hover:text-[#ff1744] text-xs transition-colors px-1"
+          class="text-[#888] hover:text-[#ff1744] text-xs transition-colors px-1"
           @click="confirmDelete(a.id)"
           title="Delete"
         >
@@ -220,7 +220,7 @@ onMounted(fetchAlerts)
         </button>
         <span v-else class="flex gap-1 text-xs">
           <button class="text-[#ff1744] font-bold px-1.5 hover:text-[#ff5252] transition-colors font-sans" @click="deleteAlert(a.id)">DEL</button>
-          <button class="text-[#666] hover:text-[#aaa] px-1.5 transition-colors font-sans" @click="cancelDelete">X</button>
+          <button class="text-[#999] hover:text-[#aaa] px-1.5 transition-colors font-sans" @click="cancelDelete">X</button>
         </span>
       </div>
     </div>

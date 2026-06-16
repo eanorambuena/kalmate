@@ -66,9 +66,9 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
       <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <span class="text-[#00c853] font-bold text-xl tracking-wider">KALMATE⌘</span>
         <div class="flex items-center gap-6">
-          <a href="/terminal" class="text-[#888] hover:text-white transition-colors text-sm">Terminal</a>
-          <a href="#features" class="text-[#888] hover:text-white transition-colors text-sm">Features</a>
-          <a href="#tech" class="text-[#888] hover:text-white transition-colors text-sm">Tech</a>
+          <a href="/terminal" class="text-[#aaa] hover:text-white transition-colors text-sm">Terminal</a>
+          <a href="#features" class="text-[#aaa] hover:text-white transition-colors text-sm">Features</a>
+          <a href="#tech" class="text-[#aaa] hover:text-white transition-colors text-sm">Tech</a>
         </div>
       </div>
     </header>
@@ -97,7 +97,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
                 LAUNCH TERMINAL
               </a>
             </div>
-            <a href="/terminal/stock/AAPL" class="text-[#555] hover:text-[#aaa] transition-colors text-xs font-mono tracking-wider no-underline">
+            <a href="/terminal/stock/AAPL" class="text-[#aaa] hover:text-[#aaa] transition-colors text-xs font-mono tracking-wider no-underline">
               Or view a sample →
             </a>
           </div>
@@ -121,7 +121,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
           >
             <div class="w-12 h-12 rounded-xl bg-[#00c853]/10 flex items-center justify-center mb-5" v-html="f.icon" />
             <h3 class="text-white font-bold text-lg mb-3">{{ f.title }}</h3>
-            <p class="text-[#888] text-sm leading-relaxed">{{ f.desc }}</p>
+            <p class="text-[#aaa] text-sm leading-relaxed">{{ f.desc }}</p>
           </div>
         </div>
       </div>
@@ -146,15 +146,15 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
     <footer class="py-16 px-6 border-t border-[#1a1a1a]">
       <div class="max-w-6xl mx-auto text-center">
         <span class="text-[#00c853] font-bold text-lg tracking-wider">KALMATE⌘</span>
-        <p class="text-[#555] text-sm mt-4">Real-time financial data at your fingertips.</p>
-        <div class="flex justify-center gap-6 mt-8 text-xs text-[#555]">
+        <p class="text-[#aaa] text-sm mt-4">Real-time financial data at your fingertips.</p>
+        <div class="flex justify-center gap-6 mt-8 text-xs text-[#aaa]">
           <span>Data: Yahoo Finance</span>
           <span>Deploy: Cloudflare Pages</span>
         </div>
         <AdBanner />
 
         <div class="mt-8 pt-8 border-t border-[#1a1a1a]">
-          <p class="text-[#555] text-xs mb-3">Kalmate is free and open source.</p>
+          <p class="text-[#aaa] text-xs mb-3">Kalmate is free and open source.</p>
           <div class="flex flex-wrap items-center justify-center gap-3">
             <a
               v-if="m.githubSponsors.enabled"
@@ -230,14 +230,14 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
     <div v-if="showFintualModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4" @click.self="showFintualModal = false">
       <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div class="relative bg-[#111] border border-[#333] rounded-2xl p-8 max-w-md w-full shadow-2xl">
-        <button class="absolute top-4 right-4 text-[#555] hover:text-white text-lg cursor-pointer" @click="showFintualModal = false">✕</button>
+        <button class="absolute top-4 right-4 text-[#aaa] hover:text-white text-lg cursor-pointer" @click="showFintualModal = false">✕</button>
         <div class="text-center">
           <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-4 bg-[#6366f1]/10 text-[#6366f1]">F</div>
           <h3 class="text-white font-bold text-lg mb-3">{{ m.fintual.label }}</h3>
           <p class="text-[#aaa] text-sm leading-relaxed mb-4">
             Esta web fue hecha por <strong class="text-white">Emmanuel Norambuena</strong>.
           </p>
-          <p class="text-[#888] text-sm leading-relaxed mb-6">
+          <p class="text-[#aaa] text-sm leading-relaxed mb-6">
             Si quieres apoyarme con este referido, cuando Fintual te pregunte si alguien te recomendó, indica que me conoces. Eso me ayuda a seguir desarrollando herramientas gratis como esta.
           </p>
           <a

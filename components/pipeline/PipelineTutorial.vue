@@ -3,7 +3,7 @@
     <div v-if="show" class="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="skip" />
       <div class="relative bg-[#111] border border-[#333] rounded-2xl p-8 max-w-lg w-full shadow-2xl">
-        <button class="absolute top-4 right-4 text-[#555] hover:text-white text-lg cursor-pointer" @click="skip">✕</button>
+        <button class="absolute top-4 right-4 text-[#aaa] hover:text-white text-lg cursor-pointer" @click="skip">✕</button>
 
         <div class="text-center mb-6">
           <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-4" :style="{ background: step.color + '20', color: step.color }">
@@ -13,12 +13,12 @@
           <p class="text-[#aaa] text-sm leading-relaxed">{{ step.text }}</p>
         </div>
 
-        <div v-if="step.code" class="bg-[#0a0a0a] border border-[#222] rounded-xl p-3 mb-6 text-left font-mono text-xs text-[#888]">
+        <div v-if="step.code" class="bg-[#0a0a0a] border border-[#222] rounded-xl p-3 mb-6 text-left font-mono text-xs text-[#aaa]">
           <div v-for="(line, i) in step.code" :key="i">{{ line }}</div>
         </div>
 
         <div class="flex items-center justify-between gap-3">
-          <button class="text-[#555] hover:text-white text-xs transition-colors cursor-pointer" @click="skip">
+          <button class="text-[#aaa] hover:text-white text-xs transition-colors cursor-pointer" @click="skip">
             Skip tutorial
           </button>
           <div class="flex items-center gap-2">

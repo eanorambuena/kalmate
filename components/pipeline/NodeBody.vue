@@ -2,7 +2,7 @@
   <div class="bg-[#1a1a1a] border border-[#333] rounded-xl p-3 min-h-[100px]" :style="{ borderLeftColor: color, borderLeftWidth: '3px' }">
     <div class="text-[10px] font-bold mb-2" :style="{ color }">{{ label }}</div>
     <div v-for="(val, key) in displayData" :key="key" class="flex justify-between text-[9px] leading-relaxed">
-      <span class="text-[#555]">{{ key }}:</span>
+      <span class="text-[#888]">{{ key }}:</span>
       <span class="text-white font-mono text-right max-w-[60%] truncate">{{ formatVal(val) }}</span>
     </div>
   </div>

@@ -2,7 +2,7 @@
   <div class="bg-[#111] border border-[#333] rounded-xl p-3 min-w-[280px] cursor-grab active:cursor-grabbing relative">
     <div class="flex items-center gap-2 mb-2">
       <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: '#ff69b4' }" />
-      <span class="text-[10px] font-bold text-[#888] uppercase tracking-wider">OUTPUT</span>
+      <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">OUTPUT</span>
     </div>
     <p class="text-white text-xs font-medium mb-2">Chart</p>
     <div v-if="seriesToPlot.length > 0" class="w-full h-[120px] relative">
@@ -17,7 +17,7 @@
         </span>
       </div>
     </div>
-    <div v-else class="h-[120px] flex items-center justify-center text-[#555] text-[10px]">
+    <div v-else class="h-[120px] flex items-center justify-center text-[#aaa] text-[10px]">
       {{ result?.error || 'Run pipeline to see chart' }}
     </div>
     <div v-if="price" class="mt-1 text-center">
@@ -28,19 +28,19 @@
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-1">
           <Handle type="target" :position="Position.Left" id="series" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-          <span class="text-[7px] text-[#555] w-20">series (price[])</span>
+          <span class="text-[7px] text-[#aaa] w-20">series (price[])</span>
         </div>
         <div class="flex items-center gap-1">
           <Handle type="target" :position="Position.Left" id="overlay1" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-          <span class="text-[7px] text-[#555] w-20">overlay 1 (series)</span>
+          <span class="text-[7px] text-[#aaa] w-20">overlay 1 (series)</span>
         </div>
         <div class="flex items-center gap-1">
           <Handle type="target" :position="Position.Left" id="overlay2" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-          <span class="text-[7px] text-[#555] w-20">overlay 2 (series)</span>
+          <span class="text-[7px] text-[#aaa] w-20">overlay 2 (series)</span>
         </div>
         <div class="flex items-center gap-1">
           <Handle type="target" :position="Position.Left" id="overlay3" class="w-2 h-2 !bg-[#2979ff] !border-0" />
-          <span class="text-[7px] text-[#555] w-20">overlay 3 (series)</span>
+          <span class="text-[7px] text-[#aaa] w-20">overlay 3 (series)</span>
         </div>
       </div>
     </div>

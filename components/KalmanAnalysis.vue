@@ -56,7 +56,7 @@ function signalColor(s: string): string {
     <div class="h-64 bg-[#2a2a2a] rounded animate-pulse" />
   </div>
 
-  <div v-else-if="error || data?.error" class="bg-[#111] border border-[#2a2a2a] rounded-xl p-5 text-[#888] text-sm">
+  <div v-else-if="error || data?.error" class="bg-[#111] border border-[#2a2a2a] rounded-xl p-5 text-[#aaa] text-sm">
     {{ error?.message || data?.error || 'No data available' }}
   </div>
 
@@ -64,19 +64,19 @@ function signalColor(s: string): string {
     <div class="flex items-center justify-between mb-5">
       <div>
         <h3 class="text-white font-bold text-base">Kalman Analysis</h3>
-        <p class="text-[#555] text-xs font-mono">{{ symbol }} · Schwartz-Smith 2-Factor Model</p>
+        <p class="text-[#aaa] text-xs font-mono">{{ symbol }} · Schwartz-Smith 2-Factor Model</p>
       </div>
       <div class="flex items-center gap-4 text-xs">
         <div class="text-center">
-          <p class="text-[#555]">Price</p>
+          <p class="text-[#aaa]">Price</p>
           <p class="text-white font-bold">{{ formatPrice(data.lastPrice) }}</p>
         </div>
         <div class="text-center">
-          <p class="text-[#555]">Predicted</p>
+          <p class="text-[#aaa]">Predicted</p>
           <p class="text-white font-bold">{{ formatPrice(data.predictedPrice) }}</p>
         </div>
         <div class="text-center">
-          <p class="text-[#555]">Signal</p>
+          <p class="text-[#aaa]">Signal</p>
           <p class="font-bold" :style="{ color: signalColor(data.signal) }">{{ formatSignal(data.signal) }}</p>
         </div>
       </div>
@@ -163,13 +163,13 @@ function signalColor(s: string): string {
           />
         </g>
       </svg>
-      <div class="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] text-[#555] px-2">
+      <div class="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] text-[#aaa] px-2">
         <span>{{ chartData?.labels?.[0] || '' }}</span>
         <span>{{ chartData?.labels?.[chartData.labels.length - 1] || '' }}</span>
       </div>
     </div>
 
-    <div class="flex items-center justify-between text-xs text-[#555]">
+    <div class="flex items-center justify-between text-xs text-[#aaa]">
       <div class="flex items-center gap-4">
         <span class="flex items-center gap-1.5">
           <span class="w-3 h-0.5 bg-[#888] opacity-50 inline-block" /> Price

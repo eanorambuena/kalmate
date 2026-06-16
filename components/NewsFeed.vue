@@ -49,7 +49,7 @@ onMounted(() => {
           <div class="skeleton h-3 w-24" />
         </div>
       </div>
-      <div v-else-if="news.length === 0" class="text-center text-[#555] py-10 text-sm">
+      <div v-else-if="news.length === 0" class="text-center text-[#888] py-10 text-sm">
         No news available
       </div>
       <div v-else class="divide-y divide-[#1a1a1a]">
@@ -65,7 +65,7 @@ onMounted(() => {
           <div class="text-sm text-white line-clamp-2 font-sans leading-snug">{{ item.title }}</div>
           <div class="flex items-center gap-2 mt-1">
             <span v-if="item.publisher" class="text-[#00c853] text-[10px] font-sans font-medium">{{ item.publisher }}</span>
-            <span class="text-[#555] text-[10px] font-sans">{{ timeAgo(item.publishedDate) }}</span>
+            <span class="text-[#888] text-[10px] font-sans">{{ timeAgo(item.publishedDate) }}</span>
           </div>
         </a>
       </div>
