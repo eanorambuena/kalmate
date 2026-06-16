@@ -18,7 +18,7 @@
 
         <div class="space-y-2.5 mb-8 animate-fade-in" style="animation-delay: 0.3s">
           <div v-for="f in proFeatures" :key="f.label" class="flex items-center gap-3 bg-[#111] border border-[#222] rounded-xl px-4 py-2.5">
-            <span class="text-base flex-shrink-0">{{ f.icon }}</span>
+            <component :is="f.icon" class="w-4 h-4 flex-shrink-0" :style="{ color: '#ff69b4' }" />
             <span class="text-white text-sm">{{ f.label }}</span>
           </div>
         </div>
@@ -53,15 +53,17 @@
 </template>
 
 <script setup>
+import { TrendingUp, BarChart3, Sparkles, Link2, Mail, Zap } from '@lucide/vue'
+
 const emit = defineEmits(['close'])
 
 const proFeatures = [
-  { icon: '📈', label: 'RSI — Fuerza relativa del mercado' },
-  { icon: '📊', label: 'SMA — Medias móviles personalizables' },
-  { icon: '🔮', label: 'Forecast — Predicción Kalman' },
-  { icon: '🔗', label: 'Multi Symbol — Análisis batch' },
-  { icon: '📬', label: 'Telegram & Email alerts automáticas' },
-  { icon: '⚡', label: 'Ejecuciones ilimitadas del pipeline' },
+  { icon: TrendingUp, label: 'RSI — Fuerza relativa del mercado' },
+  { icon: BarChart3, label: 'SMA — Medias móviles personalizables' },
+  { icon: Sparkles, label: 'Forecast — Predicción Kalman' },
+  { icon: Link2, label: 'Multi Symbol — Análisis batch' },
+  { icon: Mail, label: 'Telegram & Email alerts automáticas' },
+  { icon: Zap, label: 'Ejecuciones ilimitadas del pipeline' },
 ]
 
 function goPricing() {

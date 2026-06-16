@@ -73,7 +73,7 @@
           @click="eraserMode = !eraserMode"
           title="Eraser mode: click edges to delete"
         >
-          🗑
+          <Trash2 class="w-3.5 h-3.5" />
         </button>
         <button
           class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[10px] font-bold rounded hover:text-white transition-colors border border-transparent"
@@ -96,7 +96,8 @@
           :class="autorun ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="autorun = !autorun"
         >
-          {{ autorun ? '⏵ Auto' : '⏸ Auto' }}
+          <component :is="autorun ? Pause : Play" class="w-3 h-3" />
+          Auto
         </button>
         <button
           class="px-3 py-1 rounded text-[10px] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -104,7 +105,7 @@
           :disabled="nodes.length === 0 || running || autorun"
           @click="runPipeline"
         >
-          ▶ Run
+          <Play class="w-3 h-3" /> Run
         </button>
 
         <div class="w-px h-4 bg-[#333] mx-1" />
@@ -115,7 +116,7 @@
           @click="showResults = !showResults"
           title="Toggle results panel"
         >
-          📊
+          <BarChart3 class="w-3.5 h-3.5" />
         </button>
       </div>
 
@@ -145,8 +146,10 @@
       </div>
 
       <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[10px] text-[#bbb] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
-        <span>🖱 Arrastra de salida a entrada para conectar</span>
-        <span>🖱 Click en flecha para borrar</span>
+        <MousePointer2 class="w-3 h-3 text-[#00c853]" />
+          <span>Arrastra de salida a entrada para conectar</span>
+          <span class="w-px h-3 bg-[#333]" />
+          <span>Click en flecha para borrar</span>
       </div>
     </div>
 
@@ -163,6 +166,7 @@ import { executePipeline } from '../../utils/pipeline/runner'
 import CustomNode from './nodes/CustomNode.vue'
 import ChartNode from './nodes/ChartNode.vue'
 import ProModal from './ProModal.vue'
+import { Trash2, BarChart3, Play, Pause, MousePointer2 } from '@lucide/vue'
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode }
 const flowContainer = ref<HTMLElement | null>(null)
@@ -186,6 +190,17 @@ onMounted(() => {
   if (saved) {
     try {
       const p = JSON.parse(saved)
+      if (p.edges) {
+        const oldToNew: Record<string, string> = {
+          series: 'seriesA',
+          overlay1: 'seriesB',
+          overlay2: 'seriesC',
+          overlay3: 'seriesD',
+        }
+        for (const e of p.edges) {
+          if (oldToNew[e.targetHandle]) e.targetHandle = oldToNew[e.targetHandle]
+        }
+      }
       nodes.value = p.nodes || []
       edges.value = p.edges || []
       results.value = p.results || {}

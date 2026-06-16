@@ -6,8 +6,8 @@
         <button class="absolute top-4 right-4 text-[#aaa] hover:text-white text-lg cursor-pointer" @click="skip">✕</button>
 
         <div class="text-center mb-6">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-4" :style="{ background: step.color + '20', color: step.color }">
-            {{ step.icon }}
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" :style="{ background: step.color + '20' }">
+            <component :is="step.icon" class="w-7 h-7" :style="{ color: step.color }" />
           </div>
           <h3 class="text-white font-bold text-lg mb-2">{{ step.title }}</h3>
           <p class="text-[#aaa] text-sm leading-relaxed">{{ step.text }}</p>
@@ -47,15 +47,18 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { Shuffle, Plus, Link2, Package, Diamond, Play } from '@lucide/vue'
+
 const show = ref(false)
 
 const steps = [
-  { icon: '🔀', color: '#2979ff', title: 'Welcome to Pipeline Builder', text: 'Visual pipeline builder para análisis financiero. Conecta nodos para crear estrategias sin código.' },
-  { icon: '+', color: '#2979ff', title: 'Add Nodes', text: 'Haz clic en los botones FREE/Pro del toolbar para agregar nodos al canvas. Cada nodo tiene entradas (azul) y salidas (verde).' },
-  { icon: '🔗', color: '#00c853', title: 'Connect Nodes', text: 'Arrastra desde un puerto de salida (verde) a un puerto de entrada (azul) para conectar nodos. El flujo va de izquierda a derecha.' },
-  { icon: '📦', color: '#2979ff', title: 'Available Nodes', text: 'Input: Symbol Input, Price Feed. Process: Kalman Filter. Output: Chart, Price Display, Alert.' },
-  { icon: '💎', color: '#ff69b4', title: 'Pro Nodes', text: 'SMA, RSI, Price Forecast, Multi Symbol, Telegram, Email. Upgrade en Pricing para desbloquear.' },
-  { icon: '▶', color: '#2979ff', title: 'Run Pipeline', text: 'Presiona Run para ejecutar el pipeline. Los resultados aparecen en cada nodo y en el panel lateral.' },
+  { icon: Shuffle, color: '#2979ff', title: 'Welcome to Pipeline Builder', text: 'Visual pipeline builder para análisis financiero. Conecta nodos para crear estrategias sin código.' },
+  { icon: Plus, color: '#2979ff', title: 'Add Nodes', text: 'Haz clic en los botones FREE/Pro del toolbar para agregar nodos al canvas. Cada nodo tiene entradas (azul) y salidas (verde).' },
+  { icon: Link2, color: '#00c853', title: 'Connect Nodes', text: 'Arrastra desde un puerto de salida (verde) a un puerto de entrada (azul) para conectar nodos. El flujo va de izquierda a derecha.' },
+  { icon: Package, color: '#2979ff', title: 'Available Nodes', text: 'Input: Symbol Input, Price Feed. Process: Kalman Filter. Output: Chart, Price Display, Alert.' },
+  { icon: Diamond, color: '#ff69b4', title: 'Pro Nodes', text: 'SMA, RSI, Price Forecast, Multi Symbol, Telegram, Email. Upgrade en Pricing para desbloquear.' },
+  { icon: Play, color: '#2979ff', title: 'Run Pipeline', text: 'Presiona Run para ejecutar el pipeline. Los resultados aparecen en cada nodo y en el panel lateral.' },
 ]
 
 const currentStep = ref(0)
