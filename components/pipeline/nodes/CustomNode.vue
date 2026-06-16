@@ -86,23 +86,25 @@
       />
     </div>
 
-    <div class="flex items-start justify-between gap-2 mb-1">
-      <div v-if="def.type === 'portfolioInput'">
-        <div v-for="(weight, idx) in data.weights" :key="'in-' + idx" class="flex items-center gap-1 mb-1">
-          <Handle type="target" :position="Position.Left" :id="`in${idx}`" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: `${20 + idx * 24}px` }" />
-          <span class="text-[9px] text-[#bbb]">In{{ idx + 1 }}</span>
-        </div>
+    <div class="flex items-start justify-between gap-1 mb-1">
+      <div class="flex flex-col gap-1">
+        <template v-if="def.type === 'portfolioInput'">
+          <div v-for="(weight, idx) in data.weights" :key="'in-' + idx" class="flex items-center gap-1">
+            <Handle type="target" :position="Position.Left" :id="`in${idx}`" class="!left-0 w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: `${20 + idx * 24}px` }" />
+            <span class="text-[9px] text-[#bbb]">In{{ idx + 1 }}</span>
+          </div>
+        </template>
+        <template v-else>
+          <div v-for="(inp, i) in def.inputs" :key="'in-' + i" class="flex items-center gap-1">
+            <Handle type="target" :position="Position.Left" :id="inp.id" class="!left-0 w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: `${20 + i * 24}px` }" />
+            <span class="text-[9px] text-[#bbb]">{{ inp.label }}</span>
+          </div>
+        </template>
       </div>
-      <div v-else class="flex flex-col gap-2">
-        <div v-for="(inp, i) in def.inputs" :key="'in-' + i" class="flex items-center gap-1">
-          <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ top: `${20 + i * 24}px` }" />
-          <span class="text-[9px] text-[#bbb]">{{ inp.label }}</span>
-        </div>
-      </div>
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-1">
         <div v-for="(out, i) in def.outputs" :key="'out-' + i" class="flex items-center gap-1">
           <span class="text-[9px] text-[#bbb]">{{ out.label }}</span>
-          <Handle type="source" :position="Position.Right" :id="out.id" class="w-2 h-2 !bg-[#00c853] !border-0" :style="{ top: `${20 + i * 24}px` }" />
+          <Handle type="source" :position="Position.Right" :id="out.id" class="!right-0 w-2 h-2 !bg-[#00c853] !border-0" :style="{ top: `${20 + i * 24}px` }" />
         </div>
       </div>
     </div>
