@@ -73,10 +73,10 @@ function selectSymbol(symbol: string) {
       aria-label="Search results"
       class="absolute top-full left-0 right-0 mt-1 bg-[#1a1a1a] border border-[#333] rounded shadow-xl z-50 max-h-80 overflow-y-auto"
     >
-      <div v-if="searching" class="text-center text-[#aaa] py-3 text-xs" aria-live="polite">
+      <div v-if="searching" class="text-center text-[#ccc] py-3 text-xs" aria-live="polite">
         Searching...
       </div>
-      <div v-else-if="noResults" class="text-center text-[#aaa] py-3 text-xs" aria-live="polite">
+      <div v-else-if="noResults" class="text-center text-[#ccc] py-3 text-xs" aria-live="polite">
         No results for "{{ query }}"
       </div>
       <button
@@ -89,7 +89,7 @@ function selectSymbol(symbol: string) {
       >
         <div class="flex items-center justify-between">
           <span class="text-[#00c853] font-mono text-sm">{{ r.symbol }}</span>
-          <span class="text-[#aaa] text-xs font-sans">{{ r.exchange }}</span>
+          <span class="text-[#ccc] text-xs font-sans">{{ r.exchange }}</span>
         </div>
         <div v-if="r.shortname || r.longname" class="text-[#bbb] text-xs truncate font-sans">
           {{ r.shortname || r.longname }}

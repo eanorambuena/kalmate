@@ -2,7 +2,7 @@
   <header role="banner" class="bg-[#111] border-b border-[#2a2a2a] px-4 py-2 flex items-center justify-between sticky top-0 z-50 backdrop-blur-xl bg-[#111]/95">
     <div class="flex items-center gap-4 md:gap-6">
       <NuxtLink to="/" class="text-[#00c853] font-bold text-lg tracking-wider shrink-0" aria-label="Kalmate home">
-        KALMATE<span class="text-[#aaa]" aria-hidden="true">⌘</span>
+        KALMATE<span class="text-[#ccc]" aria-hidden="true">⌘</span>
       </NuxtLink>
       <div class="hidden md:block flex-1 max-w-md">
         <SearchBar />
@@ -11,18 +11,18 @@
         <NuxtLink
           v-for="link in navLinks" :key="link.to"
           :to="link.to"
-          class="px-3 py-1.5 rounded-md text-[#aaa] hover:text-white hover:bg-white/5 transition-all duration-200 flex items-center gap-1.5"
+          class="px-3 py-1.5 rounded-md text-[#ccc] hover:text-white hover:bg-white/5 transition-all duration-200 flex items-center gap-1.5"
           :class="{ 'text-white bg-white/5': isActive(link.to) }"
           :aria-current="isActive(link.to) ? 'page' : undefined"
         >
           {{ link.label }}
-          <span class="text-[#aaa] text-[10px] font-mono" aria-hidden="true">[{{ link.key }}]</span>
+          <span class="text-[#ccc] text-[10px] font-mono" aria-hidden="true">[{{ link.key }}]</span>
         </NuxtLink>
       </nav>
     </div>
     <div class="flex items-center gap-3">
       <button
-        class="md:hidden text-[#aaa] hover:text-white transition-colors p-1"
+        class="md:hidden text-[#ccc] hover:text-white transition-colors p-1"
         @click="mobileOpen = !mobileOpen"
         :aria-label="mobileOpen ? 'Close menu' : 'Open menu'"
         :aria-expanded="mobileOpen"
@@ -37,13 +37,13 @@
         :href="monetization.githubSponsors.url"
         target="_blank"
         rel="noopener noreferrer"
-        class="hidden md:inline-flex items-center gap-1 text-[10px] text-[#aaa] hover:text-[#ff69b4] transition-colors"
+        class="hidden md:inline-flex items-center gap-1 text-[10px] text-[#ccc] hover:text-[#ff69b4] transition-colors"
         aria-label="Sponsor Kalmate on GitHub"
       >
         <svg class="w-3 h-3" viewBox="0 0 16 16" fill="currentColor"><path d="m8 14.25-.345.666a.75.75 0 0 0 .69 0l-.345-.666Zm0 0 .345.666a.75.75 0 0 1-.69 0L8 14.25ZM4.268 2.47a3.72 3.72 0 0 0-3.31 1.34c-1.27 1.7-1 4.04.64 5.78l.02.02.02.02L8 14.25l6.37-4.62.02-.02.02-.02c1.64-1.74 1.91-4.08.64-5.78a3.72 3.72 0 0 0-3.31-1.34 4.9 4.9 0 0 0-3.3 1.73L8 4.69l-.44-.49a4.9 4.9 0 0 0-3.3-1.73h.02Z"/></svg>
         Sponsor
       </a>
-      <span class="text-xs text-[#aaa] hidden md:block" aria-live="polite" aria-label="Live connection active">
+      <span class="text-xs text-[#ccc] hidden md:block" aria-live="polite" aria-label="Live connection active">
         <span class="text-[#2979ff] animate-pulse" aria-hidden="true">●</span> LIVE
       </span>
     </div>
@@ -60,7 +60,7 @@
       v-for="link in navLinks" :key="link.to"
       :to="link.to"
       class="flex flex-col items-center gap-0.5 px-3 py-1 rounded-md transition-colors"
-      :class="isActive(link.to) ? 'text-[#00c853]' : 'text-[#999] hover:text-[#aaa]'"
+      :class="isActive(link.to) ? 'text-[#00c853]' : 'text-[#999] hover:text-[#ccc]'"
       :aria-current="isActive(link.to) ? 'page' : undefined"
     >
       <span class="text-lg" aria-hidden="true">{{ link.icon }}</span>
@@ -81,13 +81,13 @@
           <NuxtLink
             v-for="link in navLinks" :key="link.to"
             :to="link.to"
-            class="px-4 py-3 rounded-lg text-[#aaa] hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3"
+            class="px-4 py-3 rounded-lg text-[#ccc] hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3"
             :class="{ 'text-white bg-white/5': isActive(link.to) }"
             @click="mobileOpen = false"
           >
             <span class="text-lg">{{ link.icon }}</span>
             <span class="font-medium">{{ link.label }}</span>
-            <span class="text-[#aaa] text-xs font-mono ml-auto">[{{ link.key }}]</span>
+            <span class="text-[#ccc] text-xs font-mono ml-auto">[{{ link.key }}]</span>
           </NuxtLink>
         </div>
       </div>

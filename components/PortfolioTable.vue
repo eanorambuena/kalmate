@@ -147,7 +147,7 @@ function selectSearchResult(symbol: string) {
 <template>
   <div>
     <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-4 card-hover">
-      <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans" id="add-position-label">ADD POSITION</div>
+      <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans" id="add-position-label">ADD POSITION</div>
       <div class="flex flex-wrap gap-2" role="form" aria-labelledby="add-position-label">
         <div class="relative">
           <label for="pos-symbol" class="sr-only">Symbol</label>
@@ -161,7 +161,7 @@ function selectSearchResult(symbol: string) {
             v-if="showSearch && newSymbol.length > 0"
             class="absolute top-full left-0 mt-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg shadow-xl z-50 min-w-[240px] overflow-hidden"
           >
-            <div v-if="searching" class="text-center text-[#aaa] py-2 text-xs">Searching...</div>
+            <div v-if="searching" class="text-center text-[#ccc] py-2 text-xs">Searching...</div>
             <button
               v-for="r in searchResults"
               :key="r.symbol"
@@ -169,7 +169,7 @@ function selectSearchResult(symbol: string) {
               @mousedown="selectSearchResult(r.symbol)"
             >
               <span class="text-[#00c853] font-mono text-sm">{{ r.symbol }}</span>
-              <span class="text-[#aaa] text-xs ml-2 font-sans">{{ r.exchange }}</span>
+              <span class="text-[#ccc] text-xs ml-2 font-sans">{{ r.exchange }}</span>
               <div v-if="r.shortname || r.longname" class="text-[#bbb] text-xs truncate font-sans">{{ r.shortname || r.longname }}</div>
             </button>
           </div>
@@ -217,7 +217,7 @@ function selectSearchResult(symbol: string) {
 
     <!-- Summary -->
     <div v-else-if="holdings.length > 0" class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-3 card-hover" aria-live="polite" aria-label="Portfolio summary">
-      <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">PORTFOLIO SUMMARY</div>
+      <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans">PORTFOLIO SUMMARY</div>
       <div class="grid grid-cols-3 gap-4 text-center">
         <div class="bg-[#1a1a1a] rounded-lg p-3">
           <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">Total Value</div>
@@ -249,7 +249,7 @@ function selectSearchResult(symbol: string) {
     <div class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden card-hover">
       <table class="w-full text-sm">
         <thead>
-          <tr class="border-b border-[#2a2a2a] text-[#aaa] text-xs">
+          <tr class="border-b border-[#2a2a2a] text-[#ccc] text-xs">
             <th class="text-left px-3 py-2.5 font-sans">SYMBOL</th>
             <th class="text-right px-3 py-2.5 font-sans">SHARES</th>
             <th class="text-right px-3 py-2.5 font-sans">AVG $</th>
@@ -261,7 +261,7 @@ function selectSearchResult(symbol: string) {
         </thead>
         <tbody>
           <tr v-if="holdings.length === 0">
-            <td colspan="7" class="text-center text-[#aaa] py-12 text-xs font-sans">
+            <td colspan="7" class="text-center text-[#ccc] py-12 text-xs font-sans">
               No positions. Add one above.
             </td>
           </tr>
@@ -305,7 +305,7 @@ function selectSearchResult(symbol: string) {
               </button>
               <span v-else class="flex gap-1 text-xs">
                 <button class="text-[#ff1744] font-bold px-1 hover:text-[#ff5252] transition-colors" @click="deleteHolding(h.id)">DEL</button>
-                <button class="text-[#999] hover:text-[#aaa] px-1 transition-colors" @click="cancelDelete">X</button>
+                <button class="text-[#999] hover:text-[#ccc] px-1 transition-colors" @click="cancelDelete">X</button>
               </span>
             </td>
           </tr>

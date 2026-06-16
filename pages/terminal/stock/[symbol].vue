@@ -55,12 +55,12 @@ watch(range, () => {
 </script>
 
 <template>
-  <div v-if="loading" class="text-center text-[#aaa] py-20 text-sm animate-pulse-slow">
+  <div v-if="loading" class="text-center text-[#ccc] py-20 text-sm animate-pulse-slow">
         Loading market data...
       </div>
       <div v-else-if="error" class="text-center py-20">
         <div class="text-[#ff1744] font-bold mb-2">Data Unavailable</div>
-        <div class="text-[#aaa] text-xs">Yahoo Finance may be unreachable or {{ symbol }} is not a valid symbol.</div>
+        <div class="text-[#ccc] text-xs">Yahoo Finance may be unreachable or {{ symbol }} is not a valid symbol.</div>
       </div>
       <template v-else>
         <div v-if="quote" class="bg-[#111] border border-[#333] rounded p-4 mb-4" aria-live="polite" aria-label="Quote data">
@@ -84,35 +84,35 @@ watch(range, () => {
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-xs">
             <div>
-              <span class="text-[#aaa] font-sans">Open: </span>
+              <span class="text-[#ccc] font-sans">Open: </span>
               <span class="text-white font-mono">{{ '$' + (quote.regularMarketOpen?.toFixed(2) ?? '-') }}</span>
             </div>
             <div>
-              <span class="text-[#aaa] font-sans">High: </span>
+              <span class="text-[#ccc] font-sans">High: </span>
               <span class="text-white font-mono">{{ '$' + (quote.regularMarketDayHigh?.toFixed(2) ?? '-') }}</span>
             </div>
             <div>
-              <span class="text-[#aaa] font-sans">Low: </span>
+              <span class="text-[#ccc] font-sans">Low: </span>
               <span class="text-white font-mono">{{ '$' + (quote.regularMarketDayLow?.toFixed(2) ?? '-') }}</span>
             </div>
             <div>
-              <span class="text-[#aaa] font-sans">Prev Close: </span>
+              <span class="text-[#ccc] font-sans">Prev Close: </span>
               <span class="text-white font-mono">{{ '$' + (quote.regularMarketPreviousClose?.toFixed(2) ?? '-') }}</span>
             </div>
             <div>
-              <span class="text-[#aaa] font-sans">Volume: </span>
+              <span class="text-[#ccc] font-sans">Volume: </span>
               <span class="text-white font-mono">{{ quote.regularMarketVolume?.toLocaleString() ?? '-' }}</span>
             </div>
             <div>
-              <span class="text-[#aaa] font-sans">Mkt Cap: </span>
+              <span class="text-[#ccc] font-sans">Mkt Cap: </span>
               <span class="text-white font-mono">{{ quote.marketCap ? '$' + (quote.marketCap / 1e9).toFixed(2) + 'B' : '-' }}</span>
             </div>
             <div>
-              <span class="text-[#aaa] font-sans">52W High: </span>
+              <span class="text-[#ccc] font-sans">52W High: </span>
               <span class="text-white font-mono">{{ '$' + (quote.fiftyTwoWeekHigh?.toFixed(2) ?? '-') }}</span>
             </div>
             <div>
-              <span class="text-[#aaa] font-sans">52W Low: </span>
+              <span class="text-[#ccc] font-sans">52W Low: </span>
               <span class="text-white font-mono">{{ '$' + (quote.fiftyTwoWeekLow?.toFixed(2) ?? '-') }}</span>
             </div>
           </div>
@@ -137,7 +137,7 @@ watch(range, () => {
           <div v-if="history.length > 0">
             <ClientOnly><StockChart :data="history" /></ClientOnly>
           </div>
-          <div v-else class="h-[400px] flex items-center justify-center text-[#aaa] text-sm" aria-label="No chart data">
+          <div v-else class="h-[400px] flex items-center justify-center text-[#ccc] text-sm" aria-label="No chart data">
             No chart data available
           </div>
         </div>

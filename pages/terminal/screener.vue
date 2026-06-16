@@ -71,7 +71,7 @@ onMounted(search)
 </script>
 
 <template>
-  <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">SCREENER</div>
+  <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans">SCREENER</div>
 
       <!-- Presets -->
       <div class="flex flex-wrap gap-2 mb-4">
@@ -89,7 +89,7 @@ onMounted(search)
       <div class="bg-[#111] border border-[#333] rounded p-3 mb-4" role="search" aria-label="Stock screener filters">
         <div class="flex flex-wrap gap-2 items-end">
           <div>
-            <label for="scr-query" class="text-[#aaa] text-[10px] mb-1 font-sans block">Search</label>
+            <label for="scr-query" class="text-[#ccc] text-[10px] mb-1 font-sans block">Search</label>
             <input
               id="scr-query"
               v-model="searchQuery"
@@ -100,7 +100,7 @@ onMounted(search)
             />
           </div>
           <div>
-            <label for="scr-min" class="text-[#aaa] text-[10px] mb-1 font-sans block">Min Price</label>
+            <label for="scr-min" class="text-[#ccc] text-[10px] mb-1 font-sans block">Min Price</label>
             <input
               id="scr-min"
               v-model="minPrice"
@@ -111,7 +111,7 @@ onMounted(search)
             />
           </div>
           <div>
-            <label for="scr-max" class="text-[#aaa] text-[10px] mb-1 font-sans block">Max Price</label>
+            <label for="scr-max" class="text-[#ccc] text-[10px] mb-1 font-sans block">Max Price</label>
             <input
               id="scr-max"
               v-model="maxPrice"
@@ -122,7 +122,7 @@ onMounted(search)
             />
           </div>
           <div>
-            <label for="scr-sort" class="text-[#aaa] text-[10px] mb-1 font-sans block">Sort By</label>
+            <label for="scr-sort" class="text-[#ccc] text-[10px] mb-1 font-sans block">Sort By</label>
             <select
               id="scr-sort"
               v-model="sortBy"
@@ -136,7 +136,7 @@ onMounted(search)
             </select>
           </div>
           <div>
-            <label for="scr-dir" class="text-[#aaa] text-[10px] mb-1 font-sans block">Order</label>
+            <label for="scr-dir" class="text-[#ccc] text-[10px] mb-1 font-sans block">Order</label>
             <select
               id="scr-dir"
               v-model="sortDir"
@@ -157,15 +157,15 @@ onMounted(search)
 
       <!-- Results -->
       <div class="bg-[#111] border border-[#333] rounded overflow-hidden">
-        <div v-if="loading" class="text-center text-[#aaa] py-8 text-xs animate-pulse-slow">
+        <div v-if="loading" class="text-center text-[#ccc] py-8 text-xs animate-pulse-slow">
           Screening...
         </div>
-        <div v-else-if="results.length === 0" class="text-center text-[#aaa] py-8 text-xs">
+        <div v-else-if="results.length === 0" class="text-center text-[#ccc] py-8 text-xs">
           No results. Try a different search.
         </div>
         <table v-else class="w-full text-sm">
           <thead>
-            <tr class="border-b border-[#333] text-[#aaa] text-xs">
+            <tr class="border-b border-[#333] text-[#ccc] text-xs">
               <th class="text-left px-3 py-2">SYMBOL</th>
               <th class="text-left px-3 py-2 hidden sm:table-cell">NAME</th>
               <th class="text-right px-3 py-2">PRICE</th>
@@ -207,10 +207,10 @@ onMounted(search)
               >
                 {{ item.regularMarketChangePercent >= 0 ? '+' : '' }}{{ item.regularMarketChangePercent?.toFixed(2) ?? '...' }}%
               </td>
-              <td class="px-3 py-2 text-right font-mono text-[#aaa] hidden md:table-cell">
+              <td class="px-3 py-2 text-right font-mono text-[#ccc] hidden md:table-cell">
                 {{ item.regularMarketVolume?.toLocaleString() ?? '-' }}
               </td>
-              <td class="px-3 py-2 text-right font-mono text-[#aaa] hidden lg:table-cell">
+              <td class="px-3 py-2 text-right font-mono text-[#ccc] hidden lg:table-cell">
                 {{ item.marketCap ? '$' + (item.marketCap / 1e9).toFixed(1) + 'B' : '-' }}
               </td>
             </tr>

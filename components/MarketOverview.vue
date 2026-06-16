@@ -39,7 +39,7 @@ onMounted(() => {
 
 <template>
   <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-3 card-hover">
-    <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans flex items-center gap-2" aria-live="polite" aria-label="Market indices">
+    <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans flex items-center gap-2" aria-live="polite" aria-label="Market indices">
       <span>MARKET INDICES</span>
       <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Updating" />
     </div>

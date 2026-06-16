@@ -124,7 +124,7 @@ onMounted(fetchAlerts)
 <template>
   <div>
     <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-4 card-hover">
-      <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans" id="create-alert-label">CREATE ALERT</div>
+      <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans" id="create-alert-label">CREATE ALERT</div>
       <div class="flex flex-wrap gap-2 items-center" role="form" aria-labelledby="create-alert-label">
         <div class="relative">
           <label for="alert-symbol" class="sr-only">Symbol</label>
@@ -142,7 +142,7 @@ onMounted(fetchAlerts)
             v-if="showSearch && symbol.length > 0"
             class="absolute top-full left-0 mt-8 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg shadow-xl z-50 min-w-[240px] overflow-hidden"
           >
-            <div v-if="searching" class="text-center text-[#aaa] py-2 text-xs">Searching...</div>
+            <div v-if="searching" class="text-center text-[#ccc] py-2 text-xs">Searching...</div>
             <button
               v-for="r in searchResults"
               :key="r.symbol"
@@ -150,7 +150,7 @@ onMounted(fetchAlerts)
               @mousedown="selectSearchResult(r.symbol)"
             >
               <span class="text-[#00c853] font-mono text-sm">{{ r.symbol }}</span>
-              <span class="text-[#aaa] text-xs ml-2 font-sans">{{ r.exchange }}</span>
+              <span class="text-[#ccc] text-xs ml-2 font-sans">{{ r.exchange }}</span>
               <div v-if="r.shortname || r.longname" class="text-[#bbb] text-xs truncate font-sans">{{ r.shortname || r.longname }}</div>
             </button>
           </div>
@@ -220,7 +220,7 @@ onMounted(fetchAlerts)
         </button>
         <span v-else class="flex gap-1 text-xs">
           <button class="text-[#ff1744] font-bold px-1.5 hover:text-[#ff5252] transition-colors font-sans" @click="deleteAlert(a.id)">DEL</button>
-          <button class="text-[#999] hover:text-[#aaa] px-1.5 transition-colors font-sans" @click="cancelDelete">X</button>
+          <button class="text-[#999] hover:text-[#ccc] px-1.5 transition-colors font-sans" @click="cancelDelete">X</button>
         </span>
       </div>
     </div>

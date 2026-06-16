@@ -20,6 +20,6 @@ useHead({
 </script>
 
 <template>
-  <div class="text-xs text-[#aaa] mb-3 tracking-wider font-sans">PORTFOLIO</div>
+  <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans">PORTFOLIO</div>
   <PortfolioTable />
 </template>

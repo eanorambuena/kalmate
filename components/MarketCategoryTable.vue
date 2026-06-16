@@ -41,7 +41,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="text-xs text-[#aaa] mb-2 tracking-wider font-sans flex items-center gap-2" :aria-label="`${title} market data`">
+    <div class="text-xs text-[#ccc] mb-2 tracking-wider font-sans flex items-center gap-2" :aria-label="`${title} market data`">
       <span>{{ title }}</span>
       <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Updating" />
     </div>
@@ -62,7 +62,7 @@ onMounted(() => {
     <div v-else class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden card-hover">
       <table class="w-full text-sm" :aria-label="`${title} quotes`" role="table">
         <thead>
-          <tr class="border-b border-[#2a2a2a] text-[#aaa] text-xs">
+          <tr class="border-b border-[#2a2a2a] text-[#ccc] text-xs">
             <th scope="col" class="text-left px-3 py-2.5 font-sans">SYMBOL</th>
             <th scope="col" class="text-left px-3 py-2.5 font-sans hidden sm:table-cell">NAME</th>
             <th scope="col" class="text-right px-3 py-2.5 font-sans">PRICE</th>

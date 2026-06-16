@@ -37,7 +37,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="text-xs text-[#aaa] mb-2 tracking-wider font-sans flex items-center gap-2" aria-live="polite">
+    <div class="text-xs text-[#ccc] mb-2 tracking-wider font-sans flex items-center gap-2" aria-live="polite">
       <span>MARKET NEWS</span>
       <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Loading news" />
     </div>
