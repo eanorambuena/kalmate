@@ -112,7 +112,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Handle, Position } from '@vue-flow/core'
 import { nodeDefinitions, currencies } from '../../../utils/pipeline/nodeDefinitions'
 import { computed, ref, onMounted, nextTick } from 'vue'
