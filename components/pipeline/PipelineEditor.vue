@@ -1,103 +1,144 @@
 <template>
-  <div class="h-[calc(100vh-120px)] w-full relative">
-    <div class="absolute top-3 left-3 z-10 flex flex-wrap gap-1.5">
-      <div class="flex items-center gap-1 text-[10px] text-[#555] mr-1 font-mono">FREE</div>
-      <button
-        v-for="n in freeNodes" :key="n.type"
-        class="px-2.5 py-1.5 rounded text-[10px] font-bold transition-colors"
-        :style="{ background: n.color + '20', color: n.color, border: '1px solid ' + n.color + '40' }"
-        @click="addNode(n.type)"
-      >
-        + {{ n.label }}
-      </button>
-
-      <div class="w-px h-6 bg-[#333] mx-1 self-center" />
-
-      <div class="flex items-center gap-1 text-[10px] text-[#ff69b4] mr-1 font-mono">PRO</div>
-      <button
-        v-for="n in proNodes" :key="n.type"
-        class="px-2.5 py-1.5 rounded text-[10px] font-bold transition-colors flex items-center gap-1"
-        :style="{ background: isPro ? n.color + '20' : '#222', color: isPro ? n.color : '#555', border: '1px solid ' + (isPro ? n.color + '40' : '#333') }"
-        :disabled="!isPro"
-        @click="isPro ? addNode(n.type) : showProModal = true"
-      >
-        <svg v-if="!isPro" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
-        {{ n.label }}
-      </button>
-
-      <div class="w-px h-6 bg-[#333] mx-2 self-center" />
-
-      <button
-        class="px-3 py-1.5 bg-[#333] text-[#aaa] text-[10px] font-bold rounded hover:text-white transition-colors"
-        @click="clearAll"
-      >
-        Clear
-      </button>
-      <button
-        class="px-2.5 py-1.5 bg-[#222] text-[#555] text-[10px] font-bold rounded hover:text-white transition-colors"
-        @click="$emit('help')"
-        title="Show tutorial"
-      >
-        ?
-      </button>
-      <button
-        class="px-2.5 py-1.5 rounded text-[10px] font-bold transition-all"
-        :class="eraserMode ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-[#222] text-[#555] hover:text-white'"
-        @click="eraserMode = !eraserMode"
-        title="Eraser mode: click edges to delete"
-      >
-        🗑
-      </button>
-
-      <div class="w-px h-6 bg-[#333] mx-2 self-center" />
-
-      <button
-        class="px-3 py-1.5 rounded text-[10px] font-bold transition-colors"
-        :class="autorun ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#222] text-[#555] hover:text-white border border-transparent'"
-        @click="autorun = !autorun"
-        title="Toggle autorun"
-      >
-        {{ autorun ? '⏵ Autorun ON' : '⏸ Autorun OFF' }}
-      </button>
-      <button
-        class="px-4 py-1.5 rounded text-[10px] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        :class="autorun ? 'bg-[#333] text-[#555]' : 'bg-[#00c853] text-black hover:bg-[#00e863]'"
-        :disabled="nodes.length === 0 || running || autorun"
-        @click="runPipeline"
-      >
-        ▶ Run
-      </button>
-    </div>
-
-    <div class="w-full h-full" :class="{ 'eraser-active': eraserMode }" @click="onCanvasClick">
-      <VueFlow
-        v-model:nodes="nodes"
-        v-model:edges="edges"
-        :default-viewport="{ x: 200, y: 200, zoom: 0.55 }"
-        fit-view-on-init
-        :node-types="nodeTypes"
-        @connect="onConnect"
-      >
-        <Background :gap="20" pattern-color="#2a2a2a" />
-        <Controls position="bottom-right" />
-      </VueFlow>
-    </div>
-
-    <div
-      v-if="results && Object.keys(results).length > 0"
-      class="absolute bottom-3 right-3 z-10 bg-[#111] border border-[#333] rounded-xl p-3 max-w-xs text-[10px]"
-    >
-      <p class="text-[#00c853] font-bold mb-1">Results</p>
-      <div v-for="(val, key) in results" :key="key" class="mb-1">
-        <span class="text-[#555]">{{ key }}:</span>
-        <span class="text-white ml-1">{{ formatResult(val) }}</span>
+  <div class="h-[calc(100vh-120px)] w-full relative flex">
+    <div class="w-52 flex-shrink-0 bg-[#0d0d0d] border-r border-[#222] overflow-y-auto z-10 flex flex-col">
+      <div class="p-2 space-y-2">
+        <div>
+          <div class="text-[9px] font-mono text-[#555] tracking-wider px-2 mb-1 uppercase">Input</div>
+          <div class="space-y-0.5">
+            <button
+              v-for="n in inputNodes" :key="n.type"
+              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
+              :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
+              @click="addNode(n.type)"
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
+              {{ n.label }}
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="text-[9px] font-mono text-[#555] tracking-wider px-2 mb-1 uppercase">Process</div>
+          <div class="space-y-0.5">
+            <button
+              v-for="n in processNodes" :key="n.type"
+              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
+              :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
+              @click="addNode(n.type)"
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
+              {{ n.label }}
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="text-[9px] font-mono text-[#555] tracking-wider px-2 mb-1 uppercase">Output</div>
+          <div class="space-y-0.5">
+            <button
+              v-for="n in outputNodes" :key="n.type"
+              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
+              :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
+              @click="addNode(n.type)"
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
+              {{ n.label }}
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="text-[9px] font-mono text-[#ff69b4] tracking-wider px-2 mb-1 uppercase flex items-center gap-1">
+            Pro
+            <svg v-if="!isPro" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
+          </div>
+          <div class="space-y-0.5">
+            <button
+              v-for="n in proNodes" :key="n.type"
+              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
+              :style="{ background: isPro ? n.color + '15' : '#111', color: isPro ? n.color : '#555', border: '1px solid ' + (isPro ? n.color + '25' : '#222') }"
+              :disabled="!isPro"
+              @click="isPro ? addNode(n.type) : showProModal = true"
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: isPro ? n.color : '#444' }" />
+              {{ n.label }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[9px] text-[#555] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
-      <span>🖱 Arrastra de salida a entrada para conectar</span>
-      <span>🖱 Click en flecha para borrar</span>
+    <div class="flex-1 relative">
+      <div class="absolute top-2 right-2 z-10 flex items-center gap-1.5 bg-[#0d0d0d]/80 backdrop-blur-sm border border-[#222] rounded-lg px-2 py-1.5">
+        <button
+          class="px-2 py-1 rounded text-[9px] font-bold transition-all"
+          :class="eraserMode ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-[#1a1a1a] text-[#555] hover:text-white border border-transparent'"
+          @click="eraserMode = !eraserMode"
+          title="Eraser mode: click edges to delete"
+        >
+          🗑
+        </button>
+        <button
+          class="px-2 py-1 bg-[#1a1a1a] text-[#555] text-[9px] font-bold rounded hover:text-white transition-colors border border-transparent"
+          @click="clearAll"
+        >
+          Clear
+        </button>
+        <button
+          class="px-2 py-1 bg-[#1a1a1a] text-[#555] text-[9px] font-bold rounded hover:text-white transition-colors border border-transparent"
+          @click="$emit('help')"
+          title="Show tutorial"
+        >
+          ?
+        </button>
+
+        <div class="w-px h-4 bg-[#333] mx-1" />
+
+        <button
+          class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
+          :class="autorun ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#555] border border-transparent hover:text-white'"
+          @click="autorun = !autorun"
+        >
+          {{ autorun ? '⏵ Auto' : '⏸ Auto' }}
+        </button>
+        <button
+          class="px-3 py-1 rounded text-[9px] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          :class="autorun ? 'bg-[#222] text-[#555]' : 'bg-[#00c853] text-black hover:bg-[#00e863]'"
+          :disabled="nodes.length === 0 || running || autorun"
+          @click="runPipeline"
+        >
+          ▶ Run
+        </button>
+      </div>
+
+      <div ref="flowContainer" class="w-full h-full" :class="{ 'eraser-active': eraserMode }" @click="onCanvasClick">
+        <VueFlow
+          v-model:nodes="nodes"
+          v-model:edges="edges"
+          :default-viewport="{ x: 200, y: 200, zoom: 0.55 }"
+          fit-view-on-init
+          :node-types="nodeTypes"
+          @connect="onConnect"
+        >
+          <Background :gap="20" pattern-color="#2a2a2a" />
+          <Controls position="bottom-right" />
+        </VueFlow>
+      </div>
+
+      <div
+        v-if="results && Object.keys(results).length > 0"
+        class="absolute bottom-3 right-3 z-10 bg-[#111] border border-[#333] rounded-xl p-3 max-w-xs text-[10px]"
+      >
+        <p class="text-[#00c853] font-bold mb-1">Results</p>
+        <div v-for="(val, key) in results" :key="key" class="mb-1">
+          <span class="text-[#555]">{{ key }}:</span>
+          <span class="text-white ml-1">{{ formatResult(val) }}</span>
+        </div>
+      </div>
+
+      <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[9px] text-[#555] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
+        <span>🖱 Arrastra de salida a entrada para conectar</span>
+        <span>🖱 Click en flecha para borrar</span>
+      </div>
     </div>
+
     <ProModal v-if="showProModal" @close="showProModal = false" />
   </div>
 </template>
@@ -113,6 +154,7 @@ import ChartNode from './nodes/ChartNode.vue'
 import ProModal from './ProModal.vue'
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode }
+const flowContainer = ref<HTMLElement | null>(null)
 
 const emit = defineEmits<{ help: [] }>()
 
@@ -194,7 +236,9 @@ watch(autorun, () => {
   if (autorun.value) scheduleAutoRun()
 })
 
-const freeNodes = computed(() => nodeDefinitions.filter(n => !n.pro))
+const inputNodes = computed(() => nodeDefinitions.filter(n => n.category === 'input' && !n.pro))
+const processNodes = computed(() => nodeDefinitions.filter(n => n.category === 'process' && !n.pro))
+const outputNodes = computed(() => nodeDefinitions.filter(n => n.category === 'output' && !n.pro))
 const proNodes = computed(() => nodeDefinitions.filter(n => n.pro))
 
 function addNode(type: string) {
@@ -203,10 +247,17 @@ function addNode(type: string) {
   nodeCounter++
   const id = `${type}-${nodeCounter}`
   const nodeType = type === 'chartOutput' ? 'chart' : 'custom'
+  let x = 200 + nodeCounter * 30
+  let y = 200 + nodeCounter * 40
+  if (flowContainer.value) {
+    const rect = flowContainer.value.getBoundingClientRect()
+    x = (rect.width / 2 - 200) / 0.55 + nodeCounter * 15
+    y = (rect.height / 2 - 200) / 0.55 + nodeCounter * 20
+  }
   nodes.value = [...nodes.value, {
     id,
     type: nodeType,
-    position: { x: 100 + nodeCounter * 40, y: 100 + nodeCounter * 60 },
+    position: { x, y },
     data: { ...def.defaultData, label: `${def.label} ${nodeCounter}`, type, pro: def.pro },
   }]
 }
