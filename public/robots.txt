@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
-Crawl-delay: 10
 
 User-agent: GPTBot
 Allow: /
@@ -11,4 +10,4 @@ Allow: /
 User-agent: ClaudeBot
 Allow: /
 
-Sitemap: https://kalmate.pages.dev/sitemap.xml
+Sitemap: https://kalmate.pages.dev/sitemap
