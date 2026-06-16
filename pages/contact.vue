@@ -7,6 +7,7 @@
           <NuxtLink to="/terminal" class="text-[#ccc] hover:text-white transition-colors text-sm">Terminal</NuxtLink>
           <NuxtLink to="/about" class="text-[#ccc] hover:text-white transition-colors text-sm">About</NuxtLink>
           <NuxtLink to="/contact" class="text-white text-sm">Contact</NuxtLink>
+          <NuxtLink to="/blog" class="text-[#ccc] hover:text-white transition-colors text-sm">Blog</NuxtLink>
         </div>
       </div>
     </header>
@@ -46,6 +47,7 @@
           <NuxtLink to="/privacy" class="hover:text-white transition-colors">Privacy</NuxtLink>
           <NuxtLink to="/terms" class="hover:text-white transition-colors">Terms</NuxtLink>
           <NuxtLink to="/disclaimer" class="hover:text-white transition-colors">Disclaimer</NuxtLink>
+          <NuxtLink to="/blog" class="hover:text-white transition-colors">Blog</NuxtLink>
         </div>
       </div>
     </footer>
@@ -54,9 +56,10 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'Contact Kalmate — Get in Touch',
+  title: 'Contact Kalmate — Get in Touch | Financial Terminal Support',
   meta: [
-    { name: 'description', content: 'Contact the Kalmate team. Send us an email or open an issue on GitHub.' },
+    { name: 'description', content: 'Contact the Kalmate team. Send us an email at contact@kalmate.pages.dev or open an issue on GitHub for support with the financial terminal.' },
+    { name: 'keywords', content: 'contact kalmate, financial terminal support, kalmate email, kalmate github' },
   ],
 })
 </script>

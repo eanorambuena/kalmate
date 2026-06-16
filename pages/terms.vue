@@ -90,9 +90,10 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'Terms of Service — Kalmate',
+  title: 'Terms of Service — Kalmate | Terms & Conditions',
   meta: [
-    { name: 'description', content: 'Kalmate Terms of Service. Learn about the terms governing your use of the Kalmate financial terminal.' },
+    { name: 'description', content: 'Kalmate Terms of Service governing the use of the free open-source financial terminal, data pipeline, and portfolio tracking tools.' },
+    { name: 'keywords', content: 'kalmate terms, terms of service, financial terminal terms, open source terms' },
   ],
 })
 </script>

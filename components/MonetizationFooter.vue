@@ -13,6 +13,7 @@
         <NuxtLink to="/privacy" class="text-[#888] hover:text-white transition-colors">Privacy</NuxtLink>
         <NuxtLink to="/terms" class="text-[#888] hover:text-white transition-colors">Terms</NuxtLink>
         <NuxtLink to="/disclaimer" class="text-[#888] hover:text-white transition-colors">Disclaimer</NuxtLink>
+        <NuxtLink to="/blog" class="text-[#888] hover:text-white transition-colors">Blog</NuxtLink>
       </div>
 
       <div class="mt-8 pt-8 border-t border-[#1a1a1a]">

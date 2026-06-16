@@ -103,9 +103,10 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'Privacy Policy — Kalmate',
+  title: 'Privacy Policy — Kalmate | Data & Cookie Practices',
   meta: [
-    { name: 'description', content: 'Kalmate Privacy Policy. Learn how we handle cookies, data, and Google AdSense on our financial terminal.' },
+    { name: 'description', content: 'Kalmate Privacy Policy. Learn how we handle cookies, Google AdSense data, local storage, and third-party services on our financial terminal.' },
+    { name: 'keywords', content: 'kalmate privacy, privacy policy, cookie policy, google adsense, data privacy' },
   ],
 })
 </script>

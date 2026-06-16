@@ -6,17 +6,17 @@ import { canonicalUrl } from '../utils/seo'
 const canonical = canonicalUrl('/')
 
 useHead({
-  title: 'Kalmate — Bloomberg-Style Financial Terminal',
+  title: 'Kalmate — Free Open-Source Financial Terminal & Data Pipeline',
   meta: [
-    { name: 'description', content: 'Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts. Powered by Yahoo Finance.' },
-    { name: 'keywords', content: 'financial terminal, bloomberg alternative, stock market, real-time quotes, portfolio tracker, yahoo finance, chile' },
+    { name: 'description', content: 'Kalmate is a free open-source financial terminal with real-time market data, portfolio tracking, price alerts, stock screener, and visual data pipeline with node editor. No sign-up required.' },
+    { name: 'keywords', content: 'kalmate, financial terminal, open source trading platform, visual pipeline, node editor, data pipeline finance, real-time stock quotes, portfolio tracker, stock screener, market analysis, forex, crypto' },
     { property: 'og:url', content: canonical },
-    { property: 'og:title', content: 'Kalmate — Bloomberg-Style Financial Terminal' },
-    { property: 'og:description', content: 'Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.' },
+    { property: 'og:title', content: 'Kalmate — Professional Financial Terminal' },
+    { property: 'og:description', content: 'Free professional financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.' },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'Kalmate — Bloomberg-Style Financial Terminal' },
-    { name: 'twitter:description', content: 'Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.' },
+    { name: 'twitter:title', content: 'Kalmate — Professional Financial Terminal' },
+    { name: 'twitter:description', content: 'Free professional financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.' },
   ],
   link: [
     { rel: 'canonical', href: canonical },
@@ -31,7 +31,7 @@ useHead({
         "url": canonical,
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "Web",
-        "description": "Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.",
+        "description": "Free professional financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
         "author": { "@type": "Person", "name": "Emmanuel Norambuena", "url": "https://eanorambuena.github.io" }
       })
@@ -71,6 +71,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
           <a href="#tech" class="text-[#ccc] hover:text-white transition-colors text-sm">Tech</a>
           <NuxtLink to="/about" class="text-[#ccc] hover:text-white transition-colors text-sm">About</NuxtLink>
           <NuxtLink to="/contact" class="text-[#ccc] hover:text-white transition-colors text-sm">Contact</NuxtLink>
+          <NuxtLink to="/blog" class="text-[#ccc] hover:text-white transition-colors text-sm">Blog</NuxtLink>
         </div>
       </div>
     </header>
@@ -88,7 +89,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
             >{{ word }}</span>
           </h1>
           <p class="text-[#ccc] text-lg md:text-xl leading-relaxed mb-8 max-w-xl animate-fade-in-up" style="animation-delay: 0.5s">
-            Free Bloomberg-style terminal powered by Yahoo Finance. Track equities, forex, bonds, commodities, and crypto with real-time data and professional-grade charts.
+            Free professional terminal powered by Yahoo Finance. Track equities, forex, bonds, commodities, and crypto with real-time data and professional-grade charts.
           </p>
           <div class="animate-fade-in-up flex flex-col items-start gap-3" style="animation-delay: 0.7s">
             <div class="flex items-center gap-4">
@@ -159,6 +160,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
           <NuxtLink to="/privacy" class="text-[#888] hover:text-white transition-colors">Privacy</NuxtLink>
           <NuxtLink to="/terms" class="text-[#888] hover:text-white transition-colors">Terms</NuxtLink>
           <NuxtLink to="/disclaimer" class="text-[#888] hover:text-white transition-colors">Disclaimer</NuxtLink>
+          <NuxtLink to="/blog" class="text-[#888] hover:text-white transition-colors">Blog</NuxtLink>
         </div>
         <AdBanner />
 

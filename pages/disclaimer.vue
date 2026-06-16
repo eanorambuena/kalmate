@@ -86,9 +86,10 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'Disclaimer — Kalmate',
+  title: 'Disclaimer — Kalmate | Financial Data & Investment Disclaimer',
   meta: [
-    { name: 'description', content: 'Kalmate disclaimer. The information on this site is for informational purposes only and does not constitute financial advice.' },
+    { name: 'description', content: 'Kalmate disclaimer. Market data is for informational purposes only and does not constitute financial advice. No guarantee of data accuracy.' },
+    { name: 'keywords', content: 'kalmate disclaimer, financial disclaimer, investment disclaimer, market data disclaimer' },
   ],
 })
 </script>

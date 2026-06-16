@@ -7,6 +7,7 @@
           <NuxtLink to="/terminal" class="text-[#ccc] hover:text-white transition-colors text-sm">Terminal</NuxtLink>
           <NuxtLink to="/about" class="text-white text-sm">About</NuxtLink>
           <NuxtLink to="/contact" class="text-[#ccc] hover:text-white transition-colors text-sm">Contact</NuxtLink>
+          <NuxtLink to="/blog" class="text-[#ccc] hover:text-white transition-colors text-sm">Blog</NuxtLink>
         </div>
       </div>
     </header>
@@ -14,13 +15,13 @@
     <main class="max-w-3xl mx-auto px-6 pt-32 pb-24">
       <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">About Kalmate</h1>
       <p class="text-[#ccc] text-lg leading-relaxed mb-8">
-        Kalmate is a free, Bloomberg-style financial terminal built for modern web. It provides real-time market data, professional charts, portfolio tracking, and advanced tools — all at zero cost.
+        Kalmate is a free, professional financial terminal built for modern web. It provides real-time market data, professional charts, portfolio tracking, and advanced tools — all at zero cost.
       </p>
 
       <section class="mb-12">
         <h2 class="text-2xl font-bold text-white mb-4">Why Kalmate?</h2>
         <p class="text-[#ccc] leading-relaxed mb-4">
-          Financial data tools are expensive. Bloomberg Terminal costs thousands per year. We built Kalmate to democratize access to real-time market intelligence — completely free, no sign-up required.
+          Financial data tools are expensive. Professional terminals cost thousands per year. We built Kalmate to democratize access to real-time market intelligence — completely free, no sign-up required.
         </p>
         <p class="text-[#ccc] leading-relaxed">
           Powered by Yahoo Finance and TradingView charts, Kalmate delivers professional-grade market analysis directly in your browser.
@@ -78,6 +79,7 @@
           <NuxtLink to="/privacy" class="hover:text-white transition-colors">Privacy</NuxtLink>
           <NuxtLink to="/terms" class="hover:text-white transition-colors">Terms</NuxtLink>
           <NuxtLink to="/disclaimer" class="hover:text-white transition-colors">Disclaimer</NuxtLink>
+          <NuxtLink to="/blog" class="hover:text-white transition-colors">Blog</NuxtLink>
         </div>
       </div>
     </footer>
@@ -86,9 +88,10 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'About Kalmate — Free Financial Terminal',
+  title: 'About Kalmate — Open-Source Financial Terminal & Data Pipeline',
   meta: [
-    { name: 'description', content: 'Learn about Kalmate, the free Bloomberg-style financial terminal with real-time market data, professional charts, and portfolio tracking.' },
+    { name: 'description', content: 'Learn about Kalmate, the free open-source financial terminal with real-time market data, visual data pipeline editor, portfolio tracking, and professional charts. Built by Emmanuel Norambuena.' },
+    { name: 'keywords', content: 'kalmate, about kalmate, open source financial terminal, free market data, financial data pipeline, emmanuel norambuena' },
   ],
 })
 </script>

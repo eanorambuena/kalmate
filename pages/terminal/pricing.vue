@@ -4,11 +4,12 @@ import { canonicalUrl } from '../../utils/seo'
 const canonical = canonicalUrl('/terminal/pricing')
 
 useHead({
-  title: 'Pricing | Kalmate',
+  title: 'Pricing — Free vs Pro Plan | Kalmate',
   meta: [
-    { name: 'description', content: 'Compare Kalmate free and pro plans.' },
-    { property: 'og:title', content: 'Pricing | Kalmate' },
-    { property: 'og:description', content: 'Compare Kalmate free and pro plans.' },
+    { name: 'description', content: 'Kalmate is free forever with no sign-up required. Compare our free and pro plans for the financial terminal with real-time data, pipeline editor, and portfolio tracking.' },
+    { name: 'keywords', content: 'kalmate pricing, free financial terminal, free forever, no sign-up, pro plan, financial terminal pricing' },
+    { property: 'og:title', content: 'Pricing — Free vs Pro Plan | Kalmate' },
+    { property: 'og:description', content: 'Kalmate is free forever with no sign-up required. Compare our free and pro plans.' },
     { property: 'og:url', content: canonical },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },

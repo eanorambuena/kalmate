@@ -6,11 +6,12 @@ import PipelineTutorial from '../../components/pipeline/PipelineTutorial.vue'
 const canonical = canonicalUrl('/terminal/pipeline')
 
 useHead({
-  title: 'Pipeline | Kalmate',
+  title: 'Data Pipeline & Visual Node Editor | Kalmate',
   meta: [
-    { name: 'description', content: 'Build and run visual trading pipelines in Kalmate.' },
-    { property: 'og:title', content: 'Pipeline | Kalmate' },
-    { property: 'og:description', content: 'Build and run visual trading pipelines in Kalmate.' },
+    { name: 'description', content: 'Build visual financial data pipelines with Kalmate\'s node editor. Connect indicators like SMA, EMA, Kalman filters, and portfolio inputs in a drag-and-drop interface. No coding required.' },
+    { name: 'keywords', content: 'kalmate pipeline, financial pipeline, visual node editor, data pipeline finance, drag and drop trading, technical indicators, SMA, EMA, Kalman filter, no-code finance' },
+    { property: 'og:title', content: 'Data Pipeline & Visual Node Editor | Kalmate' },
+    { property: 'og:description', content: 'Build visual financial data pipelines with Kalmate\'s node editor. Connect indicators like SMA, EMA, Kalman filters, and portfolio inputs in a drag-and-drop interface.' },
     { property: 'og:url', content: canonical },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },

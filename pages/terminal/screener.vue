@@ -31,11 +31,12 @@ const presets = [
 ]
 
 useHead({
-  title: 'Stock Screener | Kalmate',
+  title: 'Stock Screener — Filter Thousands of Stocks & ETFs | Kalmate',
   meta: [
-    { name: 'description', content: 'Filter and sort thousands of instruments with the Kalmate stock screener.' },
-    { property: 'og:title', content: 'Stock Screener | Kalmate' },
-    { property: 'og:description', content: 'Filter and sort thousands of instruments with the Kalmate stock screener.' },
+    { name: 'description', content: 'Screen and filter thousands of stocks, ETFs, forex, and crypto on Kalmate. Use pre-built presets or custom filters to find trading opportunities.' },
+    { name: 'keywords', content: 'kalmate screener, stock screener, stock filter, ETF screener, forex screener, crypto screener, trading opportunities, market screener' },
+    { property: 'og:title', content: 'Stock Screener — Filter Thousands of Stocks & ETFs | Kalmate' },
+    { property: 'og:description', content: 'Screen and filter thousands of stocks, ETFs, forex, and crypto on Kalmate. Use pre-built presets or custom filters.' },
     { property: 'og:url', content: canonical },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },

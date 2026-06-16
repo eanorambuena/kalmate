@@ -23,13 +23,13 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Kalmate is a free, open-source Bloomberg-style financial terminal. Track real-time stock quotes, forex, commodities, crypto, and indices. Manage your portfolio with live P&L, set price alerts with browser notifications, screen stocks by filters, and view professional candlestick charts. No API key required. Powered by Yahoo Finance.' },
-        { name: 'keywords', content: 'financial terminal, bloomberg terminal alternative, free stock market tracker, real-time stock quotes, portfolio tracker, stock screener, price alerts, candlestick charts, forex tracker, crypto tracker, yahoo finance, open source finance' },
+        { name: 'description', content: 'Kalmate is a free, open-source professional financial terminal. Track real-time stock quotes, forex, commodities, crypto, and indices. Manage your portfolio with live P&L, set price alerts with browser notifications, screen stocks by filters, build visual data pipelines with node editor, and view professional candlestick charts. No API key required. Powered by Yahoo Finance.' },
+        { name: 'keywords', content: 'kalmate, financial terminal, financial pipeline, visual node editor, data pipeline finance, open source trading platform, real-time stock tracker, portfolio manager, stock screener, price alerts, candlestick charts, forex tracker, crypto tracker, yahoo finance, market analysis tools, bloomberg alternative' },
 
         // Open Graph
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://kalmate.pages.dev' },
-        { property: 'og:title', content: 'Kalmate — Free Bloomberg-Style Financial Terminal' },
+        { property: 'og:title', content: 'Kalmate — Free Professional Financial Terminal' },
         { property: 'og:description', content: 'Free, open-source financial terminal with real-time stock quotes, portfolio tracking with live P&L, price alerts, stock screener, and professional charts. No API key needed.' },
         { property: 'og:image', content: 'https://kalmate.pages.dev/og-image.png' },
         { property: 'og:image:width', content: '1200' },
@@ -40,7 +40,7 @@ export default defineNuxtConfig({
 
         // Twitter
         { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:title', content: 'Kalmate — Free Bloomberg-Style Financial Terminal' },
+        { name: 'twitter:title', content: 'Kalmate — Free Professional Financial Terminal' },
         { name: 'twitter:description', content: 'Free, open-source financial terminal. Track stocks, forex, crypto with live charts and portfolio management.' },
         { name: 'twitter:image', content: 'https://kalmate.pages.dev/og-image.png' },
 
@@ -63,7 +63,7 @@ export default defineNuxtConfig({
             '@type': 'WebApplication',
             name: 'Kalmate',
             url: 'https://kalmate.pages.dev',
-            description: 'Free Bloomberg-style financial terminal with real-time market data, portfolio tracking, price alerts, stock screener, and professional candlestick charts.',
+            description: 'Free professional financial terminal with real-time market data, portfolio tracking, price alerts, stock screener, and professional candlestick charts.',
             applicationCategory: 'FinanceApplication',
             operatingSystem: 'Any',
             offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
@@ -88,7 +88,7 @@ export default defineNuxtConfig({
             '@context': 'https://schema.org',
             '@type': 'SoftwareSourceCode',
             name: 'Kalmate',
-            description: 'Open-source Bloomberg-style financial terminal built with Nuxt 3, Vue 3, and Tailwind CSS.',
+            description: 'Open-source professional financial terminal built with Nuxt 3, Vue 3, and Tailwind CSS.',
             codeRepository: 'https://github.com/eanorambuena/kalmate',
             programmingLanguage: 'TypeScript',
           }),

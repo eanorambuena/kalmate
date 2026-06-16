@@ -11,7 +11,7 @@ export default <Config>{
   theme: {
     extend: {
       colors: {
-        bloomberg: {
+        terminal: {
           bg: '#0a0a0a',
           surface: '#111',
           border: '#2a2a2a',

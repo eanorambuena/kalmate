@@ -110,6 +110,7 @@ const navLinks = [
   { to: '/terminal/pricing', label: 'PRICING', key: '6', icon: '💎' },
   { to: '/about', label: 'ABOUT', key: '7', icon: 'ℹ️' },
   { to: '/contact', label: 'CONTACT', key: '8', icon: '✉️' },
+  { to: '/blog', label: 'BLOG', key: '9', icon: '📝' },
 ]
 
 function isActive(to: string) {
