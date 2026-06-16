@@ -1,8 +1,8 @@
 minimumReleaseAge: 0
 minimumReleaseAgeStrict: false
-onlyBuiltDependencies:
-  - esbuild
-  - sharp
-  - '@parcel/watcher'
-  - vue-demi
-  - protobufjs
+allowBuilds:
+  esbuild: true
+  sharp: true
+  '@parcel/watcher': true
+  vue-demi: true
+  protobufjs: true
