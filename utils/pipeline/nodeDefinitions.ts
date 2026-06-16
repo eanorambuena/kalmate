@@ -31,7 +31,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'currencyInput',
     label: 'Currency',
-    description: 'Tipo de cambio entre dos monedas (USD → CLP)',
+    description: 'Exchange rate between two currencies (USD → CLP)',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -42,7 +42,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'scalarInput',
     label: 'Scalar',
-    description: 'Ingresa un número constante',
+    description: 'Enter a constant number',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -53,7 +53,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'symbolInput',
     label: 'Symbol Input',
-    description: 'Escribe el ticker a analizar (ej: AAPL, GOOGL)',
+    description: 'Enter the ticker to analyze (e.g. AAPL, GOOGL)',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -64,7 +64,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'priceFeed',
     label: 'Price Feed',
-    description: 'Obtiene precio actual + historial desde Yahoo Finance',
+    description: 'Gets current price + history from Yahoo Finance',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -79,7 +79,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'kalmanFilter',
     label: 'Kalman Filter',
-    description: 'Suaviza precio con Schwartz-Smith, detecta sobre/precio justo',
+    description: 'Smooths price with Schwartz-Smith, detects fair value',
     category: 'process',
     color: '#00c853',
     pro: false,
@@ -94,7 +94,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'chartOutput',
     label: 'Chart',
-    description: 'Visualiza precios y series temporales en un gráfico',
+    description: 'Visualize prices and time series on a chart',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -110,7 +110,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'candleChart',
     label: 'Candle Chart',
-    description: 'Gráfico de velas japonesas OHLC',
+    description: 'Japanese candlestick OHLC chart',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -126,7 +126,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'priceDisplay',
     label: 'Price Display',
-    description: 'Muestra el precio actual del activo',
+    description: 'Shows current asset price',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -137,7 +137,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'alertOutput',
     label: 'Alert',
-    description: 'Activa alerta cuando se cruza un umbral de precio',
+    description: 'Triggers alert when price threshold is crossed',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -148,7 +148,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'multiSymbolInput',
     label: 'Multi Symbol',
-    description: 'Varios tickers separados por coma para análisis batch',
+    description: 'Multiple tickers separated by comma for batch analysis',
     category: 'input',
     color: '#2979ff',
     pro: true,
@@ -159,7 +159,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'smaIndicator',
     label: 'SMA',
-    description: 'Media móvil simple del precio',
+    description: 'Simple moving average of price',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -170,7 +170,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'rsiIndicator',
     label: 'RSI',
-    description: 'Índice de fuerza relativa (sobrecompra/sobreventa)',
+    description: 'Relative strength index (overbought/oversold)',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -181,7 +181,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'forecastNode',
     label: 'Forecast',
-    description: 'Predice precio futuro usando el filtro de Kalman',
+    description: 'Predicts future price using Kalman filter',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -195,7 +195,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'emaIndicator',
     label: 'EMA',
-    description: 'Media móvil exponencial del precio',
+    description: 'Exponential moving average of price',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -206,7 +206,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'mathOp',
     label: 'Math Op',
-    description: 'Operación matemática entre dos valores (+, -, *, /)',
+    description: 'Mathematical operation between two values (+, -, *, /)',
     category: 'process',
     color: '#00c853',
     pro: false,
@@ -219,19 +219,19 @@ export const nodeDefinitions: NodeDefinition[] = [
   },
   {
     type: 'newsOutput',
-    label: 'Noticias',
-    description: 'Últimas noticias del ticker desde Yahoo Finance',
+    label: 'News',
+    description: 'Latest news for the ticker from Yahoo Finance',
     category: 'process',
     color: '#00c853',
     pro: false,
     inputs: [{ id: 'source', label: 'Source', type: 'symbol' }],
-    outputs: [{ id: 'news', label: 'Noticias', type: 'any' }],
+    outputs: [{ id: 'news', label: 'News', type: 'any' }],
     defaultData: {},
   },
   {
     type: 'telegramOutput',
     label: 'Telegram',
-    description: 'Envía alertas a tu Telegram cuando hay señal',
+    description: 'Sends alerts to your Telegram when signal triggers',
     category: 'output',
     color: '#ff69b4',
     pro: true,
@@ -242,7 +242,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'portfolioInput',
     label: 'Portfolio',
-    description: 'Suma ponderada de múltiples inputs con pesos',
+    description: 'Weighted sum of multiple inputs with weights',
     category: 'process',
     color: '#00c853',
     pro: false,
@@ -257,7 +257,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'emailOutput',
     label: 'Email',
-    description: 'Envía reporte por email con precios y señales',
+    description: 'Sends email report with prices and signals',
     category: 'output',
     color: '#ff69b4',
     pro: true,

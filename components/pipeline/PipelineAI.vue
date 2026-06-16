@@ -7,7 +7,7 @@
           AI Pipeline
           <span v-if="!modelReady" class="text-[#666] font-normal">(local)</span>
         </span>
-        <button class="text-[#bbb] hover:text-white text-[9px]" @click="$emit('close')" title="Cerrar">✕</button>
+        <button class="text-[#bbb] hover:text-white text-[9px]" @click="$emit('close')" title="Close">✕</button>
       </div>
 
       <div v-if="generating" class="mb-2 text-[9px] text-[#666] flex items-center gap-1">

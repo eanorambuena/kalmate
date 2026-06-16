@@ -1,0 +1,428 @@
+{
+  "app": {
+    "name": "Kalmate",
+    "tagline": "Real-time financial data at your fingertips. Free open-source financial terminal.",
+    "email": "a25.eanorambuena@gmail.com",
+    "copyright": "© 2026 Kalmate. Open source under MIT License.",
+    "dataSource": "Data: Yahoo Finance",
+    "deploy": "Deploy: Cloudflare Pages",
+    "currency": "Currency:"
+  },
+  "header": {
+    "nav": {
+      "market": "MARKET",
+      "portfolio": "PORTFOLIO",
+      "screener": "SCREENER",
+      "alerts": "ALERTS",
+      "pipeline": "PIPELINE",
+      "pricing": "PRICING",
+      "about": "ABOUT",
+      "contact": "CONTACT",
+      "blog": "BLOG"
+    },
+    "sponsor": "Sponsor",
+    "live": "LIVE",
+    "aria": {
+      "home": "Kalmate home",
+      "mainNav": "Main navigation",
+      "mobileNav": "Mobile navigation",
+      "live": "Live connection active",
+      "closeMenu": "Close menu",
+      "openMenu": "Open menu",
+      "sponsor": "Sponsor Kalmate on GitHub"
+    }
+  },
+  "footer": {
+    "linksTitle": "Links",
+    "legalTitle": "Legal",
+    "terminal": "Terminal",
+    "about": "About",
+    "contact": "Contact",
+    "blog": "Blog",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "disclaimer": "Disclaimer",
+    "fintual": {
+      "title": "This site was built by Emmanuel Norambuena.",
+      "description": "If you want to support me with this referral, when Fintual asks if someone recommended you, just say you know me. It helps me keep building free tools like this one.",
+      "cta": "Go to Fintual →"
+    }
+  },
+  "home": {
+    "hero": {
+      "subtitle": "REAL-TIME MARKET DATA",
+      "title": "Financial Intelligence at Your Fingertips",
+      "description": "Free professional terminal powered by Yahoo Finance. Track equities, forex, bonds, commodities, and crypto with real-time data and professional-grade charts.",
+      "tryPipeline": "TRY PIPELINES →",
+      "launchTerminal": "LAUNCH TERMINAL",
+      "sample": "Or view a sample →"
+    },
+    "features": {
+      "title": "FEATURES",
+      "heading": "Professional Tools, Zero Cost",
+      "subtitle": "Everything you need to track and analyze financial markets, completely free.",
+      "items": {
+        "dashboard": { "title": "Market Dashboard", "desc": "Real-time quotes for equities, forex, bonds, commodities, and crypto. Organized by category with instant search." },
+        "portfolio": { "title": "Portfolio Tracking", "desc": "Track your holdings with real-time P&L. Add positions, monitor performance, and make informed decisions." },
+        "alerts": { "title": "Smart Alerts", "desc": "Set price alerts above/below thresholds. Real-time polling with browser notifications so you never miss a move." },
+        "screener": { "title": "Powerful Screener", "desc": "Search and filter across thousands of instruments. Use presets or custom filters to find the right opportunities." },
+        "charts": { "title": "Professional Charts", "desc": "TradingView-powered charts with 1d to 1y ranges. Technical analysis tools at your fingertips." },
+        "news": { "title": "Financial News", "desc": "Stay informed with integrated news feed per instrument. Market-moving stories right where you need them." }
+      }
+    },
+    "tech": {
+      "title": "TECHNOLOGY",
+      "heading": "Built for Performance"
+    }
+  },
+  "about": {
+    "title": "About Kalmate",
+    "subtitle": "Kalmate is a free, professional financial terminal built for modern web. It provides real-time market data, professional charts, portfolio tracking, and advanced tools — all at zero cost.",
+    "why": {
+      "title": "Why Kalmate?",
+      "p1": "Financial data tools are expensive. Professional terminals cost thousands per year. We built Kalmate to democratize access to real-time market intelligence — completely free, no sign-up required.",
+      "p2": "Powered by Yahoo Finance and TradingView charts, Kalmate delivers professional-grade market analysis directly in your browser."
+    },
+    "features": {
+      "title": "Features",
+      "items": [
+        "Real-time Data — Equities, forex, bonds, commodities, and crypto",
+        "Professional Charts — TradingView-powered with full technical analysis",
+        "Portfolio Tracking — Monitor holdings with real-time P&L",
+        "Smart Screener — Find opportunities across thousands of instruments",
+        "Data Pipeline — Build custom analysis workflows with visual nodes"
+      ]
+    },
+    "opensource": {
+      "title": "Open Source",
+      "text": "Kalmate is open source and free forever. You can contribute, report issues, or fork the project on GitHub."
+    },
+    "creator": {
+      "title": "Creator",
+      "text": "Built by Emmanuel Norambuena."
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Have a question, suggestion, or feedback? We'd love to hear from you.",
+    "email": {
+      "title": "Email",
+      "text": "Send us an email at:"
+    },
+    "github": {
+      "title": "GitHub",
+      "text": "Open an issue or contribute on GitHub:"
+    },
+    "creator": {
+      "title": "Creator",
+      "text": "Built by Emmanuel Norambuena:"
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "updated": "Last updated: June 2026",
+    "sections": {
+      "info": {
+        "title": "1. Information We Collect",
+        "p1": "Kalmate does not require user registration or accounts. We do not collect personal information such as names, email addresses, or payment data.",
+        "p2": "We may collect anonymous usage data through third-party services to improve our service."
+      },
+      "cookies": {
+        "title": "2. Cookies",
+        "p1": "Kalmate uses cookies and similar technologies for the following purposes:",
+        "items": [
+          "Advertising: Google AdSense uses cookies to serve personalized ads based on your browsing activity.",
+          "Analytics: We may use analytics services to understand how users interact with the site.",
+          "Functional: Local storage is used to save your portfolio data (stored locally in your browser, not on our servers)."
+        ]
+      },
+      "adsense": {
+        "title": "3. Google AdSense",
+        "p1": "We use Google AdSense to display advertisements. Google uses cookies to serve ads based on users' visits to this site and other websites.",
+        "p2": "You can opt out of personalized advertising by visiting Google Ads Settings.",
+        "p3": "As a third-party vendor, Google uses cookies to serve ads on our site. Google's use of the DART cookie enables it to serve ads based on your visits to this site and other sites on the Internet."
+      },
+      "thirdParty": {
+        "title": "4. Third-Party Services",
+        "p1": "Kalmate integrates with the following third-party services:",
+        "items": [
+          "Yahoo Finance — real-time market data",
+          "TradingView — charts and technical analysis",
+          "Google AdSense — advertising",
+          "Cloudflare Pages — hosting and CDN"
+        ]
+      },
+      "storage": {
+        "title": "5. Data Storage",
+        "p1": "Portfolio positions, alerts, and pipeline configurations are stored locally in your browser using localStorage. We do not transmit or store this data on our servers."
+      },
+      "rights": {
+        "title": "6. Your Rights",
+        "p1": "Depending on your jurisdiction, you may have the right to access, correct, delete, or port your data. Since we do not store personal data on our servers, most of these rights are managed through your browser settings."
+      },
+      "contact": {
+        "title": "7. Contact",
+        "p1": "If you have questions about this Privacy Policy, contact us at:"
+      }
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "updated": "Last updated: June 2026",
+    "sections": {
+      "acceptance": {
+        "title": "1. Acceptance of Terms",
+        "p1": "By using Kalmate, you agree to these Terms of Service. If you do not agree, do not use the service."
+      },
+      "service": {
+        "title": "2. Service Description",
+        "p1": "Kalmate is a free financial data visualization tool that provides real-time market data from public APIs. The service is provided 'as is' without any warranty."
+      },
+      "advice": {
+        "title": "3. No Financial Advice",
+        "p1": "Kalmate does not provide financial advice, investment recommendations, or trading signals. All data is for informational and educational purposes only. Always consult a qualified financial advisor before making investment decisions."
+      },
+      "accuracy": {
+        "title": "4. Data Accuracy",
+        "p1": "While we strive to provide accurate and timely data, we make no guarantees about the accuracy, completeness, or timeliness of the information displayed. Data may be delayed and should not be used for trading decisions."
+      },
+      "responsibilities": {
+        "title": "5. User Responsibilities",
+        "p1": "You agree not to misuse the service, including attempting to disrupt, overload, or gain unauthorized access to our systems."
+      },
+      "liability": {
+        "title": "6. Limitation of Liability",
+        "p1": "Kalmate and its creators shall not be liable for any damages arising from the use or inability to use the service."
+      },
+      "changes": {
+        "title": "7. Changes to Terms",
+        "p1": "We reserve the right to modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms."
+      },
+      "contact": {
+        "title": "8. Contact",
+        "p1": "For questions about these terms, contact:"
+      }
+    }
+  },
+  "disclaimer": {
+    "title": "Disclaimer",
+    "updated": "Last updated: June 2026",
+    "sections": {
+      "advice": {
+        "title": "No Financial Advice",
+        "p1": "The information provided on Kalmate is for informational and educational purposes only. It does not constitute financial advice, investment advice, trading advice, or any other type of advice.",
+        "p2": "You should not treat any content on this site as a recommendation to buy, sell, or hold any security or financial instrument."
+      },
+      "accuracy": {
+        "title": "Data Accuracy",
+        "p1": "Market data displayed on Kalmate is provided by third-party sources (Yahoo Finance) and may be delayed. We do not guarantee the accuracy, completeness, or timeliness of the data. Do not use this data for trading decisions without verifying it with your broker or data provider."
+      },
+      "guarantee": {
+        "title": "No Guarantee",
+        "p1": "Kalmate is provided 'as is' without any representations or warranties, express or implied. We make no representations or warranties regarding the availability, reliability, or accuracy of the service."
+      },
+      "risk": {
+        "title": "Investment Risk",
+        "p1": "Investing in financial markets involves substantial risk of loss. Past performance is not indicative of future results. You should consult a qualified financial advisor before making any investment decisions."
+      },
+      "links": {
+        "title": "Third-Party Links",
+        "p1": "Kalmate may contain links to third-party websites or services. We are not responsible for the content, privacy practices, or availability of these external sites."
+      },
+      "advertising": {
+        "title": "Advertising",
+        "p1": "Kalmate displays advertisements via Google AdSense. We do not endorse any products or services advertised on this site."
+      },
+      "contact": {
+        "title": "Contact",
+        "p1": "If you have questions about this disclaimer, contact:"
+      }
+    }
+  },
+  "pricing": {
+    "title": "PRICING",
+    "heading": "Simple Plans for Every Trader",
+    "subtitle": "Start free, upgrade when you need pro nodes.",
+    "free": {
+      "label": "FREE",
+      "price": "$0",
+      "description": "Forever free for basic usage.",
+      "currentPlan": "Current Plan",
+      "downgrade": "Downgrade"
+    },
+    "pro": {
+      "label": "PRO",
+      "price": "$9.990",
+      "once": "Once, forever.",
+      "description": "Unlock all pro nodes and features.",
+      "upgrade": "Upgrade to Pro",
+      "currentPlan": "Current Plan"
+    },
+    "featureComparison": "Feature Comparison",
+    "features": [
+      { "label": "Visual node editor" },
+      { "label": "Basic nodes (Symbol, Price, Chart, Kalman)" },
+      { "label": "Pro nodes (RSI, SMA, Forecast, Multi Symbol)" },
+      { "label": "Telegram & Email alerts" },
+      { "label": "Real-time market data" },
+      { "label": "Kalman filter analysis" },
+      { "label": "Unlimited pipeline runs" },
+      { "label": "Stock detail page with charts" }
+    ],
+    "upgrade": {
+      "title": "UPGRADE",
+      "heading": "Choose a payment method",
+      "subtitle": "Donate any amount via any method below and get Pro activated.",
+      "backToPlans": "← Back to plans",
+      "backToMethods": "← Back to methods",
+      "methods": {
+        "buda": {
+          "name": "Buda (crypto)",
+          "desc": "Donate in crypto via Buda",
+          "details": "Send $9.990 CLP in BTC, ETH or USDC to this link and activate Pro forever.",
+          "actionLabel": "Donate with Buda"
+        },
+        "mach": {
+          "name": "MACH / Transfer",
+          "desc": "Transfer from any Chilean bank",
+          "details": "Pay $9.990 CLP with MACH from any bank (Santander, BCI, BancoEstado, etc.).",
+          "actionLabel": "Pay with MACH",
+          "manualTransfer": "Or transfer manually to:",
+          "amount": "Amount: $9.990 CLP (any bank)"
+        },
+        "github": {
+          "name": "GitHub Sponsors",
+          "desc": "Sponsor me on GitHub",
+          "details": "One-time donation of $9.990 CLP (≈ $9 USD) as a GitHub sponsor. Pro activated forever.",
+          "actionLabel": "Sponsor on GitHub"
+        }
+      },
+      "activate": {
+        "prompt": "Already donated? Activate your Pro:",
+        "button": "I donated, activate Pro 🎉",
+        "note": "Honor system for now. Automated payments coming soon."
+      },
+      "qrAlt": "QR MACH"
+    }
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Market insights, tutorials, and financial education.",
+    "readMore": "Read more →",
+    "backToBlog": "← Back to Blog",
+    "noRecentNews": "No recent news",
+    "posts": {
+      "financial-terminal": {
+        "title": "What Is a Financial Terminal and Why Do You Need One?",
+        "excerpt": "Bloomberg costs $24K/year. Kalmate is free. Compare costs, explore 29 symbols across 6 asset classes, and see real-time AAPL data in action.",
+        "date": "June 15, 2026",
+        "category": "Education"
+      },
+      "market-indicators": {
+        "title": "Understanding Market Indicators: SMA, EMA, and Kalman Filters",
+        "excerpt": "See SMA(3) vs EMA(3) calculated step by step with real numbers. Learn when to use each indicator and try them live in Kalmate's Pipeline.",
+        "date": "June 10, 2026",
+        "category": "Tutorial"
+      },
+      "diversified-portfolio": {
+        "title": "How to Build a Diversified Portfolio in 2026",
+        "excerpt": "Step-by-step guide with real symbols: SPY, QQQ, ^TNX, GC=F, BTC-USD. Track your diversified portfolio live in Kalmate's free Portfolio Tracker.",
+        "date": "June 5, 2026",
+        "category": "Education"
+      }
+    }
+  },
+  "pipeline": {
+    "tutorial": {
+      "skip": "Skip tutorial",
+      "back": "Back",
+      "next": "Next",
+      "done": "Done",
+      "steps": [
+        { "title": "Welcome to Pipeline Builder", "text": "Visual pipeline builder for financial analysis. Connect nodes to create strategies without code." },
+        { "title": "Add Nodes", "text": "Click the FREE/Pro buttons on the toolbar to add nodes to the canvas. Each node has inputs (blue) and outputs (green)." },
+        { "title": "Connect Nodes", "text": "Drag from an output port (green) to an input port (blue) to connect nodes. The flow goes from left to right." },
+        { "title": "Available Nodes", "text": "Input: Symbol Input, Price Feed. Process: Kalman Filter. Output: Chart, Price Display, Alert." },
+        { "title": "Pro Nodes", "text": "SMA, RSI, Price Forecast, Multi Symbol, Telegram, Email. Upgrade on Pricing to unlock." },
+        { "title": "Run Pipeline", "text": "Press Run to execute the pipeline. Results appear on each node and in the side panel." }
+      ]
+    },
+    "proModal": {
+      "proFeature": "PRO FEATURE",
+      "title": "Unlock Pro",
+      "subtitle": "Take your analysis to the next level",
+      "once": "Once, forever. No subscription.",
+      "cta": "Activate Pro Now",
+      "paymentMethods": "MACH · Buda · GitHub Sponsors · Honor system",
+      "features": [
+        { "label": "RSI — Relative market strength" },
+        { "label": "SMA — Customizable moving averages" },
+        { "label": "Forecast — Kalman prediction" },
+        { "label": "Multi Symbol — Batch analysis" },
+        { "label": "Telegram & Email alerts" },
+        { "label": "Unlimited pipeline runs" }
+      ]
+    },
+    "nodes": {
+      "currencyInput": { "label": "Currency", "description": "Exchange rate between two currencies (USD → CLP)", "from": "From", "to": "To" },
+      "scalarInput": { "label": "Scalar", "description": "Enter a constant number" },
+      "symbolInput": { "label": "Symbol Input", "description": "Enter the ticker to analyze (e.g. AAPL, GOOGL)", "placeholder": "AAPL" },
+      "priceFeed": { "label": "Price Feed", "description": "Gets current price + history from Yahoo Finance" },
+      "kalmanFilter": { "label": "Kalman Filter", "description": "Smooths price with Schwartz-Smith, detects fair value" },
+      "chartOutput": { "label": "Chart", "description": "Visualize prices and time series on a chart" },
+      "candleChart": { "label": "Candle Chart", "description": "Japanese candlestick OHLC chart" },
+      "priceDisplay": { "label": "Price Display", "description": "Shows current asset price" },
+      "alertOutput": { "label": "Alert", "description": "Triggers alert when price threshold is crossed" },
+      "multiSymbolInput": { "label": "Multi Symbol", "description": "Multiple tickers separated by comma for batch analysis" },
+      "smaIndicator": { "label": "SMA", "description": "Simple moving average of price" },
+      "rsiIndicator": { "label": "RSI", "description": "Relative strength index (overbought/oversold)" },
+      "forecastNode": { "label": "Forecast", "description": "Predicts future price using Kalman filter" },
+      "emaIndicator": { "label": "EMA", "description": "Exponential moving average of price" },
+      "mathOp": { "label": "Math Op", "description": "Mathematical operation between two values (+, -, *, /)", "add": "+ (add)", "subtract": "- (subtract)", "multiply": "* (multiply)", "divide": "/ (divide)" },
+      "newsOutput": { "label": "News", "description": "Latest news for the ticker from Yahoo Finance" },
+      "telegramOutput": { "label": "Telegram", "description": "Sends alerts to your Telegram when signal triggers" },
+      "portfolioInput": { "label": "Portfolio", "description": "Weighted sum of multiple inputs with weights" },
+      "emailOutput": { "label": "Email", "description": "Sends email report with prices and signals" },
+      "categories": { "input": "Input", "process": "Process", "output": "Output" },
+      "pro": "PRO"
+    },
+    "editor": {
+      "eraserMode": "Eraser mode: click edges to delete",
+      "clearAll": "Clear all",
+      "runAll": "Run all",
+      "autorun": "Auto-run",
+      "results": "Results",
+      "ai": "AI",
+      "save": "Save"
+    },
+    "saver": {
+      "save": "Save",
+      "ok": "OK",
+      "import": "Import"
+    }
+  },
+  "search": {
+    "placeholder": "Search ticker... (e.g. AAPL, USDCLP=X)"
+  },
+  "toast": {
+    "dismiss": "Dismiss notification"
+  },
+  "portfolio": {
+    "addPosition": "Add Position",
+    "delete": "DEL",
+    "cancel": "X",
+    "confirmDelete": "Confirm Delete"
+  },
+  "alerts": {
+    "addAlert": "Add Alert",
+    "rearm": "Rearm",
+    "delete": "DEL",
+    "cancel": "X",
+    "confirmDelete": "Confirm Delete"
+  },
+  "monetization": {
+    "githubSponsors": "Sponsor",
+    "donateBuda": "Donar con Buda (cripto en Chile)",
+    "investFintual": "Invertir en Fintual (regulado CMF)"
+  }
+}

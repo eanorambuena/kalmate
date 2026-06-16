@@ -1,5 +1,16 @@
 export default defineNuxtConfig({
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/i18n'],
+  i18n: {
+    defaultLocale: 'en',
+    locales: [
+      { code: 'en', language: 'en', name: 'English' },
+      { code: 'es', language: 'es', name: 'Español' },
+    ],
+    lazy: true,
+    langDir: 'locales',
+    detectBrowserLanguage: false,
+    strategy: 'prefix_except_default',
+  },
   css: [
     '~/assets/css/main.css',
     '@vue-flow/core/dist/style.css',

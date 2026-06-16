@@ -46,8 +46,8 @@
         v-model="data.op"
         class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer text-center"
       >
-        <option value="+">+ (suma)</option>
-        <option value="-">- (resta)</option>
+<option value="+">+ (add)</option>
+<option value="-">- (subtract)</option>
         <option value="*">* (multiply)</option>
         <option value="/">/ (divide)</option>
       </select>

@@ -222,7 +222,7 @@ describe('executors', () => {
     }) as any
     const result = await executors.newsOutput(mkCtx({ inputs: { symbol: 'AAPL' } }))
     assert.equal(result.count, 0)
-    assert.equal(result.latest, 'Sin noticias recientes')
+    assert.equal(result.latest, 'No recent news')
     global.fetch = origFetch
   })
 

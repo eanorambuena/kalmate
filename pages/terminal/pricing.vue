@@ -143,7 +143,7 @@ const features = [
             </div>
             <p class="text-[#aaa] text-xs font-mono tracking-widest mb-2">PRO</p>
             <p class="text-4xl font-bold text-white mb-1">$9.990</p>
-            <p class="text-[#aaa] text-sm mb-1">Una vez, para siempre.</p>
+            <p class="text-[#aaa] text-sm mb-1">Once, forever.</p>
             <p class="text-[#aaa] text-sm mb-6">Unlock all pro nodes and features.</p>
             <button
               v-if="plan !== 'pro'"

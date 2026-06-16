@@ -37,9 +37,9 @@
           <button class="flex-1 text-left text-[10px] text-[#bbb] hover:text-white truncate" @click="loadPipeline(p.name)">
             {{ p.name }}
           </button>
-          <button class="text-[#666] hover:text-[#2979ff] text-[9px] hidden group-hover:inline" @click="startRename(p.name)" title="Renombrar">✎</button>
-          <button class="text-[#666] hover:text-[#2979ff] text-[9px] hidden group-hover:inline" @click="downloadPipeline(p.name)" title="Descargar">↓</button>
-          <button class="text-[#666] hover:text-[#ff1744] text-[9px] hidden group-hover:inline" @click="deletePipeline(p.name)" title="Eliminar">✕</button>
+          <button class="text-[#666] hover:text-[#2979ff] text-[9px] hidden group-hover:inline" @click="startRename(p.name)" title="Rename">✎</button>
+          <button class="text-[#666] hover:text-[#2979ff] text-[9px] hidden group-hover:inline" @click="downloadPipeline(p.name)" title="Download">↓</button>
+          <button class="text-[#666] hover:text-[#ff1744] text-[9px] hidden group-hover:inline" @click="deletePipeline(p.name)" title="Delete">✕</button>
         </template>
       </div>
 

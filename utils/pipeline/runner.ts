@@ -200,7 +200,7 @@ export const executors: Record<string, NodeExecutor> = {
       if (!res.ok) return { news: [], latest: '-', count: 0, error: `HTTP ${res.status}` }
       const articles = await res.json()
       if (!Array.isArray(articles)) return { news: [], latest: '-', count: 0, error: 'Unexpected format' }
-      if (articles.length === 0) return { news: [], latest: 'Sin noticias recientes', count: 0 }
+      if (articles.length === 0) return { news: [], latest: 'No recent news', count: 0 }
       const headlines = articles.slice(0, 5).map(a => a.title || 'Sin título')
       return {
         count: articles.length,
