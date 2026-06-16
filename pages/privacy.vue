@@ -81,7 +81,7 @@
         <h2 class="text-2xl font-bold text-white mb-4">7. Contact</h2>
         <p class="text-[#ccc] leading-relaxed">
           If you have questions about this Privacy Policy, contact us at:
-          <a href="mailto:contact@kalmate.pages.dev" class="text-[#00c853] hover:underline">contact@kalmate.pages.dev</a>
+          <a href="mailto:a25.eanorambuena@gmail.com" class="text-[#00c853] hover:underline">a25.eanorambuena@gmail.com</a>
         </p>
       </section>
     </main>
@@ -102,6 +102,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'landing' })
+
 useHead({
   title: 'Privacy Policy — Kalmate | Data & Cookie Practices',
   meta: [

@@ -21,7 +21,7 @@
       <div class="bg-[#111] border border-[#222] rounded-2xl p-8 mb-8">
         <h2 class="text-xl font-bold text-white mb-4">Email</h2>
         <p class="text-[#ccc] mb-2">Send us an email at:</p>
-        <a href="mailto:contact@kalmate.pages.dev" class="text-[#00c853] hover:underline text-lg font-medium">contact@kalmate.pages.dev</a>
+        <a href="mailto:a25.eanorambuena@gmail.com" class="text-[#00c853] hover:underline text-lg font-medium">a25.eanorambuena@gmail.com</a>
       </div>
 
       <div class="bg-[#111] border border-[#222] rounded-2xl p-8 mb-8">
@@ -55,10 +55,12 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'landing' })
+
 useHead({
   title: 'Contact Kalmate — Get in Touch | Financial Terminal Support',
   meta: [
-    { name: 'description', content: 'Contact the Kalmate team. Send us an email at contact@kalmate.pages.dev or open an issue on GitHub for support with the financial terminal.' },
+    { name: 'description', content: 'Contact the Kalmate team. Send us an email at a25.eanorambuena@gmail.com or open an issue on GitHub for support with the financial terminal.' },
     { name: 'keywords', content: 'contact kalmate, financial terminal support, kalmate email, kalmate github' },
   ],
 })

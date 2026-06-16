@@ -87,6 +87,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'landing' })
+
 useHead({
   title: 'About Kalmate — Open-Source Financial Terminal & Data Pipeline',
   meta: [

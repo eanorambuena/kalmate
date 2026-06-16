@@ -68,7 +68,7 @@
         <h2 class="text-2xl font-bold text-white mb-4">8. Contact</h2>
         <p class="text-[#ccc] leading-relaxed">
           For questions about these terms, contact:
-          <a href="mailto:contact@kalmate.pages.dev" class="text-[#00c853] hover:underline">contact@kalmate.pages.dev</a>
+          <a href="mailto:a25.eanorambuena@gmail.com" class="text-[#00c853] hover:underline">a25.eanorambuena@gmail.com</a>
         </p>
       </section>
     </main>
@@ -89,6 +89,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'landing' })
+
 useHead({
   title: 'Terms of Service — Kalmate | Terms & Conditions',
   meta: [

@@ -54,6 +54,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'landing' })
+
 const posts = [
   {
     slug: 'what-is-a-financial-terminal',

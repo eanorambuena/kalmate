@@ -17,14 +17,17 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@latest --activate
+
       - name: Install Chromium
         run: sudo apt-get update -q && sudo apt-get install -yq chromium-browser
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       - name: Run Lighthouse
         run: |

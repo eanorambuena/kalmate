@@ -78,6 +78,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'landing' })
+
 useHead({
   title: 'What Is a Financial Terminal? — Kalmate Blog | Market Data Tools',
   meta: [

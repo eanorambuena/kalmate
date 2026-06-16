@@ -85,6 +85,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'landing' })
+
 useHead({
   title: 'How to Build a Diversified Portfolio in 2026 — Kalmate Blog',
   meta: [
