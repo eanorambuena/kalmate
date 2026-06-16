@@ -3,7 +3,7 @@
     <div class="w-52 flex-shrink-0 bg-[#0d0d0d] border-r border-[#222] overflow-y-auto z-10 flex flex-col">
       <div class="p-2 space-y-2">
         <div>
-          <div class="text-[9px] font-mono text-[#888] tracking-wider px-2 mb-1 uppercase">Input</div>
+          <div class="text-[9px] font-mono text-[#bbb] tracking-wider px-2 mb-1 uppercase">Input</div>
           <div class="space-y-0.5">
             <button
               v-for="n in inputNodes" :key="n.type"
@@ -17,7 +17,7 @@
           </div>
         </div>
         <div>
-          <div class="text-[9px] font-mono text-[#888] tracking-wider px-2 mb-1 uppercase">Process</div>
+          <div class="text-[9px] font-mono text-[#bbb] tracking-wider px-2 mb-1 uppercase">Process</div>
           <div class="space-y-0.5">
             <button
               v-for="n in processNodes" :key="n.type"
@@ -31,7 +31,7 @@
           </div>
         </div>
         <div>
-          <div class="text-[9px] font-mono text-[#888] tracking-wider px-2 mb-1 uppercase">Output</div>
+          <div class="text-[9px] font-mono text-[#bbb] tracking-wider px-2 mb-1 uppercase">Output</div>
           <div class="space-y-0.5">
             <button
               v-for="n in outputNodes" :key="n.type"
@@ -69,20 +69,20 @@
       <div class="absolute top-2 right-2 z-10 flex items-center gap-1.5 bg-[#0d0d0d]/80 backdrop-blur-sm border border-[#222] rounded-lg px-2 py-1.5">
         <button
           class="px-2 py-1 rounded text-[9px] font-bold transition-all"
-          :class="eraserMode ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-[#1a1a1a] text-[#888] hover:text-white border border-transparent'"
+          :class="eraserMode ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-[#1a1a1a] text-[#bbb] hover:text-white border border-transparent'"
           @click="eraserMode = !eraserMode"
           title="Eraser mode: click edges to delete"
         >
           🗑
         </button>
         <button
-          class="px-2 py-1 bg-[#1a1a1a] text-[#888] text-[9px] font-bold rounded hover:text-white transition-colors border border-transparent"
+          class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[9px] font-bold rounded hover:text-white transition-colors border border-transparent"
           @click="clearAll"
         >
           Clear
         </button>
         <button
-          class="px-2 py-1 bg-[#1a1a1a] text-[#888] text-[9px] font-bold rounded hover:text-white transition-colors border border-transparent"
+          class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[9px] font-bold rounded hover:text-white transition-colors border border-transparent"
           @click="$emit('help')"
           title="Show tutorial"
         >
@@ -93,14 +93,14 @@
 
         <button
           class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
-          :class="autorun ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#888] border border-transparent hover:text-white'"
+          :class="autorun ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="autorun = !autorun"
         >
           {{ autorun ? '⏵ Auto' : '⏸ Auto' }}
         </button>
         <button
           class="px-3 py-1 rounded text-[9px] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          :class="autorun ? 'bg-[#222] text-[#888]' : 'bg-[#00c853] text-black hover:bg-[#00e863]'"
+          :class="autorun ? 'bg-[#222] text-[#bbb]' : 'bg-[#00c853] text-black hover:bg-[#00e863]'"
           :disabled="nodes.length === 0 || running || autorun"
           @click="runPipeline"
         >
@@ -111,7 +111,7 @@
 
         <button
           class="px-2 py-1 rounded text-[9px] font-bold transition-colors"
-          :class="showResults ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#888] border border-transparent hover:text-white'"
+          :class="showResults ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="showResults = !showResults"
           title="Toggle results panel"
         >
@@ -139,12 +139,12 @@
       >
         <p class="text-[#00c853] font-bold mb-1">Results</p>
         <div v-for="(val, key) in results" :key="key" class="mb-1">
-          <span class="text-[#888]">{{ key }}:</span>
+          <span class="text-[#bbb]">{{ key }}:</span>
           <span class="text-white ml-1">{{ formatResult(val) }}</span>
         </div>
       </div>
 
-      <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[9px] text-[#888] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
+      <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[9px] text-[#bbb] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
         <span>🖱 Arrastra de salida a entrada para conectar</span>
         <span>🖱 Click en flecha para borrar</span>
       </div>
