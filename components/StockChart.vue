@@ -37,6 +37,7 @@ function initChart() {
   const intraday = isIntraday(props.data)
 
   chart = createChart(chartContainer.value, {
+    autoSize: true,
     layout: {
       background: { type: ColorType.Solid, color: '#0a0a0a' },
       textColor: '#888',
@@ -45,9 +46,7 @@ function initChart() {
       vertLines: { color: '#1a1a1a' },
       horzLines: { color: '#1a1a1a' },
     },
-    width: chartContainer.value.clientWidth,
-    height: 400,
-    crosshair: { mode: 0 },
+
     timeScale: {
       borderColor: '#2a2a2a',
       timeVisible: intraday,
@@ -113,17 +112,8 @@ onUnmounted(() => {
     chart = null
   }
 })
-
-const handleResize = () => {
-  if (chart && chartContainer.value) {
-    chart.applyOptions({ width: chartContainer.value.clientWidth })
-  }
-}
-
-onMounted(() => window.addEventListener('resize', handleResize))
-onUnmounted(() => window.removeEventListener('resize', handleResize))
 </script>
 
 <template>
-  <div ref="chartContainer" class="w-full" role="img" aria-label="Stock price chart showing candlestick data with volume histogram" />
+  <div ref="chartContainer" style="height: 400px" role="img" aria-label="Stock price chart showing candlestick data with volume histogram" />
 </template>

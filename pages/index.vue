@@ -67,7 +67,6 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
         <span class="text-[#00c853] font-bold text-xl tracking-wider">KALMATE⌘</span>
         <div class="flex items-center gap-6">
           <a href="/terminal" class="text-[#888] hover:text-white transition-colors text-sm">Terminal</a>
-          <a href="/terminal/pricing" class="text-[#888] hover:text-white transition-colors text-sm">Pricing</a>
           <a href="#features" class="text-[#888] hover:text-white transition-colors text-sm">Features</a>
           <a href="#tech" class="text-[#888] hover:text-white transition-colors text-sm">Tech</a>
         </div>
@@ -97,10 +96,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
             <a href="/terminal/stock/AAPL" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm">
               VIEW SAMPLE
             </a>
-            <a href="/terminal/pricing" class="inline-flex items-center gap-2 border border-[#ff69b4]/30 text-[#ff69b4] px-8 py-3.5 rounded-lg hover:bg-[#ff69b4]/10 transition-colors text-sm">
-              PRICING
-            </a>
-            <a href="/terminal/pipeline" class="inline-flex items-center gap-2 bg-[#aa00ff]/20 text-[#aa00ff] border border-[#aa00ff]/30 px-8 py-3.5 rounded-lg hover:bg-[#aa00ff]/30 transition-colors text-sm whitespace-nowrap">
+            <a href="/terminal/pipeline" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm whitespace-nowrap">
               Try Pipelines →
             </a>
           </div>
