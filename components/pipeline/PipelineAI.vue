@@ -1,20 +1,22 @@
 <template>
-  <Transition name="slide">
-    <div v-if="open" class="fixed right-0 top-0 h-full w-96 bg-[#111] border-l border-[#333] shadow-2xl z-20 flex flex-col pointer-events-auto" ref="panelRef">
-      <div class="flex items-center justify-between px-4 py-3 border-b border-[#222]">
-        <span class="text-xs font-bold text-[#00c853] uppercase tracking-wider flex items-center gap-1.5">
-          AI Pipeline
-        </span>
-        <button class="text-[#bbb] hover:text-white text-xs transition-colors" @click="close" title="Close">✕</button>
+  <div v-if="open" class="fixed z-30 pointer-events-none" :style="panelPos">
+    <div class="w-96 bg-[#111] border border-[#333] rounded-2xl shadow-2xl pointer-events-auto flex flex-col overflow-hidden transition-shadow duration-200 hover:shadow-[0_0_30px_rgba(0,200,83,0.1)]"
+         ref="panelRef">
+      <div
+        class="flex items-center justify-between px-4 py-2.5 border-b border-[#222] cursor-grab active:cursor-grabbing select-none"
+        @mousedown="startDrag"
+      >
+        <span class="text-xs font-bold text-[#00c853] uppercase tracking-wider">AI Pipeline</span>
+        <button class="text-[#888] hover:text-white text-lg leading-none px-1.5 py-0.5 rounded-lg hover:bg-[#222] transition-colors" @click="close" title="Close">✕</button>
       </div>
 
-      <div class="flex-1 overflow-y-auto px-4 py-3 space-y-3" ref="messagesRef">
+      <div class="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0" ref="messagesRef">
         <div v-if="!conversation.length" class="text-[#666] text-xs text-center mt-12 leading-relaxed">
-          Describe the pipeline you want to build.<br>
-          Example: <span class="text-[#888] font-mono">chart AAPL with candles and SMA20</span>
+          Describe el pipeline que quieres construir.<br>
+          Ej: <span class="text-[#888] font-mono">chart AAPL con SMA20</span>
         </div>
         <div v-for="(msg, i) in conversation" :key="i" class="flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
-          <div class="text-xs max-w-[85%] rounded-2xl px-3.5 py-2 leading-relaxed" :class="msg.role === 'user' ? 'bg-[#00c853]/20 text-white' : 'bg-[#222] text-[#ccc]'">
+          <div class="text-xs max-w-[85%] rounded-2xl px-3.5 py-2 leading-relaxed break-words" :class="msg.role === 'user' ? 'bg-[#00c853]/20 text-white' : 'bg-[#222] text-[#ccc]'">
             {{ msg.content }}
           </div>
         </div>
@@ -36,7 +38,7 @@
           <input
             v-model="query"
             type="text"
-            placeholder="Describe your pipeline..."
+            placeholder="Describe tu pipeline..."
             class="flex-1 bg-[#222] border border-[#444] rounded-xl px-3 py-2 text-white text-xs font-mono outline-none focus:border-[#00c853] transition-colors"
             @keydown.enter="doGenerate"
             :disabled="generating"
@@ -53,11 +55,11 @@
         </div>
       </div>
     </div>
-  </Transition>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { useAIPipeline } from '~/composables/useAIPipeline'
 import { Zap } from '@lucide/vue'
 
@@ -76,12 +78,47 @@ const error = ref('')
 const result = ref<{ nodes: any[]; edges: any[] } | null>(null)
 const conversation = ref<Array<{ role: string; content: string }>>([])
 const messagesRef = ref<HTMLElement | null>(null)
+const panelRef = ref<HTMLElement | null>(null)
+
+const posX = ref(24)
+const posY = ref(80)
+const dragging = ref(false)
+const dragOffset = { x: 0, y: 0 }
 
 watch(() => props.modelValue, (v) => { open.value = v })
+watch(open, (v) => { emit('update:modelValue', v) })
 
-watch(open, (v) => {
-  emit('update:modelValue', v)
+function startDrag(e: MouseEvent) {
+  const panel = panelRef.value
+  if (!panel) return
+  const rect = panel.getBoundingClientRect()
+  dragOffset.x = e.clientX - rect.left
+  dragOffset.y = e.clientY - rect.top
+  dragging.value = true
+  document.addEventListener('mousemove', onDrag)
+  document.addEventListener('mouseup', stopDrag)
+}
+
+function onDrag(e: MouseEvent) {
+  if (!dragging.value) return
+  posX.value = e.clientX - dragOffset.x
+  posY.value = e.clientY - dragOffset.y
+}
+
+function stopDrag() {
+  dragging.value = false
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', stopDrag)
+}
+
+onUnmounted(() => {
+  stopDrag()
 })
+
+const panelPos = computed(() => ({
+  left: posX.value + 'px',
+  top: posY.value + 'px',
+}))
 
 async function doGenerate() {
   if (!query.value.trim()) return
@@ -95,10 +132,10 @@ async function doGenerate() {
   const plan = await generate(q)
   if ('error' in plan) {
     error.value = plan.error
-    conversation.value.push({ role: 'assistant', content: 'Error: ' + plan.error })
+    conversation.value.push({ role: 'assistant', content: plan.error })
   } else {
     result.value = plan
-    const summary = `Generated: ${plan.nodes.length} nodes, ${plan.edges.length} connections`
+    const summary = `Pipeline listo: ${plan.nodes.length} nodos, ${plan.edges.length} conexiones`
     conversation.value.push({ role: 'assistant', content: summary })
     emit('apply', plan)
   }
@@ -116,12 +153,3 @@ function close() {
   open.value = false
 }
 </script>
-
-<style scoped>
-.slide-enter-active, .slide-leave-active {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.slide-enter-from, .slide-leave-to {
-  transform: translateX(100%);
-}
-</style>

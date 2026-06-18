@@ -41,6 +41,20 @@ RULES:
 - A priceFeed can connect to multiple nodes`
 }
 
+const VALID_KEYWORDS = [
+  'chart', 'candle', 'candlestick', 'sma', 'ema', 'rsi', 'kalman',
+  'moving average', 'forecast', 'price', 'symbol', 'indicator',
+  'compare', 'plot', 'show', 'display', 'track', 'portfolio',
+  'filter', 'smooth', 'signal', 'forex', 'stock', 'currency',
+]
+
+function isValidQuery(q: string): boolean {
+  const lowered = q.toLowerCase()
+  if (lowered.length < 3) return false
+  if (/[A-Z]{2,5}/.test(q)) return true
+  return VALID_KEYWORDS.some(k => lowered.includes(k))
+}
+
 export default defineEventHandler(async (event) => {
   const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
@@ -50,7 +64,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<{ query?: string }>(event)
   const query = body?.query?.trim()
   if (!query) {
-    return { error: 'query is required' }
+    return { error: 'Describe qué pipeline quieres construir' }
+  }
+  if (!isValidQuery(query)) {
+    return { error: 'Describe qué pipeline quieres construir. Ej: "chart AAPL con SMA20" o "forecast EURUSD con kalman"' }
   }
 
   const prompt = buildPrompt(query)

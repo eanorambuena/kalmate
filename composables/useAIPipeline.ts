@@ -16,6 +16,20 @@ export type PipelinePlan = {
   edges: EdgeSpec[]
 }
 
+const VALID_KEYWORDS = [
+  'chart', 'candle', 'candlestick', 'sma', 'ema', 'rsi', 'kalman',
+  'moving average', 'forecast', 'price', 'symbol', 'indicator',
+  'compare', 'plot', 'show', 'display', 'track', 'portfolio',
+  'filter', 'smooth', 'signal', 'forex', 'stock', 'currency',
+]
+
+function isValidQuery(q: string): boolean {
+  const lowered = q.toLowerCase()
+  if (lowered.length < 3) return false
+  if (/[A-Z]{2,5}/.test(q)) return true
+  return VALID_KEYWORDS.some(k => lowered.includes(k))
+}
+
 function parseKeywords(query: string): PipelinePlan {
   const q = query.toLowerCase()
   const symbols = q.match(/[A-Z]{1,5}(?:-[A-Z]{1,5})?/g) || ['AAPL']
@@ -99,6 +113,9 @@ function parseKeywords(query: string): PipelinePlan {
 
 export function useAIPipeline() {
   async function generate(query: string): Promise<PipelinePlan | { error: string }> {
+    if (!isValidQuery(query)) {
+      return { error: 'Describe qué pipeline quieres construir. Ej: "chart AAPL con SMA20" o "forecast EURUSD con kalman"' }
+    }
     try {
       const res = await $fetch('/api/generate-pipeline', {
         method: 'POST',
