@@ -169,8 +169,8 @@
       </div>
     </div>
 
-    <ProModal v-if="showProModal" @close="showProModal = false" />
-    <PipelineAI v-if="showAI" @apply="onAIApply" @close="showAI = false" />
+    <ProModal v-model="showProModal" />
+    <PipelineAI v-model="showAI" @apply="onAIApply" />
     <PipelineSaver v-if="showSaver" @load="onPipelineLoad" @close="showSaver = false" />
   </div>
 </template>
@@ -324,6 +324,10 @@ function onConnect(connection: any) {
 }
 
 function onCanvasClick(e: MouseEvent) {
+  if (showAI.value) {
+    showAI.value = false
+    return
+  }
   if (!eraserMode.value) return
   const target = e.target as HTMLElement
   const edgeEl = target.closest('.vue-flow__edge')

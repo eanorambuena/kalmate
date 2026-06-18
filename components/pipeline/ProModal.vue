@@ -1,12 +1,10 @@
 <template>
-  <Teleport to="body">
-    <div class="fixed inset-0 z-50 flex items-center justify-center" @click.self="$emit('close')">
-      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div class="relative bg-[#0d0d0d] border border-[#ff69b4]/30 rounded-3xl p-10 max-w-lg w-full mx-4 shadow-[0_0_80px_rgba(255,105,180,0.15)] modal-enter">
-        <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-[#ff69b4] via-[#ffd700] to-[#00c853] flex items-center justify-center text-3xl shadow-[0_0_40px_rgba(255,105,180,0.4)] animate-pulse-slow">
-          <span class="text-black font-bold text-2xl">✦</span>
-        </div>
-        <button class="absolute top-4 right-4 text-[#aaa] hover:text-white text-xl transition-colors" @click="$emit('close')">✕</button>
+  <Modal v-model="open">
+    <div class="bg-[#0d0d0d] border border-[#ff69b4]/30 rounded-3xl p-10 max-w-lg w-full mx-4 shadow-[0_0_80px_rgba(255,105,180,0.15)] modal-enter">
+      <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-[#ff69b4] via-[#ffd700] to-[#00c853] flex items-center justify-center text-3xl shadow-[0_0_40px_rgba(255,105,180,0.4)] animate-pulse-slow">
+        <span class="text-black font-bold text-2xl">✦</span>
+      </div>
+      <button class="absolute top-4 right-4 text-[#aaa] hover:text-white text-xl transition-colors" @click="open = false">✕</button>
 
         <div class="text-center mt-4">
           <p class="text-[#ff69b4] text-xs font-mono tracking-[0.2em] mb-2 animate-fade-in">PRO FEATURE</p>
@@ -47,15 +45,21 @@
         <p class="text-[#aaa] text-[10px] text-center mt-4 animate-fade-in" style="animation-delay: 0.6s">
           MACH · Buda · GitHub Sponsors · Honor system
         </p>
-      </div>
     </div>
-  </Teleport>
+  </Modal>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+import Modal from '../Modal.vue'
 import { TrendingUp, BarChart3, Sparkles, Link2, Mail, Zap } from '@lucide/vue'
 
-const emit = defineEmits(['close'])
+const props = defineProps<{ modelValue?: boolean }>()
+const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
+const open = ref(props.modelValue ?? false)
+
+watch(() => props.modelValue, (v) => { open.value = v ?? false })
+watch(open, (v) => { emit('update:modelValue', v) })
 
 const proFeatures = [
   { icon: TrendingUp, label: 'RSI — Relative market strength' },

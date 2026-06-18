@@ -89,36 +89,34 @@
     </div>
   </footer>
 
-  <Teleport to="body">
-    <div v-if="showFintualModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4" @click.self="showFintualModal = false">
-      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div class="relative bg-[#111] border border-[#333] rounded-2xl p-8 max-w-md w-full shadow-2xl">
-        <button class="absolute top-4 right-4 text-[#ccc] hover:text-white text-lg cursor-pointer" @click="showFintualModal = false">✕</button>
-        <div class="text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-4 bg-[#6366f1]/10 text-[#6366f1]">F</div>
-          <h3 class="text-white font-bold text-lg mb-3">{{ m.fintual.label }}</h3>
-          <p class="text-[#ccc] text-sm leading-relaxed mb-4">
-            This site was built by <strong class="text-white">Emmanuel Norambuena</strong>.
-          </p>
-          <p class="text-[#ccc] text-sm leading-relaxed mb-6">
-            If you want to support me with this referral, when Fintual asks if someone recommended you, just say you know me. It helps me keep building free tools like this one.
-          </p>
-          <a
-            :href="m.fintual.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-[#6366f1] text-white rounded-xl text-sm font-bold hover:bg-[#6366f1]/90 transition-all no-underline"
-            @click="showFintualModal = false"
-          >
-            Go to {{ m.fintual.label }} →
-          </a>
-        </div>
+  <Modal v-model="showFintualModal">
+    <div class="bg-[#111] border border-[#333] rounded-2xl p-8 max-w-md w-full shadow-2xl">
+      <button class="absolute top-4 right-4 text-[#ccc] hover:text-white text-lg cursor-pointer" @click="showFintualModal = false">✕</button>
+      <div class="text-center">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-4 bg-[#6366f1]/10 text-[#6366f1]">F</div>
+        <h3 class="text-white font-bold text-lg mb-3">{{ m.fintual.label }}</h3>
+        <p class="text-[#ccc] text-sm leading-relaxed mb-4">
+          This site was built by <strong class="text-white">Emmanuel Norambuena</strong>.
+        </p>
+        <p class="text-[#ccc] text-sm leading-relaxed mb-6">
+          If you want to support me with this referral, when Fintual asks if someone recommended you, just say you know me. It helps me keep building free tools like this one.
+        </p>
+        <a
+          :href="m.fintual.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-[#6366f1] text-white rounded-xl text-sm font-bold hover:bg-[#6366f1]/90 transition-all no-underline"
+          @click="showFintualModal = false"
+        >
+          Go to {{ m.fintual.label }} →
+        </a>
       </div>
     </div>
-  </Teleport>
+  </Modal>
 </template>
 
 <script setup lang="ts">
+import Modal from './Modal.vue'
 import { monetization as m } from '../utils/monetization'
 import { useCurrency } from '~/composables/useCurrency'
 
