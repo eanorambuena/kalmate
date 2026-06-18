@@ -1,5 +1,3 @@
-import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
-
 type NodeSpec = {
   type: string
   data: Record<string, any>
@@ -18,48 +16,6 @@ export type PipelinePlan = {
   edges: EdgeSpec[]
 }
 
-let pipeline: any = null
-let loading = false
-let loaded = false
-
-function buildPrompt(query: string): string {
-  const nodeList = nodeDefinitions
-    .filter(n => !n.pro)
-    .map(n => {
-      const ins = n.inputs.map(i => `${i.id}(${i.type})`).join(', ') || 'none'
-      const outs = n.outputs.map(o => `${o.id}(${o.type})`).join(', ') || 'none'
-      return `  - ${n.type}: "${n.label}" | inputs: [${ins}] | outputs: [${outs}] | desc: ${n.description}`
-    })
-    .join('\n')
-
-  return `You are an assistant that generates financial pipelines. You have these nodes available:
-${nodeList}
-Each node is identified by its "type". "Input" nodes provide data, "process" nodes transform it, "output" nodes display it.
-
-Generate a pipeline for: "${query}"
-
-Return ONLY valid JSON without markdown, without explanations, with this structure:
-{
-  "nodes": [
-    { "type": "symbolInput", "data": { "symbol": "AAPL" } },
-    { "type": "priceFeed", "data": {} },
-    { "type": "candleChart", "data": {} }
-  ],
-  "edges": [
-    { "source": 0, "target": 1, "sourceHandle": "source", "targetHandle": "source" },
-    { "source": 1, "target": 2, "sourceHandle": "ohlc", "targetHandle": "seriesA" }
-  ]
-}
-
-RULES:
-- source and target in edges are indices of the nodes array (0, 1, 2...)
-- sourceHandle must match an output id of the source node
-- targetHandle must match an input id of the target node
-- Nodes must connect in logical order: inputs -> process -> outputs
-- A symbolInput node must always connect to a priceFeed
-- A priceFeed can connect to multiple nodes`
-}
-
 function parseKeywords(query: string): PipelinePlan {
   const q = query.toLowerCase()
   const symbols = q.match(/[A-Z]{1,5}(?:-[A-Z]{1,5})?/g) || ['AAPL']
@@ -76,8 +32,6 @@ function parseKeywords(query: string): PipelinePlan {
 
   nodes.push({ type: 'symbolInput', data: { symbol: ticker } })
   nodes.push({ type: 'priceFeed', data: {} })
-
-  let priceIdx = 0, pfIdx = 1
 
   nodes.push({ type: 'priceFeed', data: {} })
   edges.push({ source: 0, target: 1, sourceHandle: 'source', targetHandle: 'source' })
@@ -144,46 +98,17 @@ function parseKeywords(query: string): PipelinePlan {
 }
 
 export function useAIPipeline() {
-  async function loadModel(onProgress?: (pct: number) => void) {
-    if (loaded) return
-    if (loading) return
-    loading = true
-    try {
-      const { pipeline: p } = await import('@xenova/transformers')
-      pipeline = await p('text-generation', 'Xenova/Qwen2-0.5B-Instruct', {
-        progress_callback: (p: any) => {
-          if (p.status === 'progress' && onProgress) {
-            onProgress(Math.round(p.progress * 100))
-          }
-        },
-      })
-      loaded = true
-    } catch {
-      loaded = false
-    } finally {
-      loading = false
-    }
-  }
-
   async function generate(query: string): Promise<PipelinePlan | { error: string }> {
-    if (pipeline) {
-      const prompt = buildPrompt(query)
-      try {
-        const output = await pipeline(prompt, {
-          max_new_tokens: 512,
-          temperature: 0.2,
-          do_sample: false,
-        })
-        const text = (output as any)[0]?.generated_text || ''
-        const jsonStr = text.includes('{') ? text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1) : ''
-        if (jsonStr) {
-          const plan: PipelinePlan = JSON.parse(jsonStr)
-          if (plan.nodes && plan.edges) return plan
-        }
-      } catch {}
-    }
+    try {
+      const res = await $fetch('/api/generate-pipeline', {
+        method: 'POST',
+        body: { query },
+      })
+      if (res.error) return { error: res.error }
+      if (res.nodes && res.edges) return res as PipelinePlan
+    } catch {}
     return parseKeywords(query)
   }
 
-  return { loadModel, generate, loading: () => loading, loaded: () => loaded }
+  return { generate }
 }

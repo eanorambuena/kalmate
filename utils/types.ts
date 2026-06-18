@@ -49,3 +49,11 @@ export interface AlertCondition {
   createdAt: string
   lastChecked?: string
 }
+
+export interface ChileIndicator {
+  codigo: string
+  nombre: string
+  unidad_medida: string
+  fecha: string
+  valor: number
+}

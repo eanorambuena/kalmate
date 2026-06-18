@@ -7,7 +7,7 @@ interface NewsItem {
   summary?: string
 }
 
-const { data, pending } = await useAsyncData(
+const { data, pending, refresh } = await useAsyncData(
   'market-news',
   async () => {
     const result = await $fetch('/api/news')

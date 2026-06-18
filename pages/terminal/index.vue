@@ -30,6 +30,9 @@ const categories = Object.entries(ALL_MARKETS).map(([title, symbols]) => ({
   <div class="mb-6">
     <MarketOverview />
   </div>
+  <div class="mb-4">
+    <ChileIndicators />
+  </div>
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
     <div v-for="cat in categories" :key="cat.title">
       <MarketCategoryTable :title="cat.title" :symbols="cat.symbols" />

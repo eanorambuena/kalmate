@@ -3,9 +3,7 @@
     <div class="absolute top-3 right-3 w-80 bg-[#111] border border-[#333] rounded-xl p-3 pointer-events-auto shadow-2xl">
       <div class="flex items-center justify-between mb-2">
         <span class="text-[10px] font-bold text-[#00c853] uppercase tracking-wider flex items-center gap-1">
-          <div class="w-1.5 h-1.5 rounded-full" :class="modelReady ? 'bg-[#00c853]' : 'bg-[#666]'" />
           AI Pipeline
-          <span v-if="!modelReady" class="text-[#666] font-normal">(local)</span>
         </span>
         <button class="text-[#bbb] hover:text-white text-[9px]" @click="$emit('close')" title="Close">✕</button>
       </div>
@@ -43,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useAIPipeline } from '~/composables/useAIPipeline'
 import { Zap } from '@lucide/vue'
 
@@ -52,17 +50,12 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const { loadModel, generate, loaded } = useAIPipeline()
+const { generate } = useAIPipeline()
 
 const query = ref('')
 const generating = ref(false)
 const error = ref('')
-const modelReady = ref(false)
 const result = ref<{ nodes: any[]; edges: any[] } | null>(null)
-
-onMounted(() => {
-  loadModel().then(() => { modelReady.value = loaded() }).catch(() => {})
-})
 
 async function doGenerate() {
   if (!query.value.trim()) return

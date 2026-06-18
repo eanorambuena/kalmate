@@ -11,7 +11,7 @@ interface IndexQuote {
   changePercent: number
 }
 
-const { data, pending, error } = await useAsyncData(
+const { data, pending, error, refresh } = await useAsyncData(
   'market-indices',
   async () => {
     const symbols = MAJOR_INDICES.map(i => i.symbol).join(',')

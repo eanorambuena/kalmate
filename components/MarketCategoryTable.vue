@@ -15,7 +15,7 @@ const props = defineProps<{
   symbols: { symbol: string; name: string }[]
 }>()
 
-const { data, pending, error } = await useAsyncData(
+const { data, pending, error, refresh } = await useAsyncData(
   `market-${props.title}`,
   async () => {
     const syms = props.symbols.map(s => s.symbol).join(',')
