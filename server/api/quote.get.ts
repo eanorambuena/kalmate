@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     const result = symbolList.length === 1
       ? await getQuote(symbolList[0])
       : await getQuotes(symbolList)
-    setCache(cacheKey, result, 30_000)
+    setCache(cacheKey, result, 60_000)
     return result
   } catch (error: any) {
     throw createError({ statusCode: 500, statusMessage: error.message })

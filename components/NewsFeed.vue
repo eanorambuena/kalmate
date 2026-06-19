@@ -30,8 +30,19 @@ function timeAgo(dateStr?: string): string {
 }
 
 onMounted(() => {
-  const interval = setInterval(() => refresh(), 120000)
-  onUnmounted(() => clearInterval(interval))
+  let interval: ReturnType<typeof setInterval>
+  function start() { interval = setInterval(() => refresh(), 300000) }
+  function stop() { clearInterval(interval) }
+  start()
+  function onVisibility() {
+    if (document.hidden) stop()
+    else { refresh(); start() }
+  }
+  document.addEventListener('visibilitychange', onVisibility)
+  onUnmounted(() => {
+    stop()
+    document.removeEventListener('visibilitychange', onVisibility)
+  })
 })
 </script>
 
