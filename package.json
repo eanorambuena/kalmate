@@ -8,11 +8,16 @@
     "build": "nuxi build",
     "generate": "nuxi generate",
     "preview": "nuxi preview",
-    "test": "node --experimental-strip-types --test test/pipeline.test.ts",
+    "test": "node --experimental-strip-types --test test/pipeline.test.ts test/quotePoller.test.ts",
+    "test:all": "node --experimental-strip-types --test 'test/**/*.test.ts'",
     "test:a11y": "lighthouse http://localhost:3000 --output-path=./reports/lighthouse-a11y.html --output=html --only-categories=accessibility --view",
     "test:perf": "lighthouse http://localhost:3000 --output-path=./reports/lighthouse-perf.html --output=html --only-categories=performance,best-practices,seo --view",
     "test:lighthouse": "lighthouse http://localhost:3000 --output-path=./reports/lighthouse.html --output=html --view",
+    "lighthouse:local": "CHROME_PATH=$(which google-chrome 2>/dev/null || which chromium-browser 2>/dev/null || which chromium 2>/dev/null || echo '') && if [ -n \"$CHROME_PATH\" ]; then mkdir -p reports && npx lighthouse https://kalmate.pages.dev --output=html --output-path=./reports/lighthouse-local --chrome-path=\"$CHROME_PATH\" --chrome-flags='--headless=new --no-sandbox --disable-gpu' && echo 'Report: reports/lighthouse-local.html'; else echo 'Chrome not found. Install Chrome or Chromium to run Lighthouse locally.'; fi",
     "postinstall": "nuxi prepare"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "node --experimental-strip-types --test 'test/**/*.test.ts'"
   },
   "dependencies": {
     "@lucide/vue": "^1.18.0",
@@ -30,6 +35,7 @@
     "@oxc-minify/binding-linux-x64-gnu": "0.133.0",
     "@oxc-parser/binding-linux-x64-gnu": "0.133.0",
     "@oxc-transform/binding-linux-x64-gnu": "0.133.0",
-    "lighthouse": "^13.4.0"
+    "lighthouse": "^13.4.0",
+    "simple-git-hooks": "^2.13.1"
   }
 }
