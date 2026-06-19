@@ -1,41 +1,33 @@
 <script setup lang="ts">
 import { MAJOR_INDICES } from '../utils/constants'
 import { useCurrency } from '~/composables/useCurrency'
+import type { CategoryItem } from '~/utils/quotePoller'
 const { formatPrice } = useCurrency()
 
-interface IndexQuote {
+interface IndexDisplay {
   symbol: string
   name: string
-  price: number
-  change: number
-  changePercent: number
+  price: number | null
+  change: number | null
+  changePercent: number | null
 }
 
-const { data, pending, error, refresh } = await useAsyncData(
-  'market-indices',
-  async () => {
-    const symbols = MAJOR_INDICES.map(i => i.symbol).join(',')
-    const result = await $fetch(`/api/quote?symbols=${symbols}`)
-    const arr = Array.isArray(result) ? result : [result]
-    return arr.map((q: any) => {
-      const info = MAJOR_INDICES.find(i => i.symbol === q.symbol)
-      return {
-        symbol: q.symbol,
-        name: info?.name ?? q.symbol,
-        price: q.regularMarketPrice,
-        change: q.regularMarketChange,
-        changePercent: q.regularMarketChangePercent,
-      }
-    })
-  },
-  { default: () => [] }
-)
+const props = withDefaults(defineProps<{
+  items?: CategoryItem[]
+  loading?: boolean
+}>(), { items: () => [], loading: false })
 
-const indices = computed(() => data.value)
-
-onMounted(() => {
-  const interval = setInterval(() => refresh(), 60000)
-  onUnmounted(() => clearInterval(interval))
+const indices = computed<IndexDisplay[]>(() => {
+  if (props.items.length > 0) {
+    return props.items
+  }
+  return MAJOR_INDICES.map(idx => ({
+    symbol: idx.symbol,
+    name: idx.name,
+    price: null,
+    change: null,
+    changePercent: null,
+  }))
 })
 </script>
 

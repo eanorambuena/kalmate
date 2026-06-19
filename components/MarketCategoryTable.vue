@@ -2,56 +2,22 @@
 import { useCurrency } from '~/composables/useCurrency'
 const { formatPrice, formatChange, formatChangePercent } = useCurrency()
 
-interface CategoryItem {
-  symbol: string
-  name: string
-  price: number | null
-  change: number | null
-  changePercent: number | null
-}
+import type { CategoryItem } from '~/utils/quotePoller'
 
 const props = defineProps<{
   title: string
-  symbols: { symbol: string; name: string }[]
+  items: CategoryItem[]
+  loading: boolean
 }>()
-
-const { data, pending, error, refresh } = await useAsyncData(
-  `market-${props.title}`,
-  async () => {
-    const syms = props.symbols.map(s => s.symbol).join(',')
-    const result = await $fetch(`/api/quote?symbols=${syms}`)
-    return props.symbols.map((sym) => {
-      const q = Array.isArray(result) ? (result as any[]).find((d: any) => d.symbol === sym.symbol) : (result as any) || {}
-      return {
-        symbol: sym.symbol,
-        name: sym.name,
-        price: q.regularMarketPrice ?? null,
-        change: q.regularMarketChange ?? null,
-        changePercent: q.regularMarketChangePercent ?? null,
-      }
-    })
-  },
-  { default: () => [] }
-)
-
-const items = computed(() => data.value || [])
-
-onMounted(() => {
-  const interval = setInterval(() => refresh(), 30000)
-  onUnmounted(() => clearInterval(interval))
-})
 </script>
 
 <template>
   <div>
     <div class="text-xs text-[#ccc] mb-2 tracking-wider font-sans flex items-center gap-2" :aria-label="`${title} market data`">
       <span>{{ title }}</span>
-      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Updating" />
+      <span v-if="loading" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Updating" />
     </div>
-    <div v-if="error" role="alert" class="text-[#ff1744] text-xs py-8 text-center bg-[#111] border border-[#2a2a2a] rounded-xl">
-      No data available
-    </div>
-    <div v-else-if="pending && items.length === 0" class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden" aria-label="Loading data">
+    <div v-if="loading && items.length === 0" class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden" aria-label="Loading data">
       <div class="p-3 space-y-2">
         <div v-for="i in 4" :key="i" class="flex items-center gap-3">
           <div class="skeleton h-4 w-16" />
