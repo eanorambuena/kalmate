@@ -3,20 +3,22 @@ import { canonicalUrl } from '../../utils/seo'
 import { ALL_MARKETS } from '../../utils/constants'
 import { useQuotePoller } from '~/composables/useQuotePoller'
 
+const { t } = useI18n()
+
 const canonical = canonicalUrl('/terminal')
 
 useHead({
-  title: 'Market Dashboard — Real-Time Stock Quotes & Forex | Kalmate',
+  title: computed(() => t('terminal.heading.market')),
   meta: [
-    { name: 'description', content: 'Browse real-time market quotes for equities, forex, bonds, commodities, and crypto on Kalmate financial terminal. Free stock tracker with live prices, charts, and news.' },
+    { name: 'description', content: computed(() => t('landing.hero.subtext')) },
     { name: 'keywords', content: 'kalmate market dashboard, real-time stock quotes, forex tracker, crypto prices, commodity prices, financial terminal, live market data' },
-    { property: 'og:title', content: 'Market Dashboard — Real-Time Stock Quotes & Forex | Kalmate' },
-    { property: 'og:description', content: 'Browse real-time market quotes for equities, forex, bonds, commodities, and crypto on Kalmate financial terminal.' },
+    { property: 'og:title', content: computed(() => t('terminal.heading.market')) },
+    { property: 'og:description', content: computed(() => t('landing.hero.subtext')) },
     { property: 'og:url', content: canonical },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'Market Dashboard | Kalmate' },
-    { name: 'twitter:description', content: 'Browse real-time quotes for equities, forex, bonds, commodities, and crypto in Kalmate.' },
+    { name: 'twitter:title', content: computed(() => t('terminal.heading.market')) },
+    { name: 'twitter:description', content: computed(() => t('landing.hero.subtext')) },
   ],
   link: [{ rel: 'canonical', href: canonical }],
 })

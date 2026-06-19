@@ -3,75 +3,75 @@
     <Header />
 
     <main class="max-w-3xl mx-auto px-6 pt-24 pb-24">
-      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">Privacy Policy</h1>
-      <p class="text-[#888] text-sm mb-8">Last updated: June 2026</p>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">{{ $t('staticPages.privacy.title') }}</h1>
+      <p class="text-[#888] text-sm mb-8">{{ $t('staticPages.privacy.updated') }}</p>
 
       <section class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-4">1. Information We Collect</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.privacy.sections.collect.title') }}</h2>
         <p class="text-[#ccc] leading-relaxed mb-4">
-          Kalmate does not require user registration or accounts. We do not collect personal information such as names, email addresses, or payment data.
+          {{ $t('staticPages.privacy.sections.collect.text1') }}
         </p>
         <p class="text-[#ccc] leading-relaxed">
-          We may collect anonymous usage data through third-party services to improve our service.
+          {{ $t('staticPages.privacy.sections.collect.text2') }}
         </p>
       </section>
 
       <section class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-4">2. Cookies</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.privacy.sections.cookies.title') }}</h2>
         <p class="text-[#ccc] leading-relaxed mb-4">
-          Kalmate uses cookies and similar technologies for the following purposes:
+          {{ $t('staticPages.privacy.sections.cookies.text') }}
         </p>
         <ul class="list-disc pl-6 text-[#ccc] space-y-2">
-          <li><strong class="text-white">Advertising:</strong> Google AdSense uses cookies to serve personalized ads based on your browsing activity.</li>
-          <li><strong class="text-white">Analytics:</strong> We may use analytics services to understand how users interact with the site.</li>
-          <li><strong class="text-white">Functional:</strong> Local storage is used to save your portfolio data (stored locally in your browser, not on our servers).</li>
+          <li v-for="type in cookieTypes" :key="type.label">
+            <strong class="text-white">{{ type.label }}</strong> {{ type.desc }}
+          </li>
         </ul>
       </section>
 
       <section class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-4">3. Google AdSense</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.privacy.sections.adsense.title') }}</h2>
         <p class="text-[#ccc] leading-relaxed mb-4">
-          We use Google AdSense to display advertisements. Google uses cookies to serve ads based on users' visits to this site and other websites.
+          {{ $t('staticPages.privacy.sections.adsense.text1') }}
         </p>
         <p class="text-[#ccc] leading-relaxed mb-4">
-          You can opt out of personalized advertising by visiting <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" class="text-[#00c853] hover:underline">Google Ads Settings</a>.
+          {{ $t('staticPages.privacy.sections.adsense.text2') }}
+          <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" class="text-[#00c853] hover:underline">{{ $t('staticPages.privacy.sections.adsense.googleAdsLink') }}</a>.
         </p>
         <p class="text-[#ccc] leading-relaxed">
-          As a third-party vendor, Google uses cookies to serve ads on our site. Google's use of the DART cookie enables it to serve ads based on your visits to this site and other sites on the Internet.
+          {{ $t('staticPages.privacy.sections.adsense.text3') }}
         </p>
       </section>
 
       <section class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-4">4. Third-Party Services</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.privacy.sections.thirdParty.title') }}</h2>
         <p class="text-[#ccc] leading-relaxed">
-          Kalmate integrates with the following third-party services:
+          {{ $t('staticPages.privacy.sections.thirdParty.text') }}
         </p>
         <ul class="list-disc pl-6 text-[#ccc] space-y-2 mt-4">
-          <li><strong class="text-white">Yahoo Finance</strong> — real-time market data</li>
-          <li><strong class="text-white">TradingView</strong> — charts and technical analysis</li>
-          <li><strong class="text-white">Google AdSense</strong> — advertising</li>
-          <li><strong class="text-white">Cloudflare Pages</strong> — hosting and CDN</li>
+          <li v-for="service in thirdPartyServices" :key="service.name">
+            <strong class="text-white">{{ service.name }}</strong> — {{ service.desc }}
+          </li>
         </ul>
       </section>
 
       <section class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-4">5. Data Storage</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.privacy.sections.storage.title') }}</h2>
         <p class="text-[#ccc] leading-relaxed">
-          Portfolio positions, alerts, and pipeline configurations are stored locally in your browser using localStorage. We do not transmit or store this data on our servers.
+          {{ $t('staticPages.privacy.sections.storage.text') }}
         </p>
       </section>
 
       <section class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-4">6. Your Rights</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.privacy.sections.rights.title') }}</h2>
         <p class="text-[#ccc] leading-relaxed">
-          Depending on your jurisdiction, you may have the right to access, correct, delete, or port your data. Since we do not store personal data on our servers, most of these rights are managed through your browser settings.
+          {{ $t('staticPages.privacy.sections.rights.text') }}
         </p>
       </section>
 
       <section class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-4">7. Contact</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.privacy.sections.contact.title') }}</h2>
         <p class="text-[#ccc] leading-relaxed">
-          If you have questions about this Privacy Policy, contact us at:
+          {{ $t('staticPages.privacy.sections.contact.text') }}
           <a href="mailto:a25.eanorambuena@gmail.com" class="text-[#00c853] hover:underline">a25.eanorambuena@gmail.com</a>
         </p>
       </section>
@@ -84,10 +84,15 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'landing' })
 
+const { t } = useI18n()
+
+const cookieTypes = computed(() => t('staticPages.privacy.sections.cookies.types'))
+const thirdPartyServices = computed(() => t('staticPages.privacy.sections.thirdParty.services'))
+
 useHead({
-  title: 'Privacy Policy — Kalmate | Data & Cookie Practices',
+  title: computed(() => t('staticPages.privacy.title')),
   meta: [
-    { name: 'description', content: 'Kalmate Privacy Policy. Learn how we handle cookies, Google AdSense data, local storage, and third-party services on our financial terminal.' },
+    { name: 'description', content: computed(() => t('staticPages.privacy.updated')) },
     { name: 'keywords', content: 'kalmate privacy, privacy policy, cookie policy, google adsense, data privacy' },
   ],
 })

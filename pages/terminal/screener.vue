@@ -3,6 +3,8 @@ import { canonicalUrl } from '../../utils/seo'
 import { useCurrency } from '~/composables/useCurrency'
 const { formatPrice, formatChange, formatChangePercent } = useCurrency()
 
+const { t } = useI18n()
+
 const canonical = canonicalUrl('/terminal/screener')
 
 interface QuoteItem {
@@ -22,26 +24,40 @@ const minPrice = ref('')
 const maxPrice = ref('')
 const sortBy = ref('regularMarketChange')
 const sortDir = ref('desc')
-const presets = [
-  { label: 'Top Gainers', q: 'stock market', sort: 'regularMarketChangePercent', dir: 'desc' },
-  { label: 'Top Losers', q: 'stock market', sort: 'regularMarketChangePercent', dir: 'asc' },
-  { label: 'Tech Stocks', q: 'technology stocks', sort: 'marketCap', dir: 'desc' },
-  { label: 'Dividend', q: 'dividend stocks', sort: 'regularMarketChangePercent', dir: 'desc' },
-  { label: 'Growth', q: 'growth stocks', sort: 'regularMarketChangePercent', dir: 'desc' },
-]
+
+const presetList = computed(() => [
+  { label: t('terminal.screener.presets.topGainers'), q: 'stock market', sort: 'regularMarketChangePercent', dir: 'desc' },
+  { label: t('terminal.screener.presets.topLosers'), q: 'stock market', sort: 'regularMarketChangePercent', dir: 'asc' },
+  { label: t('terminal.screener.presets.techStocks'), q: 'technology stocks', sort: 'marketCap', dir: 'desc' },
+  { label: t('terminal.screener.presets.dividend'), q: 'dividend stocks', sort: 'regularMarketChangePercent', dir: 'desc' },
+  { label: t('terminal.screener.presets.growth'), q: 'growth stocks', sort: 'regularMarketChangePercent', dir: 'desc' },
+])
+
+const sortOptions = computed(() => [
+  { value: 'regularMarketChangePercent', label: t('terminal.screener.filters.sortChangePct') },
+  { value: 'regularMarketChange', label: t('terminal.screener.filters.sortChange') },
+  { value: 'regularMarketPrice', label: t('terminal.screener.filters.sortPrice') },
+  { value: 'marketCap', label: t('terminal.screener.filters.sortMktCap') },
+  { value: 'regularMarketVolume', label: t('terminal.screener.filters.sortVolume') },
+])
+
+const orderOptions = computed(() => [
+  { value: 'desc', label: t('terminal.screener.filters.orderHighLow') },
+  { value: 'asc', label: t('terminal.screener.filters.orderLowHigh') },
+])
 
 useHead({
-  title: 'Stock Screener — Filter Thousands of Stocks & ETFs | Kalmate',
+  title: computed(() => t('terminal.heading.screener')),
   meta: [
-    { name: 'description', content: 'Screen and filter thousands of stocks, ETFs, forex, and crypto on Kalmate. Use pre-built presets or custom filters to find trading opportunities.' },
+    { name: 'description', content: computed(() => t('landing.features.cards.screener.desc')) },
     { name: 'keywords', content: 'kalmate screener, stock screener, stock filter, ETF screener, forex screener, crypto screener, trading opportunities, market screener' },
-    { property: 'og:title', content: 'Stock Screener — Filter Thousands of Stocks & ETFs | Kalmate' },
-    { property: 'og:description', content: 'Screen and filter thousands of stocks, ETFs, forex, and crypto on Kalmate. Use pre-built presets or custom filters.' },
+    { property: 'og:title', content: computed(() => t('terminal.heading.screener')) },
+    { property: 'og:description', content: computed(() => t('landing.features.cards.screener.desc')) },
     { property: 'og:url', content: canonical },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'Stock Screener | Kalmate' },
-    { name: 'twitter:description', content: 'Filter and sort thousands of instruments with the Kalmate stock screener.' },
+    { name: 'twitter:title', content: computed(() => t('terminal.heading.screener')) },
+    { name: 'twitter:description', content: computed(() => t('landing.features.cards.screener.desc')) },
   ],
   link: [{ rel: 'canonical', href: canonical }],
 })
@@ -63,7 +79,7 @@ async function search() {
   }
 }
 
-function applyPreset(p: typeof presets[number]) {
+function applyPreset(p: typeof presetList.value[number]) {
   searchQuery.value = p.q
   sortBy.value = p.sort
   sortDir.value = p.dir
@@ -74,12 +90,12 @@ onMounted(search)
 </script>
 
 <template>
-  <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans">SCREENER</div>
+  <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans">{{ $t('terminal.heading.screener') }}</div>
 
       <!-- Presets -->
       <div class="flex flex-wrap gap-2 mb-4">
         <button
-          v-for="p in presets"
+          v-for="p in presetList"
           :key="p.label"
           class="bg-[#1a1a1a] text-[#bbb] px-2 py-1 rounded text-xs hover:bg-[#333] transition-colors font-sans"
           @click="applyPreset(p)"
@@ -89,71 +105,66 @@ onMounted(search)
       </div>
 
       <!-- Filters -->
-      <div class="bg-[#111] border border-[#333] rounded p-3 mb-4" role="search" aria-label="Stock screener filters">
+      <div class="bg-[#111] border border-[#333] rounded p-3 mb-4" role="search" :aria-label="$t('terminal.screener.filters.search')">
         <div class="flex flex-wrap gap-2 items-end">
           <div>
-            <label for="scr-query" class="text-[#ccc] text-[10px] mb-1 font-sans block">Search</label>
+            <label for="scr-query" class="text-[#ccc] text-[10px] mb-1 font-sans block">{{ $t('terminal.screener.filters.search') }}</label>
             <input
               id="scr-query"
               v-model="searchQuery"
               type="text"
-              placeholder="e.g. tech stocks, dividend..."
+              :placeholder="$t('terminal.screener.filters.searchPlaceholder')"
                class="bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-sm w-48 text-white font-sans"
               @keyup.enter="search"
             />
           </div>
           <div>
-            <label for="scr-min" class="text-[#ccc] text-[10px] mb-1 font-sans block">Min Price</label>
+            <label for="scr-min" class="text-[#ccc] text-[10px] mb-1 font-sans block">{{ $t('terminal.screener.filters.minPrice') }}</label>
             <input
               id="scr-min"
               v-model="minPrice"
               type="number"
               step="0.01"
-              placeholder="0"
+              :placeholder="$t('terminal.screener.filters.minPricePlaceholder')"
                class="bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-sm w-20 text-white font-sans"
             />
           </div>
           <div>
-            <label for="scr-max" class="text-[#ccc] text-[10px] mb-1 font-sans block">Max Price</label>
+            <label for="scr-max" class="text-[#ccc] text-[10px] mb-1 font-sans block">{{ $t('terminal.screener.filters.maxPrice') }}</label>
             <input
               id="scr-max"
               v-model="maxPrice"
               type="number"
               step="0.01"
-              placeholder="9999"
+              :placeholder="$t('terminal.screener.filters.maxPricePlaceholder')"
               class="bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-sm w-20 text-white font-sans"
             />
           </div>
           <div>
-            <label for="scr-sort" class="text-[#ccc] text-[10px] mb-1 font-sans block">Sort By</label>
+            <label for="scr-sort" class="text-[#ccc] text-[10px] mb-1 font-sans block">{{ $t('terminal.screener.filters.sortBy') }}</label>
             <select
               id="scr-sort"
               v-model="sortBy"
               class="bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-sm text-white font-sans"
             >
-              <option value="regularMarketChangePercent">Change %</option>
-              <option value="regularMarketChange">Change</option>
-              <option value="regularMarketPrice">Price</option>
-              <option value="marketCap">Mkt Cap</option>
-              <option value="regularMarketVolume">Volume</option>
+              <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
           </div>
           <div>
-            <label for="scr-dir" class="text-[#ccc] text-[10px] mb-1 font-sans block">Order</label>
+            <label for="scr-dir" class="text-[#ccc] text-[10px] mb-1 font-sans block">{{ $t('terminal.screener.filters.order') }}</label>
             <select
               id="scr-dir"
               v-model="sortDir"
               class="bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-sm text-white font-sans"
             >
-              <option value="desc">High to Low</option>
-              <option value="asc">Low to High</option>
+              <option v-for="opt in orderOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
           </div>
           <button
             class="bg-[#2979ff] text-white px-3 py-1 rounded text-sm font-bold hover:bg-[#448aff] transition-colors font-sans"
             @click="search"
           >
-            SCREEN
+            {{ $t('terminal.screener.filters.screen') }}
           </button>
         </div>
       </div>
@@ -161,21 +172,21 @@ onMounted(search)
       <!-- Results -->
       <div class="bg-[#111] border border-[#333] rounded overflow-hidden">
         <div v-if="loading" class="text-center text-[#ccc] py-8 text-xs animate-pulse-slow">
-          Screening...
+          {{ $t('terminal.screener.results.loading') }}
         </div>
         <div v-else-if="results.length === 0" class="text-center text-[#ccc] py-8 text-xs">
-          No results. Try a different search.
+          {{ $t('terminal.screener.results.empty') }}
         </div>
         <table v-else class="w-full text-sm">
           <thead>
             <tr class="border-b border-[#333] text-[#ccc] text-xs">
-              <th class="text-left px-3 py-2">SYMBOL</th>
-              <th class="text-left px-3 py-2 hidden sm:table-cell">NAME</th>
-              <th class="text-right px-3 py-2">PRICE</th>
-              <th class="text-right px-3 py-2">CHANGE</th>
-              <th class="text-right px-3 py-2 hidden sm:table-cell">CHANGE %</th>
-              <th class="text-right px-3 py-2 hidden md:table-cell">VOLUME</th>
-              <th class="text-right px-3 py-2 hidden lg:table-cell">MKT CAP</th>
+              <th class="text-left px-3 py-2">{{ $t('terminal.screener.columns.symbol') }}</th>
+              <th class="text-left px-3 py-2 hidden sm:table-cell">{{ $t('terminal.screener.columns.name') }}</th>
+              <th class="text-right px-3 py-2">{{ $t('terminal.screener.columns.price') }}</th>
+              <th class="text-right px-3 py-2">{{ $t('terminal.screener.columns.change') }}</th>
+              <th class="text-right px-3 py-2 hidden sm:table-cell">{{ $t('terminal.screener.columns.changePct') }}</th>
+              <th class="text-right px-3 py-2 hidden md:table-cell">{{ $t('terminal.screener.columns.volume') }}</th>
+              <th class="text-right px-3 py-2 hidden lg:table-cell">{{ $t('terminal.screener.columns.mktCap') }}</th>
             </tr>
           </thead>
           <tbody>

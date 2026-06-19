@@ -22,7 +22,7 @@ const { toasts, remove } = useToast()
         <div class="flex items-center gap-2">
           <span class="text-lg leading-none" aria-hidden="true">{{ t.type === 'success' ? '✓' : t.type === 'error' ? '✗' : 'i' }}</span>
           <span>{{ t.message }}</span>
-          <button class="ml-2 opacity-50 hover:opacity-100 transition-opacity text-xs" @click="remove(t.id)" aria-label="Dismiss notification">✕</button>
+          <button class="ml-2 opacity-50 hover:opacity-100 transition-opacity text-xs" @click="remove(t.id)" :aria-label="$t('toast.dismiss')">✕</button>
         </div>
       </div>
     </TransitionGroup>

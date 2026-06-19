@@ -4,18 +4,18 @@
 
     <main class="max-w-3xl mx-auto px-6 pt-24 pb-24">
       <div class="flex items-center gap-3 text-xs text-[#888] mb-4">
-        <NuxtLink to="/blog" class="hover:text-white transition-colors">← Back to Blog</NuxtLink>
+        <NuxtLink to="/blog" class="hover:text-white transition-colors">← {{ $t('common.back') }}</NuxtLink>
         <span class="w-1 h-1 rounded-full bg-[#555]" />
-        <span>June 5, 2026</span>
+        <span>{{ $t('blogPosts.portfolio.date') }}</span>
         <span class="w-1 h-1 rounded-full bg-[#555]" />
-        <span class="text-[#00c853]">Education</span>
+        <span class="text-[#00c853]">{{ $t('blogPosts.portfolio.category') }}</span>
       </div>
 
-      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">How to Build a Diversified Portfolio in 2026</h1>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">{{ $t('blogPosts.portfolio.title') }}</h1>
 
       <div class="prose prose-invert max-w-none text-[#ccc] leading-relaxed space-y-4">
         <p class="text-lg">
-          Diversification is the practice of spreading investments across assets that behave differently. When stocks drop, bonds often rise. When the dollar weakens, gold typically gains. The goal: smoother returns over time.
+          {{ $t('blogPosts.portfolio.intro') }}
         </p>
 
         <div class="bg-[#111] border border-[#222] rounded-xl p-6 my-6">
@@ -90,6 +90,16 @@
           </div>
         </div>
 
+        <h2 class="text-2xl font-bold text-white mt-8 mb-4">{{ $t('blogPosts.portfolio.sections[0].heading') }}</h2>
+        <p>
+          {{ $t('blogPosts.portfolio.sections[0].text') }}
+        </p>
+
+        <h2 class="text-2xl font-bold text-white mt-8 mb-4">{{ $t('blogPosts.portfolio.sections[1].heading') }}</h2>
+        <p>
+          {{ $t('blogPosts.portfolio.sections[1].text') }}
+        </p>
+
         <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 1: Core Equities (40%)</h2>
         <p>
           Start with a broad market ETF. <NuxtLink to="/terminal/stock/SPY" class="text-[#00c853] hover:underline">SPY</NuxtLink> tracks the S&P 500, giving you exposure to 500 of the largest US companies across all sectors. In Kalmate, you can see SPY's current price, 52-week high/low, volume, and market cap instantly.
@@ -141,17 +151,12 @@
           <div class="text-[#888] mt-2">// Data refreshes every 30s. All data stored locally in your browser.</div>
         </div>
 
-        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Track It All in Kalmate</h2>
+        <h2 class="text-2xl font-bold text-white mt-8 mb-4">{{ $t('blogPosts.portfolio.conclusion.heading') }}</h2>
         <p>
-          Kalmate covers every asset class mentioned above: 9 equities, 4 indices, 3 forex pairs, 4 bonds, 5 commodities, and 4 crypto symbols — all in a single dashboard. Plus the screener can find thousands more.
+          {{ $t('blogPosts.portfolio.conclusion.text') }}
         </p>
         <p>
-          Add positions, track real-time P&amp;L, set alerts for price targets, and use the Pipeline to build custom analysis. No sign-up, no cost.
-        </p>
-        <p class="mt-6">
-          <NuxtLink to="/terminal/portfolio" class="inline-flex items-center gap-2 bg-[#00c853] text-black font-bold px-6 py-3 rounded-lg hover:bg-[#00e060] transition-colors text-sm">
-            START TRACKING →
-          </NuxtLink>
+          {{ $t('blogPosts.portfolio.conclusion.text2') }}
         </p>
       </div>
     </main>
@@ -163,10 +168,12 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'landing' })
 
+const { t } = useI18n()
+
 useHead({
-  title: 'How to Build a Diversified Portfolio in 2026 — Kalmate Blog',
+  title: computed(() => t('blogPosts.portfolio.title')),
   meta: [
-    { name: 'description', content: 'Build a diversified portfolio step by step with real Kalmate symbols: SPY, QQQ, ^TNX, GC=F, BTC-USD. Track all assets live in Kalmate\'s free portfolio tracker.' },
+    { name: 'description', content: computed(() => t('blogPosts.portfolio.intro')) },
     { name: 'keywords', content: 'portfolio diversification, diversified portfolio, asset allocation, SPY, QQQ, gold, bitcoin, kalmate portfolio tracker, free portfolio tracker' },
   ],
 })

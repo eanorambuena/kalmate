@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n()
+
 interface KalmanData {
   symbol: string
   timestamps: number[]
@@ -39,7 +41,7 @@ function formatPrice(v: number): string {
 }
 
 function formatSignal(s: string): string {
-  return s === 'overpriced' ? 'Overvalued' : s === 'underpriced' ? 'Undervalued' : '-'
+  return s === 'overpriced' ? t('kalman.overvalued') : s === 'underpriced' ? t('kalman.undervalued') : '-'
 }
 
 function signalColor(s: string): string {
@@ -57,26 +59,26 @@ function signalColor(s: string): string {
   </div>
 
   <div v-else-if="error || data?.error" class="bg-[#111] border border-[#2a2a2a] rounded-xl p-5 text-[#aaa] text-sm">
-    {{ error?.message || data?.error || 'No data available' }}
+    {{ error?.message || data?.error || $t('common.noData') }}
   </div>
 
   <div v-else-if="data" class="bg-[#111] border border-[#2a2a2a] rounded-xl p-5">
     <div class="flex items-center justify-between mb-5">
       <div>
-        <h3 class="text-white font-bold text-base">Kalman Analysis</h3>
-        <p class="text-[#aaa] text-xs font-mono">{{ symbol }} · Schwartz-Smith 2-Factor Model</p>
+        <h3 class="text-white font-bold text-base">{{ $t('kalman.heading') }}</h3>
+        <p class="text-[#aaa] text-xs font-mono">{{ symbol }} · {{ $t('kalman.subtitle') }}</p>
       </div>
       <div class="flex items-center gap-4 text-xs">
         <div class="text-center">
-          <p class="text-[#aaa]">Price</p>
+          <p class="text-[#aaa]">{{ $t('kalman.price') }}</p>
           <p class="text-white font-bold">{{ formatPrice(data.lastPrice) }}</p>
         </div>
         <div class="text-center">
-          <p class="text-[#aaa]">Predicted</p>
+          <p class="text-[#aaa]">{{ $t('kalman.predicted') }}</p>
           <p class="text-white font-bold">{{ formatPrice(data.predictedPrice) }}</p>
         </div>
         <div class="text-center">
-          <p class="text-[#aaa]">Signal</p>
+          <p class="text-[#aaa]">{{ $t('kalman.signal') }}</p>
           <p class="font-bold" :style="{ color: signalColor(data.signal) }">{{ formatSignal(data.signal) }}</p>
         </div>
       </div>
@@ -172,18 +174,18 @@ function signalColor(s: string): string {
     <div class="flex items-center justify-between text-xs text-[#aaa]">
       <div class="flex items-center gap-4">
         <span class="flex items-center gap-1.5">
-          <span class="w-3 h-0.5 bg-[#888] opacity-50 inline-block" /> Price
+          <span class="w-3 h-0.5 bg-[#888] opacity-50 inline-block" /> {{ $t('kalman.price') }}
         </span>
         <span class="flex items-center gap-1.5">
-          <span class="w-3 h-0.5 bg-[#00c853] inline-block" /> Smoothed
+          <span class="w-3 h-0.5 bg-[#00c853] inline-block" /> {{ $t('kalman.smoothed') }}
         </span>
         <span class="flex items-center gap-1.5">
-          <span class="w-3 h-0.5 bg-[#2979ff] dashed inline-block" style="border-top: 1px dashed #2979ff; height: 0; background: none;" /> Predicted
+          <span class="w-3 h-0.5 bg-[#2979ff] dashed inline-block" style="border-top: 1px dashed #2979ff; height: 0; background: none;" /> {{ $t('kalman.predicted') }}
         </span>
       </div>
       <div class="flex items-center gap-3">
-        <span>Cycle: <span :style="{ color: signalColor(data.signal) }">{{ (data.cycle[data.cycle.length - 1] * 100).toFixed(1) }}%</span></span>
-        <span>LogLik: {{ data.logLikelihood.toFixed(0) }}</span>
+        <span>{{ $t('kalman.cycle') }} <span :style="{ color: signalColor(data.signal) }">{{ (data.cycle[data.cycle.length - 1] * 100).toFixed(1) }}%</span></span>
+        <span>{{ $t('kalman.logLik') }} {{ data.logLikelihood.toFixed(0) }}</span>
       </div>
     </div>
   </div>

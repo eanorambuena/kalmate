@@ -15,9 +15,9 @@ const props = defineProps<{
   <div>
     <div class="text-xs text-[#ccc] mb-2 tracking-wider font-sans flex items-center gap-2" :aria-label="`${title} market data`">
       <span>{{ title }}</span>
-      <span v-if="loading" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Updating" />
+      <span v-if="loading" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" :aria-label="$t('marketTable.updatingLabel')" />
     </div>
-    <div v-if="loading && items.length === 0" class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden" aria-label="Loading data">
+    <div v-if="loading && items.length === 0" class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden" :aria-label="$t('marketTable.loadingLabel')">
       <div class="p-3 space-y-2">
         <div v-for="i in 4" :key="i" class="flex items-center gap-3">
           <div class="skeleton h-4 w-16" />
@@ -32,11 +32,11 @@ const props = defineProps<{
       <table class="w-full text-sm" :aria-label="`${title} quotes`" role="table">
         <thead>
           <tr class="border-b border-[#2a2a2a] text-[#ccc] text-xs">
-            <th scope="col" class="text-left px-3 py-2.5 font-sans">SYMBOL</th>
-            <th scope="col" class="text-left px-3 py-2.5 font-sans hidden sm:table-cell">NAME</th>
-            <th scope="col" class="text-right px-3 py-2.5 font-sans">PRICE</th>
-            <th scope="col" class="text-right px-3 py-2.5 font-sans">CHANGE</th>
-            <th scope="col" class="text-right px-3 py-2.5 font-sans hidden sm:table-cell">CHANGE %</th>
+            <th scope="col" class="text-left px-3 py-2.5 font-sans">{{ $t('marketTable.columns.symbol') }}</th>
+            <th scope="col" class="text-left px-3 py-2.5 font-sans hidden sm:table-cell">{{ $t('marketTable.columns.name') }}</th>
+            <th scope="col" class="text-right px-3 py-2.5 font-sans">{{ $t('marketTable.columns.price') }}</th>
+            <th scope="col" class="text-right px-3 py-2.5 font-sans">{{ $t('marketTable.columns.change') }}</th>
+            <th scope="col" class="text-right px-3 py-2.5 font-sans hidden sm:table-cell">{{ $t('marketTable.columns.changePct') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -56,28 +56,28 @@ const props = defineProps<{
               </NuxtLink>
             </td>
             <td class="px-3 py-2.5 text-[#bbb] text-xs hidden sm:table-cell font-sans truncate max-w-[160px]">{{ item.name }}</td>
-            <td class="px-3 py-2.5 text-right font-mono font-medium" aria-label="Price">
-              {{ typeof item.price === 'number' ? formatPrice(item.price) : '...' }}
+            <td class="px-3 py-2.5 text-right font-mono font-medium" :aria-label="$t('marketTable.columns.price')">
+              {{ typeof item.price === 'number' ? formatPrice(item.price) : $t('marketTable.placeholder') }}
             </td>
             <td
               class="px-3 py-2.5 text-right font-mono font-medium"
               :class="(item.change ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
-              :aria-label="`Change: ${typeof item.change === 'number' ? formatChange(item.change) : '...'}`"
+              :aria-label="$t('marketTable.columns.change') + ': ' + (typeof item.change === 'number' ? formatChange(item.change) : $t('marketTable.placeholder'))"
             >
               <span v-if="typeof item.change === 'number'" class="animate-count-up">
                 {{ formatChange(item.change) }}
               </span>
-              <span v-else>...</span>
+              <span v-else>{{ $t('marketTable.placeholder') }}</span>
             </td>
             <td
               class="px-3 py-2.5 text-right font-mono font-medium hidden sm:table-cell"
               :class="(item.changePercent ?? 0) >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
-              :aria-label="`Percent change: ${typeof item.changePercent === 'number' ? formatChangePercent(item.changePercent) : '...'}`"
+              :aria-label="$t('marketTable.columns.changePct') + ': ' + (typeof item.changePercent === 'number' ? formatChangePercent(item.changePercent) : $t('marketTable.placeholder'))"
             >
               <span v-if="typeof item.changePercent === 'number'">
                 {{ formatChangePercent(item.changePercent) }}
               </span>
-              <span v-else>...</span>
+              <span v-else>{{ $t('marketTable.placeholder') }}</span>
             </td>
           </tr>
         </tbody>

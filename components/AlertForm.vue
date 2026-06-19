@@ -2,6 +2,7 @@
 import type { AlertCondition } from '../utils/types'
 import { useToast } from '../composables/useToast'
 
+const { t } = useI18n()
 const { add: addToast } = useToast()
 
 const props = defineProps<{ refreshKey?: number }>()
@@ -78,7 +79,7 @@ async function fetchAlerts() {
 
 async function addAlert() {
   if (!symbol.value || !targetPrice.value) {
-    addToast('Fill in symbol and target price', 'error')
+    addToast(t('alerts.toast.fillFields'), 'error')
     return
   }
   try {
@@ -93,9 +94,9 @@ async function addAlert() {
     symbol.value = ''
     targetPrice.value = ''
     await fetchAlerts()
-    addToast('Alert created', 'success')
+    addToast(t('alerts.toast.created'), 'success')
   } catch (e: any) {
-    addToast(e?.data?.statusMessage || e?.message || 'Failed to create alert', 'error')
+    addToast(e?.data?.statusMessage || e?.message || t('alerts.toast.createFailed'), 'error')
     console.error(e)
   }
 }
@@ -113,9 +114,9 @@ async function deleteAlert(id: string) {
     await $fetch(`/api/alerts/${id}`, { method: 'DELETE' })
     deletingId.value = null
     await fetchAlerts()
-    addToast('Alert deleted', 'success')
+    addToast(t('alerts.toast.deleted'), 'success')
   } catch (e: any) {
-    addToast(e?.data?.statusMessage || e?.message || 'Failed to delete', 'error')
+    addToast(e?.data?.statusMessage || e?.message || t('alerts.toast.deleteFailed'), 'error')
     console.error(e)
   }
 }
@@ -127,9 +128,9 @@ async function rearmAlert(id: string) {
       body: { triggered: false },
     })
     await fetchAlerts()
-    addToast('Alert re-armed', 'success')
+    addToast(t('alerts.toast.reArmed'), 'success')
   } catch (e: any) {
-    addToast(e?.data?.statusMessage || e?.message || 'Failed to re-arm alert', 'error')
+    addToast(e?.data?.statusMessage || e?.message || t('alerts.toast.reArmFailed'), 'error')
     console.error(e)
   }
 }
@@ -145,25 +146,25 @@ watch(() => props.refreshKey, () => {
 <template>
   <div>
     <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-4 card-hover">
-      <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans" id="create-alert-label">CREATE ALERT</div>
+      <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans" id="create-alert-label">{{ $t('alerts.form.create') }}</div>
       <div class="flex flex-wrap gap-2 items-center" role="form" aria-labelledby="create-alert-label">
         <div class="relative">
-          <label for="alert-symbol" class="sr-only">Symbol</label>
+          <label for="alert-symbol" class="sr-only">{{ $t('alerts.form.symbolPlaceholder') }}</label>
           <input
             id="alert-symbol"
             v-model="symbol"
-            placeholder="SYMBOL"
+            :placeholder="$t('alerts.form.symbolPlaceholder')"
             class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm w-24 text-white uppercase placeholder-[#555] focus:border-[#2979ff] focus:outline-none transition-colors font-sans"
           />
           <div class="mt-1">
-            <div v-if="loadingPrice" class="text-[#999] text-[10px] animate-pulse">Loading price...</div>
+            <div v-if="loadingPrice" class="text-[#999] text-[10px] animate-pulse">{{ $t('alerts.form.loadingPrice') }}</div>
             <div v-else-if="currentPrice" class="text-[#00c853] text-[10px] font-mono">${{ currentPrice.toFixed(2) }}</div>
           </div>
           <div
             v-if="showSearch && symbol.length > 0"
             class="absolute top-full left-0 mt-8 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg shadow-xl z-50 min-w-[240px] overflow-hidden"
           >
-            <div v-if="searching" class="text-center text-[#ccc] py-2 text-xs">Searching...</div>
+            <div v-if="searching" class="text-center text-[#ccc] py-2 text-xs">{{ $t('alerts.form.searching') }}</div>
             <button
               v-for="r in searchResults"
               :key="r.symbol"
@@ -180,12 +181,12 @@ watch(() => props.refreshKey, () => {
           v-model="type"
           class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:border-[#2979ff] focus:outline-none transition-colors font-sans"
         >
-          <option value="above">ABOVE</option>
-          <option value="below">BELOW</option>
+          <option value="above">{{ $t('alerts.form.above') }}</option>
+          <option value="below">{{ $t('alerts.form.below') }}</option>
         </select>
         <input
           v-model="targetPrice"
-          placeholder="TARGET $"
+          :placeholder="$t('alerts.form.targetPlaceholder')"
           type="number"
           step="0.01"
           class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm w-24 text-white placeholder-[#555] focus:border-[#2979ff] focus:outline-none transition-colors font-sans"
@@ -194,7 +195,7 @@ watch(() => props.refreshKey, () => {
           class="bg-[#ffd600] text-black px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-[#ffe040] hover:shadow-lg hover:shadow-[#ffd600]/20 active:scale-95 transition-all duration-200 font-sans"
           @click="addAlert"
         >
-          CREATE
+          {{ $t('alerts.form.create') }}
         </button>
       </div>
     </div>
@@ -210,7 +211,7 @@ watch(() => props.refreshKey, () => {
         </div>
       </div>
       <div v-else-if="alerts.length === 0" class="text-center text-[#888] py-12 text-sm bg-[#111] border border-[#2a2a2a] rounded-xl">
-        No alerts configured.
+        {{ $t('alerts.list.empty') }}
       </div>
       <div
         v-for="a in alerts"
@@ -224,24 +225,24 @@ watch(() => props.refreshKey, () => {
             class="text-sm font-mono font-medium"
             :class="a.type === 'above' ? 'text-[#00c853]' : 'text-[#ff1744]'"
           >
-            {{ a.type === 'above' ? '>' : '<' }} ${{ a.targetPrice.toFixed(2) }}
+            {{ a.type === 'above' ? $t('alerts.list.above') : $t('alerts.list.below') }} ${{ a.targetPrice.toFixed(2) }}
           </span>
           <span
             v-if="a.triggered"
             class="text-[#ffd600] text-[10px] font-bold animate-pulse px-2 py-0.5 rounded-full bg-[#ffd600]/10 font-sans"
-          >TRIGGERED</span>
+          >{{ $t('alerts.list.triggered') }}</span>
         </div>
         <div class="flex gap-1">
           <div v-if="a.triggered" class="flex gap-1">
             <button
               class="text-[#2979ff] font-bold text-xs px-2 py-1 rounded hover:bg-[#2979ff]/10 transition-colors font-sans"
               @click="rearmAlert(a.id)"
-              title="Re-arm alert"
-            >RE-ARM</button>
+              :title="$t('alerts.list.reArmTitle')"
+            >{{ $t('alerts.list.reArm') }}</button>
             <button
               class="text-[#888] hover:text-[#ff1744] text-xs transition-colors px-1"
               @click="deleteAlert(a.id)"
-              title="Delete"
+              :title="$t('alerts.list.deleteTitle')"
             >✕</button>
           </div>
           <template v-else>
@@ -249,11 +250,11 @@ watch(() => props.refreshKey, () => {
               v-if="deletingId !== a.id"
               class="text-[#888] hover:text-[#ff1744] text-xs transition-colors px-1"
               @click="confirmDelete(a.id)"
-              title="Delete"
+              :title="$t('alerts.list.deleteTitle')"
             >✕</button>
             <span v-else class="flex gap-1 text-xs">
-              <button class="text-[#ff1744] font-bold px-1.5 hover:text-[#ff5252] transition-colors font-sans" @click="deleteAlert(a.id)">DEL</button>
-              <button class="text-[#999] hover:text-[#ccc] px-1.5 transition-colors font-sans" @click="cancelDelete">X</button>
+              <button class="text-[#ff1744] font-bold px-1.5 hover:text-[#ff5252] transition-colors font-sans" @click="deleteAlert(a.id)">{{ $t('alerts.list.del') }}</button>
+              <button class="text-[#999] hover:text-[#ccc] px-1.5 transition-colors font-sans" @click="cancelDelete">{{ $t('alerts.list.cancel') }}</button>
             </span>
           </template>
         </div>

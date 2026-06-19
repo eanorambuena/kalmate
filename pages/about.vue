@@ -3,58 +3,42 @@
     <Header />
 
     <main class="max-w-3xl mx-auto px-6 pt-24 pb-24">
-      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">About Kalmate</h1>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">{{ $t('staticPages.about.title') }}</h1>
       <p class="text-[#ccc] text-lg leading-relaxed mb-8">
-        Kalmate is a free, professional financial terminal built for modern web. It provides real-time market data, professional charts, portfolio tracking, and advanced tools — all at zero cost.
+        {{ $t('staticPages.about.lead') }}
       </p>
 
       <section class="mb-12">
-        <h2 class="text-2xl font-bold text-white mb-4">Why Kalmate?</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.about.why') }}</h2>
         <p class="text-[#ccc] leading-relaxed mb-4">
-          Financial data tools are expensive. Professional terminals cost thousands per year. We built Kalmate to democratize access to real-time market intelligence — completely free, no sign-up required.
+          {{ $t('staticPages.about.whyText') }}
         </p>
         <p class="text-[#ccc] leading-relaxed">
-          Powered by Yahoo Finance and TradingView charts, Kalmate delivers professional-grade market analysis directly in your browser.
+          {{ $t('staticPages.about.whyText2') }}
         </p>
       </section>
 
       <section class="mb-12">
-        <h2 class="text-2xl font-bold text-white mb-4">Features</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.about.features') }}</h2>
         <ul class="space-y-3 text-[#ccc]">
-          <li class="flex items-start gap-3">
+          <li v-for="item in featureItems" :key="item.label" class="flex items-start gap-3">
             <span class="text-[#00c853] mt-1">&#10003;</span>
-            <span><strong class="text-white">Real-time Data</strong> — Equities, forex, bonds, commodities, and crypto</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-[#00c853] mt-1">&#10003;</span>
-            <span><strong class="text-white">Professional Charts</strong> — TradingView-powered with full technical analysis</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-[#00c853] mt-1">&#10003;</span>
-            <span><strong class="text-white">Portfolio Tracking</strong> — Monitor holdings with real-time P&amp;L</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-[#00c853] mt-1">&#10003;</span>
-            <span><strong class="text-white">Smart Screener</strong> — Find opportunities across thousands of instruments</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <span class="text-[#00c853] mt-1">&#10003;</span>
-            <span><strong class="text-white">Data Pipeline</strong> — Build custom analysis workflows with visual nodes</span>
+            <span><strong class="text-white">{{ item.label }}</strong> — {{ item.desc }}</span>
           </li>
         </ul>
       </section>
 
       <section class="mb-12">
-        <h2 class="text-2xl font-bold text-white mb-4">Open Source</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.about.openSource') }}</h2>
         <p class="text-[#ccc] leading-relaxed">
-          Kalmate is open source and free forever. You can contribute, report issues, or fork the project on GitHub.
+          {{ $t('staticPages.about.openSourceText') }}
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold text-white mb-4">Creator</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">{{ $t('staticPages.about.creator') }}</h2>
         <p class="text-[#ccc] leading-relaxed">
-          Built by <a href="https://eanorambuena.github.io" target="_blank" rel="noopener noreferrer" class="text-[#00c853] hover:underline">Emmanuel Norambuena</a>.
+          {{ $t('staticPages.about.builtBy') }} <a href="https://eanorambuena.github.io" target="_blank" rel="noopener noreferrer" class="text-[#00c853] hover:underline">{{ $t('staticPages.about.creatorName') }}</a>.
         </p>
       </section>
     </main>
@@ -66,10 +50,14 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'landing' })
 
+const { t } = useI18n()
+
+const featureItems = computed(() => t('staticPages.about.featureItems'))
+
 useHead({
-  title: 'About Kalmate — Open-Source Financial Terminal & Data Pipeline',
+  title: computed(() => t('staticPages.about.title')),
   meta: [
-    { name: 'description', content: 'Learn about Kalmate, the free open-source financial terminal with real-time market data, visual data pipeline editor, portfolio tracking, and professional charts. Built by Emmanuel Norambuena.' },
+    { name: 'description', content: computed(() => t('staticPages.about.lead')) },
     { name: 'keywords', content: 'kalmate, about kalmate, open source financial terminal, free market data, financial data pipeline, emmanuel norambuena' },
   ],
 })

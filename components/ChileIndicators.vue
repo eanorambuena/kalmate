@@ -72,13 +72,13 @@ onMounted(() => {
 
 <template>
   <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-3 card-hover">
-    <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans flex items-center gap-2" aria-live="polite" aria-label="Chilean economic indicators">
-      <span>CHILE ECONOMIC INDICATORS</span>
-      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Updating" />
-      <span class="text-[#666] text-[10px] ml-auto font-normal">mindicador.cl</span>
+    <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans flex items-center gap-2" aria-live="polite" :aria-label="$t('chileIndicators.heading')">
+      <span>{{ $t('chileIndicators.heading') }}</span>
+      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" :aria-label="$t('chileIndicators.updatingLabel')" />
+      <span class="text-[#666] text-[10px] ml-auto font-normal">{{ $t('chileIndicators.source') }}</span>
     </div>
-    <div v-if="error" role="alert" class="text-[#ff1744] text-xs py-4 text-center">No data available</div>
-    <div v-else-if="pending && indicators.length === 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" aria-label="Loading indicators">
+    <div v-if="error" role="alert" class="text-[#ff1744] text-xs py-4 text-center">{{ $t('common.noData') }}</div>
+    <div v-else-if="pending && indicators.length === 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" :aria-label="$t('chileIndicators.loadingLabel')">
       <div v-for="i in 8" :key="i" class="rounded-lg p-3 bg-[#1a1a1a]">
         <div class="skeleton h-3 w-12 mb-2" />
         <div class="skeleton h-6 w-20 mb-1" />
@@ -86,7 +86,7 @@ onMounted(() => {
       </div>
     </div>
     <div v-else-if="indicators.length === 0" role="alert" class="text-[#888] text-xs py-4 text-center">
-      No indicators available
+      {{ $t('chileIndicators.empty') }}
     </div>
     <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
       <div
