@@ -537,7 +537,7 @@ export default {
         { title: '5. Responsabilidades do Usuário', text: 'Você concorda em não fazer mau uso do serviço, incluindo tentar interromper, sobrecarregar ou obter acesso não autorizado aos nossos sistemas.' },
         { title: '6. Limitação de Responsabilidade', text: 'Kalmate e seus criadores não serão responsáveis por danos decorrentes do uso ou da impossibilidade de usar o serviço.' },
         { title: '7. Alterações nos Termos', text: 'Reservamo-nos o direito de modificar estes termos a qualquer momento. O uso contínuo do serviço após as alterações constitui aceitação dos novos termos.' },
-        { title: '8. Contato', text: 'Para perguntas sobre estes termos, contate:' },
+        { title: '8. Contato', text: 'Para perguntas sobre estes termos, contate:', isContact: true },
       ],
     },
     disclaimer: {
@@ -550,7 +550,7 @@ export default {
         { title: 'Risco de Investimento', text: 'Investir nos mercados financeiros envolve um risco substancial de perda. O desempenho passado não é indicativo de resultados futuros. Você deve consultar um assessor financeiro qualificado antes de tomar qualquer decisão de investimento.' },
         { title: 'Links de Terceiros', text: 'Kalmate pode conter links para sites ou serviços de terceiros. Não somos responsáveis pelo conteúdo, práticas de privacidade ou disponibilidade destes sites externos.' },
         { title: 'Publicidade', text: 'Kalmate exibe anúncios através do Google AdSense. Não endossamos nenhum produto ou serviço anunciado neste site.' },
-        { title: 'Contato', text: 'Se tiver dúvidas sobre este aviso, contate:' },
+        { title: 'Contato', text: 'Se tiver dúvidas sobre este aviso, contate:', isContact: true },
       ],
     },
     blog: {

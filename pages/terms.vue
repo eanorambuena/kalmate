@@ -10,7 +10,7 @@
         <h2 class="text-2xl font-bold text-white mb-4">{{ section.title }}</h2>
         <p class="text-[#ccc] leading-relaxed">
           {{ section.text }}
-          <a v-if="section.title === '8. Contact'" href="mailto:a25.eanorambuena@gmail.com" class="text-[#00c853] hover:underline">a25.eanorambuena@gmail.com</a>
+          <a v-if="section.isContact" href="mailto:a25.eanorambuena@gmail.com" class="text-[#00c853] hover:underline">a25.eanorambuena@gmail.com</a>
         </p>
       </section>
     </main>

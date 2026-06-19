@@ -537,7 +537,7 @@ export default {
         { title: '5. User Responsibilities', text: 'You agree not to misuse the service, including attempting to disrupt, overload, or gain unauthorized access to our systems.' },
         { title: '6. Limitation of Liability', text: 'Kalmate and its creators shall not be liable for any damages arising from the use or inability to use the service.' },
         { title: '7. Changes to Terms', text: 'We reserve the right to modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms.' },
-        { title: '8. Contact', text: 'For questions about these terms, contact:' },
+        { title: '8. Contact', text: 'For questions about these terms, contact:', isContact: true },
       ],
     },
     disclaimer: {
@@ -550,7 +550,7 @@ export default {
         { title: 'Investment Risk', text: 'Investing in financial markets involves substantial risk of loss. Past performance is not indicative of future results. You should consult a qualified financial advisor before making any investment decisions.' },
         { title: 'Third-Party Links', text: 'Kalmate may contain links to third-party websites or services. We are not responsible for the content, privacy practices, or availability of these external sites.' },
         { title: 'Advertising', text: 'Kalmate displays advertisements via Google AdSense. We do not endorse any products or services advertised on this site.' },
-        { title: 'Contact', text: 'If you have questions about this disclaimer, contact:' },
+        { title: 'Contact', text: 'If you have questions about this disclaimer, contact:', isContact: true },
       ],
     },
     blog: {

@@ -16,7 +16,7 @@
         </p>
         <p v-if="section.text && !section.text1" class="text-[#ccc] leading-relaxed">
           {{ section.text }}
-          <a v-if="section.title === 'Contact'" href="mailto:a25.eanorambuena@gmail.com" class="text-[#00c853] hover:underline">a25.eanorambuena@gmail.com</a>
+          <a v-if="section.isContact" href="mailto:a25.eanorambuena@gmail.com" class="text-[#00c853] hover:underline">a25.eanorambuena@gmail.com</a>
         </p>
       </section>
     </main>
