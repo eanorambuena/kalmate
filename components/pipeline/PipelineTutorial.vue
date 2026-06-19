@@ -17,7 +17,7 @@
 
       <div class="flex items-center justify-between gap-3">
         <button class="text-[#aaa] hover:text-white text-xs transition-colors cursor-pointer" @click="close">
-          Skip tutorial
+          {{ $t('pipeline.tutorial.skip') }}
         </button>
         <div class="flex items-center gap-2">
           <div v-for="(s, i) in steps" :key="i" class="w-2 h-2 rounded-full transition-colors" :class="i === currentStep ? 'bg-[#00c853]' : 'bg-[#333]'" />
@@ -28,14 +28,14 @@
             class="px-4 py-2 bg-[#222] text-[#ccc] text-sm rounded-xl hover:bg-[#333] transition-colors cursor-pointer"
             @click="prev"
           >
-            Back
+            {{ $t('pipeline.tutorial.back') }}
           </button>
           <button
             class="px-5 py-2 text-sm font-bold rounded-xl transition-colors cursor-pointer"
             :style="{ background: step.color, color: '#000' }"
             @click="next"
           >
-            {{ currentStep < steps.length - 1 ? 'Next' : 'Done' }}
+            {{ currentStep < steps.length - 1 ? $t('pipeline.tutorial.next') : $t('pipeline.tutorial.done') }}
           </button>
         </div>
       </div>
@@ -48,22 +48,24 @@ import { ref, computed, onMounted } from 'vue'
 import Modal from '../Modal.vue'
 import { Shuffle, Plus, Link2, Package, Diamond, Play } from '@lucide/vue'
 
+const { t } = useI18n()
+
 const show = ref(false)
 
-const steps = [
-  { icon: Shuffle, color: '#2979ff', title: 'Welcome to Pipeline Builder', text: 'Visual pipeline builder for financial analysis. Connect nodes to create strategies without code.' },
-  { icon: Plus, color: '#2979ff', title: 'Add Nodes', text: 'Click the FREE/Pro buttons on the toolbar to add nodes to the canvas. Each node has inputs (blue) and outputs (green).' },
-  { icon: Link2, color: '#00c853', title: 'Connect Nodes', text: 'Drag from an output port (green) to an input port (blue) to connect nodes. The flow goes from left to right.' },
-  { icon: Package, color: '#2979ff', title: 'Available Nodes', text: 'Input: Symbol Input, Price Feed. Process: Kalman Filter. Output: Chart, Price Display, Alert.' },
-  { icon: Diamond, color: '#ff69b4', title: 'Pro Nodes', text: 'SMA, RSI, Price Forecast, Multi Symbol, Telegram, Email. Upgrade on Pricing to unlock.' },
-  { icon: Play, color: '#2979ff', title: 'Run Pipeline', text: 'Press Run to execute the pipeline. Results appear on each node and in the side panel.' },
-]
+const steps = computed(() => [
+  { icon: Shuffle, color: '#2979ff', title: t('pipeline.tutorial.step1.title'), text: t('pipeline.tutorial.step1.text') },
+  { icon: Plus, color: '#2979ff', title: t('pipeline.tutorial.step2.title'), text: t('pipeline.tutorial.step2.text') },
+  { icon: Link2, color: '#00c853', title: t('pipeline.tutorial.step3.title'), text: t('pipeline.tutorial.step3.text') },
+  { icon: Package, color: '#2979ff', title: t('pipeline.tutorial.step4.title'), text: t('pipeline.tutorial.step4.text') },
+  { icon: Diamond, color: '#ff69b4', title: t('pipeline.tutorial.step5.title'), text: t('pipeline.tutorial.step5.text') },
+  { icon: Play, color: '#2979ff', title: t('pipeline.tutorial.step6.title'), text: t('pipeline.tutorial.step6.text') },
+])
 
 const currentStep = ref(0)
-const step = computed(() => steps[currentStep.value])
+const step = computed(() => steps.value[currentStep.value])
 
 function next() {
-  if (currentStep.value < steps.length - 1) {
+  if (currentStep.value < steps.value.length - 1) {
     currentStep.value++
   } else {
     close()

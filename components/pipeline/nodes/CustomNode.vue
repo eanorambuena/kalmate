@@ -1,10 +1,10 @@
 <template>
   <div class="bg-[#111] border border-[#333] rounded-xl p-3 min-w-[180px] cursor-grab active:cursor-grabbing relative" :style="{ borderLeft: '3px solid ' + color }">
-    <span v-if="props.data?.pro" class="absolute -top-2 -right-2 bg-[#ff69b4] text-black text-[9px] font-bold px-1.5 py-0.5 rounded">PRO</span>
+    <span v-if="props.data?.pro" class="absolute -top-2 -right-2 bg-[#ff69b4] text-black text-[9px] font-bold px-1.5 py-0.5 rounded">{{ $t('pipeline.customNode.pro') }}</span>
 
     <div class="flex items-center gap-2 mb-1">
       <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: color }" />
-      <span class="text-[10px] font-bold text-[#bbb] uppercase tracking-wider">{{ def.category }}</span>
+      <span class="text-[10px] font-bold text-[#bbb] uppercase tracking-wider">{{ $t('pipeline.editor.categories.' + def.category) }}</span>
     </div>
 
     <p class="text-white text-xs font-medium mb-0.5 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ label }}</p>
@@ -15,13 +15,13 @@
       <input
         v-model="data.symbol"
         class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853]"
-        placeholder="AAPL"
+        :placeholder="$t('pipeline.customNode.symbolPlaceholder')"
       />
     </div>
 
     <div v-if="def.type === 'currencyInput'" class="mb-2 space-y-1.5">
       <div class="flex items-center gap-1">
-        <span class="text-[9px] text-[#bbb] w-6">From</span>
+        <span class="text-[9px] text-[#bbb] w-6">{{ $t('pipeline.customNode.currency.from') }}</span>
         <select
           v-model="data.from"
           class="flex-1 bg-[#222] border border-[#444] rounded px-1.5 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"
@@ -30,7 +30,7 @@
         </select>
       </div>
       <div class="flex items-center gap-1">
-        <span class="text-[9px] text-[#bbb] w-6">To</span>
+        <span class="text-[9px] text-[#bbb] w-6">{{ $t('pipeline.customNode.currency.to') }}</span>
         <select
           v-model="data.to"
           class="flex-1 bg-[#222] border border-[#444] rounded px-1.5 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"
@@ -46,10 +46,10 @@
         v-model="data.op"
         class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer text-center"
       >
-<option value="+">+ (add)</option>
-<option value="-">- (subtract)</option>
-        <option value="*">* (multiply)</option>
-        <option value="/">/ (divide)</option>
+<option value="+">{{ $t('pipeline.customNode.math.add') }}</option>
+<option value="-">{{ $t('pipeline.customNode.math.subtract') }}</option>
+        <option value="*">{{ $t('pipeline.customNode.math.multiply') }}</option>
+        <option value="/">{{ $t('pipeline.customNode.math.divide') }}</option>
       </select>
     </div>
 
@@ -57,7 +57,7 @@
       <input
         v-model.number="data.value"
         class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853]"
-        placeholder="1.0"
+        :placeholder="$t('pipeline.customNode.scalarPlaceholder')"
         step="0.01"
       />
     </div>
@@ -81,7 +81,7 @@
         v-model.number="data.period"
         type="number"
         class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853]"
-        placeholder="Period"
+        :placeholder="$t('pipeline.customNode.periodPlaceholder')"
         min="2"
         max="200"
       />

@@ -4,14 +4,14 @@
       <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-[#ff69b4] via-[#ffd700] to-[#00c853] flex items-center justify-center text-3xl shadow-[0_0_40px_rgba(255,105,180,0.4)] animate-pulse-slow">
         <span class="text-black font-bold text-2xl">✦</span>
       </div>
-      <button class="absolute top-4 right-4 text-[#aaa] hover:text-white text-xl transition-colors" @click="open = false">✕</button>
+      <button class="absolute top-4 right-4 text-[#aaa] hover:text-white text-xl transition-colors" :aria-label="$t('common.close')" @click="open = false">✕</button>
 
         <div class="text-center mt-4">
-          <p class="text-[#ff69b4] text-xs font-mono tracking-[0.2em] mb-2 animate-fade-in">PRO FEATURE</p>
+          <p class="text-[#ff69b4] text-xs font-mono tracking-[0.2em] mb-2 animate-fade-in">{{ $t('pipeline.proModal.badge') }}</p>
           <h2 class="text-3xl font-bold text-white mb-2 animate-fade-in" style="animation-delay: 0.1s">
-            Unlock <span class="bg-gradient-to-r from-[#ff69b4] via-[#ffd700] to-[#00c853] bg-clip-text text-transparent">Pro</span>
+            {{ $t('pipeline.proModal.unlock') }} <span class="bg-gradient-to-r from-[#ff69b4] via-[#ffd700] to-[#00c853] bg-clip-text text-transparent">{{ $t('pipeline.proModal.pro') }}</span>
           </h2>
-          <p class="text-[#aaa] text-sm mb-6 animate-fade-in" style="animation-delay: 0.2s">Take your analysis to the next level</p>
+          <p class="text-[#aaa] text-sm mb-6 animate-fade-in" style="animation-delay: 0.2s">{{ $t('pipeline.proModal.subtitle') }}</p>
         </div>
 
         <div class="space-y-2.5 mb-8 animate-fade-in" style="animation-delay: 0.3s">
@@ -23,10 +23,10 @@
 
         <div class="text-center mb-6 animate-fade-in" style="animation-delay: 0.4s">
           <p class="text-3xl font-bold text-white">
-            <span class="text-[#aaa] line-through text-xl">$0</span>
-            <span class="bg-gradient-to-r from-[#ff69b4] to-[#ffd700] bg-clip-text text-transparent"> $9.990</span>
+            <span class="text-[#aaa] line-through text-xl">{{ $t('pipeline.proModal.originalPrice') }}</span>
+            <span class="bg-gradient-to-r from-[#ff69b4] to-[#ffd700] bg-clip-text text-transparent"> {{ $t('pipeline.proModal.proPrice') }}</span>
           </p>
-          <p class="text-[#aaa] text-xs">Once, forever. No subscription.</p>
+          <p class="text-[#aaa] text-xs">{{ $t('pipeline.proModal.priceCaption') }}</p>
         </div>
 
         <button
@@ -37,22 +37,24 @@
           <span class="absolute inset-0 bg-gradient-to-r from-[#ff69b4] via-[#ffd700] to-[#00c853] bg-[length:200%_100%] animate-gradient-shift" />
           <span class="absolute inset-0 bg-[rgba(255,255,255,0.1)] opacity-0 group-hover:opacity-100 transition-opacity" />
           <span class="relative z-10 flex items-center justify-center gap-2">
-            <span>Activate Pro Now</span>
+            <span>{{ $t('pipeline.proModal.cta') }}</span>
             <span class="text-lg group-hover:translate-x-1 transition-transform">→</span>
           </span>
         </button>
 
         <p class="text-[#aaa] text-[10px] text-center mt-4 animate-fade-in" style="animation-delay: 0.6s">
-          MACH · Buda · GitHub Sponsors · Honor system
+          {{ $t('pipeline.proModal.payments') }}
         </p>
     </div>
   </Modal>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import Modal from '../Modal.vue'
 import { TrendingUp, BarChart3, Sparkles, Link2, Mail, Zap } from '@lucide/vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{ modelValue?: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
@@ -61,14 +63,15 @@ const open = ref(props.modelValue ?? false)
 watch(() => props.modelValue, (v) => { open.value = v ?? false })
 watch(open, (v) => { emit('update:modelValue', v) })
 
-const proFeatures = [
-  { icon: TrendingUp, label: 'RSI — Relative market strength' },
-  { icon: BarChart3, label: 'SMA — Customizable moving averages' },
-  { icon: Sparkles, label: 'Forecast — Kalman prediction' },
-  { icon: Link2, label: 'Multi Symbol — Batch analysis' },
-  { icon: Mail, label: 'Telegram & Email alerts' },
-  { icon: Zap, label: 'Unlimited pipeline runs' },
-]
+const featureIcons = [TrendingUp, BarChart3, Sparkles, Link2, Mail, Zap]
+
+const proFeatures = computed(() => {
+  const labels = t('pipeline.proModal.features') as string[]
+  return labels.map((label, i) => ({
+    icon: featureIcons[i] || Zap,
+    label,
+  }))
+})
 
 function goPricing() {
   window.location.href = '/terminal/pricing'

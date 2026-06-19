@@ -2,7 +2,7 @@
   <div class="absolute inset-0 z-20 pointer-events-none">
     <div class="absolute top-3 left-3 w-72 bg-[#111] border border-[#333] rounded-xl p-3 pointer-events-auto shadow-2xl">
       <div class="flex items-center justify-between mb-2">
-        <span class="text-[10px] font-bold text-[#2979ff] uppercase tracking-wider">Pipelines</span>
+        <span class="text-[10px] font-bold text-[#2979ff] uppercase tracking-wider">{{ $t('pipeline.saver.heading') }}</span>
         <button class="text-[#bbb] hover:text-white text-[9px]" @click="$emit('close')">✕</button>
       </div>
 
@@ -10,17 +10,17 @@
         <input
           v-model="newName"
           type="text"
-          placeholder="Pipeline name..."
+          :placeholder="$t('pipeline.saver.placeholder')"
           class="flex-1 bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#2979ff]"
           @keydown.enter="saveCurrent"
         />
         <button class="bg-[#2979ff] hover:bg-[#2962ff] text-white text-[10px] font-bold px-2 py-1 rounded-lg transition-colors disabled:opacity-40" :disabled="!newName.trim()" @click="saveCurrent">
-          Save
+          {{ $t('pipeline.saver.save') }}
         </button>
       </div>
 
       <div v-if="savedPipelines.length === 0" class="text-[#666] text-[10px] text-center py-4">
-        No saved pipelines
+        {{ $t('pipeline.saver.empty') }}
       </div>
 
       <div v-for="(p, idx) in savedPipelines" :key="p.name" class="flex items-center gap-1 py-1.5 border-b border-[#222] last:border-0 group">
@@ -31,21 +31,21 @@
             @keydown.enter="doRename(p.name)"
             @keydown.escape="editing = ''"
           />
-          <button class="text-[#00c853] text-[9px]" @click="doRename(p.name)">OK</button>
+          <button class="text-[#00c853] text-[9px]" @click="doRename(p.name)">{{ $t('common.ok') }}</button>
         </div>
         <template v-else>
           <button class="flex-1 text-left text-[10px] text-[#bbb] hover:text-white truncate" @click="loadPipeline(p.name)">
             {{ p.name }}
           </button>
-          <button class="text-[#666] hover:text-[#2979ff] text-[9px] hidden group-hover:inline" @click="startRename(p.name)" title="Rename">✎</button>
-          <button class="text-[#666] hover:text-[#2979ff] text-[9px] hidden group-hover:inline" @click="downloadPipeline(p.name)" title="Download">↓</button>
-          <button class="text-[#666] hover:text-[#ff1744] text-[9px] hidden group-hover:inline" @click="deletePipeline(p.name)" title="Delete">✕</button>
+          <button class="text-[#666] hover:text-[#2979ff] text-[9px] hidden group-hover:inline" @click="startRename(p.name)" :title="$t('common.rename')">✎</button>
+          <button class="text-[#666] hover:text-[#2979ff] text-[9px] hidden group-hover:inline" @click="downloadPipeline(p.name)" :title="$t('common.download')">↓</button>
+          <button class="text-[#666] hover:text-[#ff1744] text-[9px] hidden group-hover:inline" @click="deletePipeline(p.name)" :title="$t('common.delete')">✕</button>
         </template>
       </div>
 
       <div v-if="savedPipelines.length > 0" class="mt-2 pt-2 border-t border-[#222] flex gap-1">
         <button class="flex-1 text-[9px] text-[#bbb] hover:text-white py-1 rounded bg-[#1a1a1a] hover:bg-[#222] transition-colors" @click="importPipeline">
-          Import
+          {{ $t('common.import') }}
         </button>
         <input ref="fileInput" type="file" accept=".json" class="hidden" @change="onFileSelected" />
       </div>

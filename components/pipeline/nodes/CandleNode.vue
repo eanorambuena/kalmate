@@ -2,7 +2,7 @@
   <div class="bg-[#111] border border-[#333] rounded-xl p-3 min-w-[280px] cursor-grab active:cursor-grabbing relative">
     <div class="flex items-center gap-2 mb-2">
       <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: '#ff69b4' }" />
-      <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">OUTPUT</span>
+      <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">{{ $t('candle.output') }}</span>
     </div>
     <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
     <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
@@ -15,7 +15,7 @@
         <polyline v-for="(ov, idx) in overlays" :key="'ov-'+idx" :points="ov.points" fill="none" :stroke="ov.color" stroke-width="1.5" vector-effect="non-scaling-stroke" />
       </svg>
       <div class="absolute top-2 right-2 flex flex-col gap-1 text-[9px]">
-        <span class="text-[#aaa] font-mono">{{ candles.length }} candles</span>
+        <span class="text-[#aaa] font-mono">{{ $t('candle.count', { n: candles.length }) }}</span>
         <span v-for="(ov, idx) in overlays" :key="idx" class="flex items-center gap-1" :style="{ color: ov.color }">
           <span class="w-2 h-0.5 rounded" :style="{ backgroundColor: ov.color }" />
           {{ ov.label }}
@@ -23,7 +23,7 @@
       </div>
     </div>
     <div v-else class="h-[120px] flex items-center justify-center text-[#aaa] text-[10px]">
-      {{ result?.error || 'Run pipeline to see candles' }}
+      {{ result?.error || $t('candle.empty') }}
     </div>
     <div v-if="lastPrice" class="mt-1 text-center">
       <span class="text-white font-mono text-sm font-bold" :class="lastPrice >= openPrice ? 'text-[#00c853]' : 'text-[#ff1744]'">${{ lastPrice }}</span>
@@ -43,6 +43,8 @@ import { Handle, Position } from '@vue-flow/core'
 import { computed, ref, nextTick } from 'vue'
 import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
 
+const { t } = useI18n()
+
 const props = defineProps({
   id: { type: String, required: true },
   data: { type: Object, default: () => ({}) },
@@ -54,7 +56,7 @@ const def = nodeDefinitions.find(n => n.type === 'candleChart')
 const inputs = def?.inputs ?? []
 
 const result = computed(() => props.data?.result)
-const displayLabel = computed(() => props.data?.label || 'Candle Chart')
+const displayLabel = computed(() => props.data?.label || t('candle.label'))
 
 const editing = ref(false)
 const editLabel = ref('')
@@ -125,9 +127,9 @@ const overlays = computed(() => {
   type Overlay = { label: string; color: string; points: string }
   const out: Overlay[] = []
   const overlaysRaw: [string, string, string][] = [
-    [r.seriesB, 'Overlay A', '#2979ff'],
-    [r.seriesC, 'Overlay B', '#aa00ff'],
-    [r.seriesD, 'Overlay C', '#ff6d00'],
+    [r.seriesB, t('candle.overlayA'), '#2979ff'],
+    [r.seriesC, t('candle.overlayB'), '#aa00ff'],
+    [r.seriesD, t('candle.overlayC'), '#ff6d00'],
   ]
   for (const [data, label, color] of overlaysRaw) {
     if (!Array.isArray(data) || data.length < 2) continue
