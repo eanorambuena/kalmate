@@ -120,6 +120,7 @@
 import { monetization } from '../utils/monetization'
 
 const { locale, setLocale } = useI18n()
+const localePath = useLocalePath()
 const route = useRoute()
 const mobileOpen = ref(false)
 
@@ -129,22 +130,20 @@ const locales = [
   { code: 'pt', label: 'PT' },
 ]
 
-const navLinks = [
-  { to: '/terminal', labelKey: 'header.navLinks.market', icon: '📊' },
-  { to: '/terminal/portfolio', labelKey: 'header.navLinks.portfolio', icon: '💼' },
-  { to: '/terminal/screener', labelKey: 'header.navLinks.screener', icon: '🔍' },
-  { to: '/terminal/alerts', labelKey: 'header.navLinks.alerts', icon: '🔔' },
-  { to: '/terminal/pipeline', labelKey: 'header.navLinks.pipeline', icon: '🔀' },
-  { to: '/terminal/pricing', labelKey: 'header.navLinks.pricing', icon: '💎' },
-  { to: '/about', labelKey: 'header.navLinks.about', icon: 'ℹ️' },
-  { to: '/contact', labelKey: 'header.navLinks.contact', icon: '✉️' },
-  { to: '/blog', labelKey: 'header.navLinks.blog', icon: '📝' },
-]
+const navLinks = computed(() => [
+  { to: localePath('/terminal'), labelKey: 'header.navLinks.market', icon: '📊' },
+  { to: localePath('/terminal/portfolio'), labelKey: 'header.navLinks.portfolio', icon: '💼' },
+  { to: localePath('/terminal/screener'), labelKey: 'header.navLinks.screener', icon: '🔍' },
+  { to: localePath('/terminal/alerts'), labelKey: 'header.navLinks.alerts', icon: '🔔' },
+  { to: localePath('/terminal/pipeline'), labelKey: 'header.navLinks.pipeline', icon: '🔀' },
+  { to: localePath('/terminal/pricing'), labelKey: 'header.navLinks.pricing', icon: '💎' },
+  { to: localePath('/about'), labelKey: 'header.navLinks.about', icon: 'ℹ️' },
+  { to: localePath('/contact'), labelKey: 'header.navLinks.contact', icon: '✉️' },
+  { to: localePath('/blog'), labelKey: 'header.navLinks.blog', icon: '📝' },
+])
 
 function isActive(to: string) {
-  const p = route.path
-  const localized = locale.value === 'en' ? to : `/${locale.value}${to}`
-  return p === localized || p.startsWith(localized + '/')
+  return route.path === to || route.path.startsWith(to + '/')
 }
 </script>
 
