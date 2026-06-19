@@ -1,5 +1,7 @@
 # Kalmate — Agent Guidelines
 
+# Kalmate — Agent Guidelines
+
 ## Commits
 - Use **Conventional Commits**: `type(scope): description`
   - Types: `feat`, `fix`, `refactor`, `ci`, `chore`, `docs`, `test`, `perf`, `a11y`, `seo`, `i18n`
