@@ -15,6 +15,7 @@ export default {
     import: 'Importar',
     ok: 'OK',
     sponsor: 'Patrocinar',
+    language: 'Idioma',
   },
   header: {
     homeLabel: 'Ir a Kalmate',

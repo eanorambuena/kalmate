@@ -46,6 +46,18 @@
       <span class="text-xs text-[#ccc] hidden md:block" aria-live="polite" :aria-label="$t('header.liveLabel')">
         <span class="text-[#2979ff] animate-pulse" aria-hidden="true">●</span> LIVE
       </span>
+      <div class="flex items-center gap-0.5 border-l border-[#2a2a2a] pl-3 ml-1" role="radiogroup" :aria-label="$t('common.language')">
+        <button
+          v-for="l in locales" :key="l.code"
+          @click="setLocale(l.code)"
+          class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors"
+          :class="locale === l.code ? 'bg-[#00c853] text-black' : 'text-[#666] hover:text-[#ccc]'"
+          :aria-label="l.code === 'en' ? 'English' : 'Español'"
+          :aria-pressed="locale === l.code"
+        >
+          {{ l.label }}
+        </button>
+      </div>
     </div>
   </header>
 
@@ -90,6 +102,17 @@
             <span class="text-[#ccc] text-xs font-mono ml-auto">[{{ link.key }}]</span>
           </NuxtLink>
         </div>
+        <div class="mt-6 pt-4 border-t border-[#2a2a2a] flex items-center justify-center gap-1" role="radiogroup" :aria-label="$t('common.language')">
+          <button
+            v-for="l in locales" :key="l.code"
+            @click="setLocale(l.code)"
+            class="text-xs font-mono font-bold px-3 py-1.5 rounded-lg transition-colors"
+            :class="locale === l.code ? 'bg-[#00c853] text-black' : 'text-[#666] hover:text-[#ccc] bg-white/5'"
+            :aria-pressed="locale === l.code"
+          >
+            {{ l.label }}
+          </button>
+        </div>
       </div>
     </div>
   </Transition>
@@ -98,8 +121,14 @@
 <script setup lang="ts">
 import { monetization } from '../utils/monetization'
 
+const { locale, setLocale } = useI18n()
 const route = useRoute()
 const mobileOpen = ref(false)
+
+const locales = [
+  { code: 'en', label: 'EN' },
+  { code: 'es', label: 'ES' },
+]
 
 const navLinks = [
   { to: '/terminal', labelKey: 'header.navLinks.market', key: '1', icon: '📊' },
@@ -114,7 +143,9 @@ const navLinks = [
 ]
 
 function isActive(to: string) {
-  return route.path === to || route.path.startsWith(to + '/')
+  const p = route.path
+  const localized = locale.value === 'en' ? to : `/${locale.value}${to}`
+  return p === localized || p.startsWith(localized + '/')
 }
 </script>
 
