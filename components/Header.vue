@@ -16,7 +16,6 @@
           :aria-current="isActive(link.to) ? 'page' : undefined"
         >
           {{ $t(link.labelKey) }}
-          <span class="text-[#ccc] text-[10px] font-mono" aria-hidden="true">[{{ link.key }}]</span>
         </NuxtLink>
       </nav>
     </div>
@@ -99,7 +98,6 @@
           >
             <span class="text-lg">{{ link.icon }}</span>
             <span class="font-medium">{{ $t(link.labelKey) }}</span>
-            <span class="text-[#ccc] text-xs font-mono ml-auto">[{{ link.key }}]</span>
           </NuxtLink>
         </div>
         <div class="mt-6 pt-4 border-t border-[#2a2a2a] flex items-center justify-center gap-1" role="radiogroup" :aria-label="$t('common.language')">
@@ -128,18 +126,19 @@ const mobileOpen = ref(false)
 const locales = [
   { code: 'en', label: 'EN' },
   { code: 'es', label: 'ES' },
+  { code: 'pt', label: 'PT' },
 ]
 
 const navLinks = [
-  { to: '/terminal', labelKey: 'header.navLinks.market', key: '1', icon: '📊' },
-  { to: '/terminal/portfolio', labelKey: 'header.navLinks.portfolio', key: '2', icon: '💼' },
-  { to: '/terminal/screener', labelKey: 'header.navLinks.screener', key: '4', icon: '🔍' },
-  { to: '/terminal/alerts', labelKey: 'header.navLinks.alerts', key: '3', icon: '🔔' },
-  { to: '/terminal/pipeline', labelKey: 'header.navLinks.pipeline', key: '5', icon: '🔀' },
-  { to: '/terminal/pricing', labelKey: 'header.navLinks.pricing', key: '6', icon: '💎' },
-  { to: '/about', labelKey: 'header.navLinks.about', key: '7', icon: 'ℹ️' },
-  { to: '/contact', labelKey: 'header.navLinks.contact', key: '8', icon: '✉️' },
-  { to: '/blog', labelKey: 'header.navLinks.blog', key: '9', icon: '📝' },
+  { to: '/terminal', labelKey: 'header.navLinks.market', icon: '📊' },
+  { to: '/terminal/portfolio', labelKey: 'header.navLinks.portfolio', icon: '💼' },
+  { to: '/terminal/screener', labelKey: 'header.navLinks.screener', icon: '🔍' },
+  { to: '/terminal/alerts', labelKey: 'header.navLinks.alerts', icon: '🔔' },
+  { to: '/terminal/pipeline', labelKey: 'header.navLinks.pipeline', icon: '🔀' },
+  { to: '/terminal/pricing', labelKey: 'header.navLinks.pricing', icon: '💎' },
+  { to: '/about', labelKey: 'header.navLinks.about', icon: 'ℹ️' },
+  { to: '/contact', labelKey: 'header.navLinks.contact', icon: '✉️' },
+  { to: '/blog', labelKey: 'header.navLinks.blog', icon: '📝' },
 ]
 
 function isActive(to: string) {

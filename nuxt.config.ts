@@ -4,6 +4,7 @@ export default defineNuxtConfig({
     locales: [
       { code: 'en', language: 'en-US', name: 'English', file: 'en.ts' },
       { code: 'es', language: 'es-ES', name: 'Español', file: 'es.ts' },
+      { code: 'pt', language: 'pt-BR', name: 'Português', file: 'pt.ts' },
     ],
     defaultLocale: 'en',
     strategy: 'prefix_except_default',
