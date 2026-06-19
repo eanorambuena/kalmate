@@ -36,8 +36,6 @@
 
       <div class="mt-10 pt-8 border-t border-[#1a1a1a]">
         <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-[#666]">
-          <span>{{ $t('footer.dataSource') }}</span>
-          <span>{{ $t('footer.deploy') }}</span>
           <span class="flex items-center gap-2">
             {{ $t('footer.currency') }}
             <button

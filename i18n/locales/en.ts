@@ -56,8 +56,7 @@ export default {
     privacyPolicy: 'Privacy Policy',
     termsOfService: 'Terms of Service',
     disclaimer: 'Disclaimer',
-    dataSource: 'Data: Yahoo Finance',
-    deploy: 'Deploy: Cloudflare Pages',
+
     currency: 'Currency:',
     copyright: '© 2026 Kalmate. Open source under MIT License.',
     sponsor: 'Sponsor',
