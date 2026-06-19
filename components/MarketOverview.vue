@@ -33,19 +33,19 @@ const indices = computed<IndexDisplay[]>(() => {
 
 <template>
   <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-3 card-hover">
-    <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans flex items-center gap-2" aria-live="polite" aria-label="Market indices">
-      <span>MARKET INDICES</span>
-      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Updating" />
+    <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans flex items-center gap-2" aria-live="polite" :aria-label="$t('marketOverview.heading')">
+      <span>{{ $t('marketOverview.heading') }}</span>
+      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" :aria-label="$t('marketOverview.updatingLabel')" />
     </div>
-    <div v-if="error" role="alert" class="text-[#ff1744] text-xs py-4 text-center">No data available</div>
-    <div v-else-if="pending && indices.length === 0" class="grid grid-cols-2 md:grid-cols-4 gap-3" aria-label="Loading indices">
+    <div v-if="error" role="alert" class="text-[#ff1744] text-xs py-4 text-center">{{ $t('common.noData') }}</div>
+    <div v-else-if="pending && indices.length === 0" class="grid grid-cols-2 md:grid-cols-4 gap-3" :aria-label="$t('marketOverview.loadingLabel')">
       <div v-for="i in 4" :key="i" class="rounded-lg p-3">
         <div class="skeleton h-3 w-16 mb-2" />
         <div class="skeleton h-5 w-24 mb-1" />
         <div class="skeleton h-3 w-20" />
       </div>
     </div>
-    <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-3" aria-label="Market index values">
+    <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-3" :aria-label="$t('marketOverview.containerLabel')">
       <NuxtLink
         v-for="idx in indices"
         :key="idx.symbol"

@@ -1,5 +1,22 @@
 export default defineNuxtConfig({
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/i18n'],
+  i18n: {
+    locales: [
+      { code: 'en', language: 'en-US', name: 'English', file: 'en.ts' },
+      { code: 'es', language: 'es-ES', name: 'Español', file: 'es.ts' },
+      { code: 'pt', language: 'pt-BR', name: 'Português', file: 'pt.ts' },
+    ],
+    defaultLocale: 'en',
+    strategy: 'prefix_except_default',
+    lazy: true,
+    seo: true,
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root',
+      fallbackLocale: 'en',
+    },
+  },
   css: [
     '~/assets/css/main.css',
     '@vue-flow/core/dist/style.css',

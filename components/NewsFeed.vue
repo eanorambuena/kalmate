@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n()
+
 interface NewsItem {
   title: string
   link: string
@@ -23,10 +25,10 @@ function timeAgo(dateStr?: string): string {
   const d = new Date(dateStr)
   const now = new Date()
   const diff = Math.floor((now.getTime() - d.getTime()) / 1000)
-  if (diff < 60) return 'just now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
-  return `${Math.floor(diff / 86400)}d ago`
+  if (diff < 60) return t('news.time.justNow')
+  if (diff < 3600) return t('news.time.minAgo', { m: Math.floor(diff / 60) })
+  if (diff < 86400) return t('news.time.hourAgo', { h: Math.floor(diff / 3600) })
+  return t('news.time.dayAgo', { d: Math.floor(diff / 86400) })
 }
 
 onMounted(() => {
@@ -49,11 +51,11 @@ onMounted(() => {
 <template>
   <div>
     <div class="text-xs text-[#ccc] mb-2 tracking-wider font-sans flex items-center gap-2" aria-live="polite">
-      <span>MARKET NEWS</span>
-      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" aria-label="Loading news" />
+      <span>{{ $t('news.heading') }}</span>
+      <span v-if="pending" class="inline-block w-2 h-2 rounded-full bg-[#2979ff] animate-pulse" :aria-label="$t('news.loadingLabel')" />
     </div>
-    <div class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden card-hover" aria-label="Financial news">
-      <div v-if="pending && news.length === 0" class="divide-y divide-[#1a1a1a]" aria-label="Loading news">
+    <div class="bg-[#111] border border-[#2a2a2a] rounded-xl overflow-hidden card-hover" :aria-label="$t('news.containerLabel')">
+      <div v-if="pending && news.length === 0" class="divide-y divide-[#1a1a1a]" :aria-label="$t('news.loadingLabel')">
         <div v-for="i in 5" :key="i" class="px-3 py-3">
           <div class="skeleton h-4 w-full mb-2" />
           <div class="skeleton h-4 w-3/4 mb-2" />
@@ -61,7 +63,7 @@ onMounted(() => {
         </div>
       </div>
       <div v-else-if="news.length === 0" class="text-center text-[#888] py-10 text-sm">
-        No news available
+        {{ $t('news.empty') }}
       </div>
       <div v-else class="divide-y divide-[#1a1a1a]">
         <a

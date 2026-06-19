@@ -4,6 +4,8 @@ import KalmanAnalysis from '../../../components/KalmanAnalysis.vue'
 import { useCurrency } from '~/composables/useCurrency'
 const { formatPrice, formatChange, formatChangePercent } = useCurrency()
 
+const { t } = useI18n()
+
 const route = useRoute()
 const symbol = route.params.symbol as string
 
@@ -58,25 +60,25 @@ watch(range, () => {
 
 <template>
   <div v-if="loading" class="text-center text-[#ccc] py-20 text-sm animate-pulse-slow">
-        Loading market data...
+        {{ $t('terminal.stock.loading') }}
       </div>
       <div v-else-if="error" class="text-center py-20">
-        <div class="text-[#ff1744] font-bold mb-2">Data Unavailable</div>
-        <div class="text-[#ccc] text-xs">Yahoo Finance may be unreachable or {{ symbol }} is not a valid symbol.</div>
+        <div class="text-[#ff1744] font-bold mb-2">{{ $t('terminal.stock.errorHeading') }}</div>
+        <div class="text-[#ccc] text-xs">{{ $t('terminal.stock.errorDesc', { symbol }) }}</div>
       </div>
       <template v-else>
-        <div v-if="quote" class="bg-[#111] border border-[#333] rounded p-4 mb-4" aria-live="polite" aria-label="Quote data">
+        <div v-if="quote" class="bg-[#111] border border-[#333] rounded p-4 mb-4" aria-live="polite" :aria-label="$t('terminal.stock.quoteLabel')">
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div>
               <h1 class="text-2xl font-bold font-mono text-[#00c853]">{{ symbol }}</h1>
               <div v-if="quote.shortName" class="text-sm text-[#bbb] font-sans">{{ quote.shortName }}</div>
             </div>
-            <div class="text-right" aria-label="Price and change">
-              <div class="text-3xl font-bold font-mono" aria-label="Current price: {{ formatPrice(quote.regularMarketPrice) }}">{{ formatPrice(quote.regularMarketPrice) }}</div>
+            <div class="text-right" :aria-label="$t('terminal.stock.priceLabel')">
+              <div class="text-3xl font-bold font-mono" :aria-label="$t('terminal.stock.priceAria') + formatPrice(quote.regularMarketPrice)">{{ formatPrice(quote.regularMarketPrice) }}</div>
               <div
                 class="text-sm font-mono"
                 :class="quote.regularMarketChange >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]'"
-                :aria-label="`Change: ${formatChange(quote.regularMarketChange)} (${formatChangePercent(quote.regularMarketChangePercent)})`"
+                :aria-label="$t('terminal.stock.changeAria') + formatChange(quote.regularMarketChange) + ' (' + formatChangePercent(quote.regularMarketChangePercent) + ')'"
               >
                 {{ formatChange(quote.regularMarketChange) }}
                 ({{ formatChangePercent(quote.regularMarketChangePercent) }})
@@ -86,42 +88,42 @@ watch(range, () => {
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-xs">
             <div>
-              <span class="text-[#ccc] font-sans">Open: </span>
+              <span class="text-[#ccc] font-sans">{{ $t('terminal.stock.open') }}</span>
               <span class="text-white font-mono">{{ formatPrice(quote.regularMarketOpen) }}</span>
             </div>
             <div>
-              <span class="text-[#ccc] font-sans">High: </span>
+              <span class="text-[#ccc] font-sans">{{ $t('terminal.stock.high') }}</span>
               <span class="text-white font-mono">{{ formatPrice(quote.regularMarketDayHigh) }}</span>
             </div>
             <div>
-              <span class="text-[#ccc] font-sans">Low: </span>
+              <span class="text-[#ccc] font-sans">{{ $t('terminal.stock.low') }}</span>
               <span class="text-white font-mono">{{ formatPrice(quote.regularMarketDayLow) }}</span>
             </div>
             <div>
-              <span class="text-[#ccc] font-sans">Prev Close: </span>
+              <span class="text-[#ccc] font-sans">{{ $t('terminal.stock.prevClose') }}</span>
               <span class="text-white font-mono">{{ formatPrice(quote.regularMarketPreviousClose) }}</span>
             </div>
             <div>
-              <span class="text-[#ccc] font-sans">Volume: </span>
+              <span class="text-[#ccc] font-sans">{{ $t('terminal.stock.volume') }}</span>
               <span class="text-white font-mono">{{ quote.regularMarketVolume?.toLocaleString() ?? '-' }}</span>
             </div>
             <div>
-              <span class="text-[#ccc] font-sans">Mkt Cap: </span>
+              <span class="text-[#ccc] font-sans">{{ $t('terminal.stock.mktCap') }}</span>
               <span class="text-white font-mono">{{ quote.marketCap ? '$' + (quote.marketCap / 1e9).toFixed(2) + 'B' : '-' }}</span>
             </div>
             <div>
-              <span class="text-[#ccc] font-sans">52W High: </span>
+              <span class="text-[#ccc] font-sans">{{ $t('terminal.stock.w52High') }}</span>
               <span class="text-white font-mono">{{ formatPrice(quote.fiftyTwoWeekHigh) }}</span>
             </div>
             <div>
-              <span class="text-[#ccc] font-sans">52W Low: </span>
+              <span class="text-[#ccc] font-sans">{{ $t('terminal.stock.w52Low') }}</span>
               <span class="text-white font-mono">{{ formatPrice(quote.fiftyTwoWeekLow) }}</span>
             </div>
           </div>
         </div>
 
         <div class="bg-[#111] border border-[#333] rounded p-4">
-          <div class="flex items-center gap-2 mb-4" role="group" aria-label="Chart time range">
+          <div class="flex items-center gap-2 mb-4" role="group" :aria-label="$t('terminal.stock.chartRangeLabel')">
             <button
               v-for="r in (['1d', '5d', '1mo', '3mo', '6mo', '1y'] as const)"
               :key="r"
@@ -133,14 +135,14 @@ watch(range, () => {
               :aria-pressed="range === r"
               :aria-label="`${r} range`"
             >
-              {{ r.toUpperCase() }}
+              {{ $t(`stockRange.${r}`) }}
             </button>
           </div>
           <div v-if="history.length > 0">
             <ClientOnly><StockChart :data="history" /></ClientOnly>
           </div>
-          <div v-else class="h-[400px] flex items-center justify-center text-[#ccc] text-sm" aria-label="No chart data">
-            No chart data available
+          <div v-else class="h-[400px] flex items-center justify-center text-[#ccc] text-sm" :aria-label="$t('terminal.stock.noChartData')">
+            {{ $t('terminal.stock.noChartData') }}
           </div>
         </div>
 

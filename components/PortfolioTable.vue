@@ -3,6 +3,7 @@ import type { PortfolioHolding, QuoteData } from '../utils/types'
 import { useToast } from '../composables/useToast'
 import { useCurrency } from '~/composables/useCurrency'
 
+const { t } = useI18n()
 const { add: addToast } = useToast()
 const { formatPrice, formatChange, formatChangePercent } = useCurrency()
 
@@ -39,7 +40,7 @@ async function fetchQuotes() {
 
 async function addHolding() {
   if (!newSymbol.value || !newShares.value || !newAvgPrice.value) {
-    addToast('Fill in all fields', 'error')
+    addToast(t('terminal.portfolio.toast.fillFields'), 'error')
     return
   }
   try {
@@ -56,9 +57,9 @@ async function addHolding() {
     newAvgPrice.value = ''
     await fetchPortfolio()
     await fetchQuotes()
-    addToast(`${newSymbol.value.toUpperCase() || 'Position'} added`, 'success')
+    addToast(t('terminal.portfolio.toast.positionAdded'), 'success')
   } catch (e) {
-    addToast('Failed to add position', 'error')
+    addToast(t('terminal.portfolio.toast.positionAddFailed'), 'error')
     console.error(e)
   }
 }
@@ -93,9 +94,9 @@ async function deleteHolding(id: string) {
     deletingId.value = null
     await fetchPortfolio()
     await fetchQuotes()
-    addToast('Position deleted', 'success')
+    addToast(t('terminal.portfolio.toast.positionDeleted'), 'success')
   } catch (e) {
-    addToast('Failed to delete', 'error')
+    addToast(t('terminal.portfolio.toast.deleteFailed'), 'error')
     console.error(e)
   }
 }
@@ -149,21 +150,21 @@ function selectSearchResult(symbol: string) {
 <template>
   <div>
     <div class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-4 card-hover">
-      <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans" id="add-position-label">ADD POSITION</div>
+      <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans" id="add-position-label">{{ $t('terminal.portfolio.addPosition') }}</div>
       <div class="flex flex-wrap gap-2" role="form" aria-labelledby="add-position-label">
         <div class="relative">
-          <label for="pos-symbol" class="sr-only">Symbol</label>
+          <label for="pos-symbol" class="sr-only">{{ $t('terminal.portfolio.symbol') }}</label>
           <input
             id="pos-symbol"
             v-model="newSymbol"
-            placeholder="SYMBOL"
+            :placeholder="$t('terminal.portfolio.symbolPlaceholder')"
             class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm w-24 text-white uppercase placeholder-[#555] focus:border-[#00c853] focus:outline-none transition-colors"
           />
           <div
             v-if="showSearch && newSymbol.length > 0"
             class="absolute top-full left-0 mt-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg shadow-xl z-50 min-w-[240px] overflow-hidden"
           >
-            <div v-if="searching" class="text-center text-[#ccc] py-2 text-xs">Searching...</div>
+            <div v-if="searching" class="text-center text-[#ccc] py-2 text-xs">{{ $t('search.searching') }}</div>
             <button
               v-for="r in searchResults"
               :key="r.symbol"
@@ -176,19 +177,19 @@ function selectSearchResult(symbol: string) {
             </button>
           </div>
         </div>
-        <label for="pos-shares" class="sr-only">Shares</label>
+        <label for="pos-shares" class="sr-only">{{ $t('terminal.portfolio.shares') }}</label>
         <input
           id="pos-shares"
           v-model="newShares"
-          placeholder="SHARES"
+          :placeholder="$t('terminal.portfolio.sharesPlaceholder')"
           type="number"
           class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm w-20 text-white placeholder-[#555] focus:border-[#00c853] focus:outline-none transition-colors"
         />
-        <label for="pos-price" class="sr-only">Average price</label>
+        <label for="pos-price" class="sr-only">{{ $t('terminal.portfolio.avgPrice') }}</label>
         <input
           id="pos-price"
           v-model="newAvgPrice"
-          placeholder="AVG $"
+          :placeholder="$t('terminal.portfolio.avgPricePlaceholder')"
           type="number"
           step="0.01"
           class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm w-24 text-white placeholder-[#555] focus:border-[#00c853] focus:outline-none transition-colors"
@@ -197,7 +198,7 @@ function selectSearchResult(symbol: string) {
           class="bg-[#00c853] text-black px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-[#00e060] hover:shadow-lg hover:shadow-[#00c853]/20 active:scale-95 transition-all duration-200 font-sans"
           @click="addHolding"
         >
-          ADD
+          {{ $t('terminal.portfolio.add') }}
         </button>
       </div>
     </div>
@@ -219,16 +220,16 @@ function selectSearchResult(symbol: string) {
 
     <!-- Summary -->
     <div v-else-if="holdings.length > 0" class="bg-[#111] border border-[#2a2a2a] rounded-xl p-4 mb-3 card-hover" aria-live="polite" aria-label="Portfolio summary">
-      <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans">PORTFOLIO SUMMARY</div>
+      <div class="text-xs text-[#ccc] mb-3 tracking-wider font-sans">{{ $t('terminal.portfolio.summary') }}</div>
       <div class="grid grid-cols-3 gap-4 text-center">
         <div class="bg-[#1a1a1a] rounded-lg p-3">
-          <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">Total Value</div>
+          <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">{{ $t('terminal.portfolio.totalValue') }}</div>
           <div class="text-lg font-mono font-bold mt-1 animate-count-up">
             {{ calcTotalPnL() ? formatPrice(calcTotalPnL()!.totalValue) : '...' }}
           </div>
         </div>
         <div class="bg-[#1a1a1a] rounded-lg p-3">
-          <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">P&amp;L</div>
+          <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">{{ $t('terminal.portfolio.pnl') }}</div>
           <div
             class="text-lg font-mono font-bold mt-1"
             :class="calcTotalPnL() ? (calcTotalPnL()!.pnl >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]') : ''"
@@ -237,7 +238,7 @@ function selectSearchResult(symbol: string) {
           </div>
         </div>
         <div class="bg-[#1a1a1a] rounded-lg p-3">
-          <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">Return</div>
+          <div class="text-[10px] text-[#999] font-sans uppercase tracking-wider">{{ $t('terminal.portfolio.return') }}</div>
           <div
             class="text-lg font-mono font-bold mt-1"
             :class="calcTotalPnL() ? (calcTotalPnL()!.pnlPercent >= 0 ? 'text-[#00c853]' : 'text-[#ff1744]') : ''"
@@ -252,19 +253,19 @@ function selectSearchResult(symbol: string) {
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-[#2a2a2a] text-[#ccc] text-xs">
-            <th class="text-left px-3 py-2.5 font-sans">SYMBOL</th>
-            <th class="text-right px-3 py-2.5 font-sans">SHARES</th>
-            <th class="text-right px-3 py-2.5 font-sans">AVG $</th>
-            <th class="text-right px-3 py-2.5 font-sans">CURRENT</th>
-            <th class="text-right px-3 py-2.5 font-sans">P&amp;L</th>
-            <th class="text-right px-3 py-2.5 font-sans">VALUE</th>
+            <th class="text-left px-3 py-2.5 font-sans">{{ $t('terminal.portfolio.columns.symbol') }}</th>
+            <th class="text-right px-3 py-2.5 font-sans">{{ $t('terminal.portfolio.columns.shares') }}</th>
+            <th class="text-right px-3 py-2.5 font-sans">{{ $t('terminal.portfolio.columns.avgPrice') }}</th>
+            <th class="text-right px-3 py-2.5 font-sans">{{ $t('terminal.portfolio.columns.current') }}</th>
+            <th class="text-right px-3 py-2.5 font-sans">{{ $t('terminal.portfolio.columns.pnl') }}</th>
+            <th class="text-right px-3 py-2.5 font-sans">{{ $t('terminal.portfolio.columns.value') }}</th>
             <th class="text-right px-3 py-2.5" />
           </tr>
         </thead>
         <tbody>
           <tr v-if="holdings.length === 0">
             <td colspan="7" class="text-center text-[#ccc] py-12 text-xs font-sans">
-              No positions. Add one above.
+              {{ $t('terminal.portfolio.empty') }}
             </td>
           </tr>
           <tr
@@ -301,13 +302,13 @@ function selectSearchResult(symbol: string) {
                 v-if="deletingId !== h.id"
                 class="text-[#888] hover:text-[#ff1744] text-xs transition-colors px-1"
                 @click="confirmDelete(h.id)"
-                title="Delete"
+                :title="$t('terminal.portfolio.deleteTitle')"
               >
                 ✕
               </button>
               <span v-else class="flex gap-1 text-xs">
-                <button class="text-[#ff1744] font-bold px-1 hover:text-[#ff5252] transition-colors" @click="deleteHolding(h.id)">DEL</button>
-                <button class="text-[#999] hover:text-[#ccc] px-1 transition-colors" @click="cancelDelete">X</button>
+                <button class="text-[#ff1744] font-bold px-1 hover:text-[#ff5252] transition-colors" @click="deleteHolding(h.id)">{{ $t('terminal.portfolio.delConfirm') }}</button>
+                <button class="text-[#999] hover:text-[#ccc] px-1 transition-colors" @click="cancelDelete">{{ $t('terminal.portfolio.cancelDelete') }}</button>
               </span>
             </td>
           </tr>

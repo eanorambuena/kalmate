@@ -3,20 +3,22 @@ definePageMeta({ layout: 'landing' })
 
 import { canonicalUrl } from '../utils/seo'
 
+const { t } = useI18n()
+
 const canonical = canonicalUrl('/')
 
 useHead({
-  title: 'Kalmate — Free Open-Source Financial Terminal & Data Pipeline',
+  title: computed(() => t('landing.hero.heading')),
   meta: [
-    { name: 'description', content: 'Kalmate is a free open-source financial terminal with real-time market data, portfolio tracking, price alerts, stock screener, and visual data pipeline with node editor. No sign-up required.' },
+    { name: 'description', content: computed(() => t('landing.hero.subtext')) },
     { name: 'keywords', content: 'kalmate, financial terminal, open source trading platform, visual pipeline, node editor, data pipeline finance, real-time stock quotes, portfolio tracker, stock screener, market analysis, forex, crypto' },
     { property: 'og:url', content: canonical },
-    { property: 'og:title', content: 'Kalmate — Professional Financial Terminal' },
-    { property: 'og:description', content: 'Free professional financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.' },
+    { property: 'og:title', content: computed(() => t('landing.hero.heading')) },
+    { property: 'og:description', content: computed(() => t('landing.hero.subtext')) },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'Kalmate — Professional Financial Terminal' },
-    { name: 'twitter:description', content: 'Free professional financial terminal with real-time market data, portfolio tracking, alerts, and professional charts.' },
+    { name: 'twitter:title', content: computed(() => t('landing.hero.heading')) },
+    { name: 'twitter:description', content: computed(() => t('landing.hero.subtext')) },
   ],
   link: [
     { rel: 'canonical', href: canonical },
@@ -42,18 +44,18 @@ useHead({
 const { el: featuresEl, visible: featuresVisible } = useScrollReveal(0.1, 100)
 const { el: techEl, visible: techVisible } = useScrollReveal(0.2, 200)
 
-const features = [
-  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>', title: 'Market Dashboard', desc: 'Real-time quotes for equities, forex, bonds, commodities, and crypto. Organized by category with instant search.' },
-  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>', title: 'Portfolio Tracking', desc: 'Track your holdings with real-time P&L. Add positions, monitor performance, and make informed decisions.' },
-  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>', title: 'Smart Alerts', desc: 'Set price alerts above/below thresholds. Real-time polling with browser notifications so you never miss a move.' },
-  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>', title: 'Powerful Screener', desc: 'Search and filter across thousands of instruments. Use presets or custom filters to find the right opportunities.' },
-  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>', title: 'Professional Charts', desc: 'TradingView-powered charts with 1d to 1y ranges. Technical analysis tools at your fingertips.' },
-  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>', title: 'Financial News', desc: 'Stay informed with integrated news feed per instrument. Market-moving stories right where you need them.' },
-]
+const features = computed(() => [
+  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>', title: t('landing.features.cards.dashboard.title'), desc: t('landing.features.cards.dashboard.desc') },
+  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>', title: t('landing.features.cards.portfolio.title'), desc: t('landing.features.cards.portfolio.desc') },
+  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>', title: t('landing.features.cards.alerts.title'), desc: t('landing.features.cards.alerts.desc') },
+  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>', title: t('landing.features.cards.screener.title'), desc: t('landing.features.cards.screener.desc') },
+  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>', title: t('landing.features.cards.charts.title'), desc: t('landing.features.cards.charts.desc') },
+  { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>', title: t('landing.features.cards.news.title'), desc: t('landing.features.cards.news.desc') },
+])
 
 const tech = ['Nuxt 3', 'Vue 3', 'TypeScript', 'Tailwind CSS', 'TradingView Charts', 'Yahoo Finance API', 'Cloudflare Pages', 'Nitro Server']
 
-const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
+const titleWords = computed(() => t('landing.hero.heading').split(' '))
 </script>
 
 <template>
@@ -64,7 +66,7 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
       <div class="absolute inset-0 bg-gradient-to-br from-[#00c853]/5 via-transparent to-[#2979ff]/5" />
       <div class="max-w-6xl mx-auto px-6 relative z-10">
         <div class="max-w-3xl">
-          <div class="text-[#00c853] text-sm font-mono tracking-widest mb-6 animate-fade-in-down">REAL-TIME MARKET DATA</div>
+          <div class="text-[#00c853] text-sm font-mono tracking-widest mb-6 animate-fade-in-down">{{ $t('landing.hero.eyebrow') }}</div>
           <h1 class="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
             <span v-for="(word, i) in titleWords" :key="i"
               class="inline-block mr-[0.3em] animate-word-stagger"
@@ -73,19 +75,19 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
             >{{ word }}</span>
           </h1>
           <p class="text-[#ccc] text-lg md:text-xl leading-relaxed mb-8 max-w-xl animate-fade-in-up" style="animation-delay: 0.5s">
-            Free professional terminal powered by Yahoo Finance. Track equities, forex, bonds, commodities, and crypto with real-time data and professional-grade charts.
+            {{ $t('landing.hero.subtext') }}
           </p>
           <div class="animate-fade-in-up flex flex-col items-start gap-3" style="animation-delay: 0.7s">
             <div class="flex items-center gap-4">
               <a href="/terminal/pipeline" class="inline-flex items-center gap-2 bg-[#00c853] text-black font-bold px-8 py-3.5 rounded-lg hover:bg-[#00e060] transition-colors text-sm tracking-wide whitespace-nowrap">
-                TRY PIPELINES →
+                {{ $t('landing.hero.ctaPipelines') }}
               </a>
               <a href="/terminal" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm">
-                LAUNCH TERMINAL
+                {{ $t('landing.hero.ctaTerminal') }}
               </a>
             </div>
             <a href="/terminal/stock/AAPL" class="text-[#ccc] hover:text-[#ccc] transition-colors text-xs font-mono tracking-wider no-underline">
-              Or view a sample →
+              {{ $t('landing.hero.sampleLink') }}
             </a>
           </div>
         </div>
@@ -96,9 +98,9 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
     <section id="features" class="py-32 px-6" ref="featuresEl">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-20" :class="featuresVisible ? 'animate-fade-in-up' : 'opacity-0'">
-          <p class="text-[#00c853] text-sm font-mono tracking-widest mb-4">FEATURES</p>
-          <h2 class="text-4xl md:text-5xl font-bold text-white">Professional Tools, Zero Cost</h2>
-          <p class="text-[#ccc] mt-4 max-w-lg mx-auto">Everything you need to track and analyze financial markets, completely free.</p>
+          <p class="text-[#00c853] text-sm font-mono tracking-widest mb-4">{{ $t('landing.features.eyebrow') }}</p>
+          <h2 class="text-4xl md:text-5xl font-bold text-white">{{ $t('landing.features.heading') }}</h2>
+          <p class="text-[#ccc] mt-4 max-w-lg mx-auto">{{ $t('landing.features.subtext') }}</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div v-for="(f, i) in features" :key="f.title"
@@ -117,8 +119,8 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
     <section id="tech" class="py-32 px-6 bg-[#060606]" ref="techEl">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-20" :class="techVisible ? 'animate-fade-in-up' : 'opacity-0'">
-          <p class="text-[#00c853] text-sm font-mono tracking-widest mb-4">TECHNOLOGY</p>
-          <h2 class="text-4xl md:text-5xl font-bold text-white">Built for Performance</h2>
+          <p class="text-[#00c853] text-sm font-mono tracking-widest mb-4">{{ $t('landing.tech.eyebrow') }}</p>
+          <h2 class="text-4xl md:text-5xl font-bold text-white">{{ $t('landing.tech.heading') }}</h2>
         </div>
         <div class="flex flex-wrap justify-center gap-4">
           <span v-for="(t, i) in tech" :key="t"

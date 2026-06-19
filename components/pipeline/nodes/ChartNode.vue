@@ -2,7 +2,7 @@
   <div class="bg-[#111] border border-[#333] rounded-xl p-3 min-w-[280px] cursor-grab active:cursor-grabbing relative">
     <div class="flex items-center gap-2 mb-2">
       <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: '#ff69b4' }" />
-      <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">OUTPUT</span>
+      <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">{{ $t('chart.output') }}</span>
     </div>
     <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
     <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
@@ -19,7 +19,7 @@
       </div>
     </div>
     <div v-else class="h-[120px] flex items-center justify-center text-[#aaa] text-[10px]">
-      {{ result?.error || 'Run pipeline to see chart' }}
+      {{ result?.error || $t('chart.empty') }}
     </div>
     <div v-if="price" class="mt-1 text-center">
       <span class="text-white font-mono text-sm font-bold">${{ price }}</span>
@@ -39,6 +39,8 @@ import { Handle, Position } from '@vue-flow/core'
 import { computed, ref, nextTick } from 'vue'
 import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
 
+const { t } = useI18n()
+
 const props = defineProps({
   id: { type: String, required: true },
   data: { type: Object, default: () => ({}) },
@@ -46,7 +48,7 @@ const props = defineProps({
 
 const def = nodeDefinitions.find(n => n.type === 'chartOutput')
 const inputs = def?.inputs ?? []
-const displayLabel = computed(() => props.data?.label || 'Chart')
+const displayLabel = computed(() => props.data?.label || t('chart.chart'))
 
 const editing = ref(false)
 const editLabel = ref('')
@@ -77,19 +79,19 @@ const seriesToPlot = computed(() => {
   const series: Array<{ label: string; values: number[]; color: string }> = []
   const mainSeries = r.seriesA || r.history || r.series || r.price
   if (Array.isArray(mainSeries) && mainSeries.length > 0) {
-    series.push({ label: 'Main', values: mainSeries.map((d: any) => d.close ?? d), color: '#00c853' })
+    series.push({ label: t('chart.main'), values: mainSeries.map((d: any) => d.close ?? d), color: '#00c853' })
   }
   const overlayA = r.seriesB || r.overlay1 || r.sma || r.smoothed
   if (Array.isArray(overlayA) && overlayA.length > 0) {
-    series.push({ label: 'Overlay A', values: overlayA, color: '#2979ff' })
+    series.push({ label: t('chart.overlayA'), values: overlayA, color: '#2979ff' })
   }
   const overlayB = r.seriesC || r.overlay2 || r.ema || r.forecast
   if (Array.isArray(overlayB) && overlayB.length > 0) {
-    series.push({ label: 'Overlay B', values: overlayB, color: '#aa00ff' })
+    series.push({ label: t('chart.overlayB'), values: overlayB, color: '#aa00ff' })
   }
   const overlayC = r.seriesD || r.overlay3 || r.trend
   if (Array.isArray(overlayC) && overlayC.length > 0) {
-    series.push({ label: 'Overlay C', values: overlayC, color: '#ff6d00' })
+    series.push({ label: t('chart.overlayC'), values: overlayC, color: '#ff6d00' })
   }
   return series
 })

@@ -3,7 +3,7 @@
     <div class="w-52 flex-shrink-0 bg-[#0d0d0d] border-r border-[#222] overflow-y-auto z-10 flex flex-col">
       <div class="p-2 space-y-2">
         <div>
-          <div class="text-[10px]">Input</div>
+          <div class="text-[10px]">{{ $t('pipeline.editor.categories.input') }}</div>
           <div class="space-y-0.5">
             <button
               v-for="n in inputNodes" :key="n.type"
@@ -17,7 +17,7 @@
           </div>
         </div>
         <div>
-          <div class="text-[10px]">Process</div>
+          <div class="text-[10px]">{{ $t('pipeline.editor.categories.process') }}</div>
           <div class="space-y-0.5">
             <button
               v-for="n in processNodes" :key="n.type"
@@ -31,7 +31,7 @@
           </div>
         </div>
         <div>
-          <div class="text-[10px]">Output</div>
+          <div class="text-[10px]">{{ $t('pipeline.editor.categories.output') }}</div>
           <div class="space-y-0.5">
             <button
               v-for="n in outputNodes" :key="n.type"
@@ -46,7 +46,7 @@
         </div>
         <div>
           <div class="text-[10px] font-mono text-[#ff69b4] tracking-wider px-2 mb-1 uppercase flex items-center gap-1">
-            Pro
+            {{ $t('pipeline.editor.categories.pro') }}
             <svg v-if="!isPro" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
           </div>
           <div class="space-y-0.5">
@@ -71,7 +71,7 @@
           class="px-2 py-1 rounded text-[10px] font-bold transition-all"
           :class="eraserMode ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-[#1a1a1a] text-[#bbb] hover:text-white border border-transparent'"
           @click="eraserMode = !eraserMode"
-          title="Eraser mode: click edges to delete"
+          :title="$t('pipeline.editor.toolbar.eraserTitle')"
         >
           <Trash2 class="w-3.5 h-3.5" />
         </button>
@@ -79,14 +79,14 @@
           class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[10px] font-bold rounded hover:text-white transition-colors border border-transparent"
           @click="clearAll"
         >
-          Clear
+          {{ $t('pipeline.editor.toolbar.clear') }}
         </button>
         <button
           class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[10px] font-bold rounded hover:text-white transition-colors border border-transparent"
           @click="$emit('help')"
-          title="Show tutorial"
+          :title="$t('pipeline.editor.toolbar.helpTitle')"
         >
-          ?
+          {{ $t('pipeline.editor.toolbar.help') }}
         </button>
 
         <div class="w-px h-4 bg-[#333] mx-1" />
@@ -97,7 +97,7 @@
           @click="autorun = !autorun"
         >
           <component :is="autorun ? Pause : Play" class="w-3 h-3" />
-          Auto
+          {{ $t('pipeline.editor.toolbar.auto') }}
         </button>
         <button
           class="px-3 py-1 rounded text-[10px] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -105,7 +105,7 @@
           :disabled="nodes.length === 0 || running || autorun"
           @click="runPipeline"
         >
-          <Play class="w-3 h-3" /> Run
+          <Play class="w-3 h-3" /> {{ $t('pipeline.editor.toolbar.run') }}
         </button>
 
         <div class="w-px h-4 bg-[#333] mx-1" />
@@ -114,7 +114,7 @@
           class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="showResults ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="showResults = !showResults"
-          title="Toggle results panel"
+          :title="$t('pipeline.editor.toolbar.resultsTitle')"
         >
           <BarChart3 class="w-3.5 h-3.5" />
         </button>
@@ -122,7 +122,7 @@
           class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="showAI ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="showAI = !showAI"
-          title="Generate pipeline with AI"
+          :title="$t('pipeline.editor.toolbar.aiTitle')"
         >
           <Zap class="w-3.5 h-3.5" />
         </button>
@@ -130,7 +130,7 @@
           class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="showSaver ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
           @click="showSaver = !showSaver"
-          title="Save/Load pipelines"
+          :title="$t('pipeline.editor.toolbar.saveTitle')"
         >
           <Folder class="w-3.5 h-3.5" />
         </button>
@@ -154,7 +154,7 @@
         v-if="showResults && results && Object.keys(results).length > 0"
         class="absolute bottom-3 right-3 z-10 bg-[#111] border border-[#333] rounded-xl p-3 max-w-xs text-[10px]"
       >
-        <p class="text-[#00c853] font-bold mb-1">Results</p>
+        <p class="text-[#00c853] font-bold mb-1">{{ $t('pipeline.editor.toolbar.results') }}</p>
         <div v-for="(val, key) in results" :key="key" class="mb-1">
           <span class="text-[#bbb]">{{ key }}:</span>
           <span class="text-white ml-1">{{ formatResult(val) }}</span>
@@ -163,9 +163,9 @@
 
       <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[10px] text-[#bbb] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
         <MousePointer2 class="w-3 h-3 text-[#00c853]" />
-          <span>Drag from output to input to connect</span>
+          <span>{{ $t('pipeline.editor.instructions.connect') }}</span>
           <span class="w-px h-3 bg-[#333]" />
-          <span>Click arrow to delete</span>
+          <span>{{ $t('pipeline.editor.instructions.deleteEdge') }}</span>
       </div>
     </div>
 
@@ -188,6 +188,8 @@ import ProModal from './ProModal.vue'
 import PipelineAI from './PipelineAI.vue'
 import PipelineSaver from './PipelineSaver.vue'
 import { Trash2, BarChart3, Play, Pause, MousePointer2, Zap, Folder } from '@lucide/vue'
+
+const { t } = useI18n()
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode, candle: CandleNode }
 const flowContainer = ref<HTMLElement | null>(null)
@@ -348,13 +350,13 @@ function onCanvasClick(e: MouseEvent) {
 
 function formatResult(val: any): string {
   if (!val) return '-'
-  if (val.error) return 'Error: ' + val.error
+  if (val.error) return t('pipeline.editor.format.error') + val.error
   if (typeof val === 'number') return val.toFixed(2)
   if (typeof val.price === 'number') return '$' + val.price.toFixed(2)
   if (typeof val.source === 'number') return '$' + val.source.toFixed(2)
-  if (val.signal === 1) return 'Overpriced'
-  if (val.signal === -1) return 'Underpriced'
-  return 'OK'
+  if (val.signal === 1) return t('pipeline.editor.format.overpriced')
+  if (val.signal === -1) return t('pipeline.editor.format.underpriced')
+  return t('pipeline.editor.format.ok')
 }
 
 async function runPipeline() {

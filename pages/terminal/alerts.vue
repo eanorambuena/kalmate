@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { canonicalUrl } from '../../utils/seo'
 
+const { t } = useI18n()
+
 const canonical = canonicalUrl('/terminal/alerts')
 
 useHead({
-  title: 'Price Alerts — Real-Time Stock Notifications | Kalmate',
+  title: computed(() => t('terminal.heading.alerts')),
   meta: [
-    { name: 'description', content: 'Set custom price alerts for stocks, crypto, and forex on Kalmate. Get real-time browser notifications when prices hit your targets. Free price alert system.' },
+    { name: 'description', content: computed(() => t('landing.features.cards.alerts.desc')) },
     { name: 'keywords', content: 'kalmate alerts, price alerts, stock price notifications, real-time alerts, crypto alerts, forex alerts, browser notifications, free stock alerts' },
-    { property: 'og:title', content: 'Price Alerts — Real-Time Stock Notifications | Kalmate' },
-    { property: 'og:description', content: 'Set custom price alerts for stocks, crypto, and forex on Kalmate. Get real-time browser notifications when prices hit your targets.' },
+    { property: 'og:title', content: computed(() => t('terminal.heading.alerts')) },
+    { property: 'og:description', content: computed(() => t('landing.features.cards.alerts.desc')) },
     { property: 'og:url', content: canonical },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'Price Alerts | Kalmate' },
-    { name: 'twitter:description', content: 'Set up stock price alerts and monitor market moves with Kalmate.' },
+    { name: 'twitter:title', content: computed(() => t('terminal.heading.alerts')) },
+    { name: 'twitter:description', content: computed(() => t('landing.features.cards.alerts.desc')) },
   ],
   link: [{ rel: 'canonical', href: canonical }],
 })
@@ -25,10 +27,10 @@ onMounted(() => startPolling(30000))
 
 <template>
   <div class="text-xs text-[#ccc] mb-3 flex items-center gap-2">
-    <span class="font-sans">ALERTS</span>
+    <span class="font-sans">{{ $t('terminal.heading.alerts') }}</span>
     <span class="text-[#888] text-[10px] flex items-center gap-1">
       <span :class="isPolling ? 'text-[#00c853]' : 'text-[#888]'" class="text-xs">●</span>
-      {{ isPolling ? 'LIVE' : 'OFF' }}
+      {{ isPolling ? $t('terminal.alerts.live') : $t('terminal.alerts.off') }}
     </span>
   </div>
   <AlertForm :refresh-key="refreshKey" />

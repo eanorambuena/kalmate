@@ -55,8 +55,8 @@ function selectSymbol(symbol: string) {
     <input
       v-model="query"
       type="text"
-      placeholder="Search ticker... (e.g. AAPL, USDCLP=X)"
-      aria-label="Search stocks and symbols"
+      :placeholder="$t('search.placeholder')"
+      :aria-label="$t('search.inputLabel')"
       role="combobox"
       aria-expanded="isOpen && results.length > 0"
       aria-autocomplete="list"
@@ -70,14 +70,14 @@ function selectSymbol(symbol: string) {
       v-if="isOpen && query.length > 0"
       id="search-results"
       role="listbox"
-      aria-label="Search results"
+      :aria-label="$t('search.resultsLabel')"
       class="absolute top-full left-0 right-0 mt-1 bg-[#1a1a1a] border border-[#333] rounded shadow-xl z-50 max-h-80 overflow-y-auto"
     >
       <div v-if="searching" class="text-center text-[#ccc] py-3 text-xs" aria-live="polite">
-        Searching...
+        {{ $t('search.searching') }}
       </div>
       <div v-else-if="noResults" class="text-center text-[#ccc] py-3 text-xs" aria-live="polite">
-        No results for "{{ query }}"
+        {{ $t('search.noResults', { query }) }}
       </div>
       <button
         v-for="r in results"
