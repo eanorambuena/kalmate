@@ -32,7 +32,7 @@ export default {
       alerts: 'ALERTAS',
       pipeline: 'PIPELINE',
       pricing: 'PRECIOS',
-      about: 'SOBRE',
+      about: 'ACERCA DE',
       contact: 'CONTACTO',
       blog: 'BLOG',
     },
@@ -49,7 +49,7 @@ export default {
     links: 'Enlaces',
     legal: 'Legal',
     terminal: 'Terminal',
-    about: 'Sobre',
+    about: 'Acerca de',
     contact: 'Contacto',
     blog: 'Blog',
     privacyPolicy: 'Política de Privacidad',
@@ -448,7 +448,7 @@ export default {
   },
   staticPages: {
     about: {
-      title: 'Sobre Kalmate',
+      title: 'Acerca de Kalmate',
       lead: 'Kalmate es un terminal financiero profesional gratuito construido para la web moderna. Proporciona datos de mercado en tiempo real, gráficos profesionales, seguimiento de portafolio y herramientas avanzadas — todo a costo cero.',
       why: '¿Por qué Kalmate?',
       whyText: 'Las herramientas de datos financieros son caras. Los terminales profesionales cuestan miles al año. Construimos Kalmate para democratizar el acceso a la inteligencia de mercado en tiempo real — completamente gratis, sin necesidad de registro.',
