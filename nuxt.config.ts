@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     '@vue-flow/controls/dist/style.css',
   ],
   compatibilityDate: '2024-11-01',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
   nitro: {
     preset: 'cloudflare-pages',
   },
