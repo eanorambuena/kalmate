@@ -8,12 +8,12 @@
   </div>
 </template>
 
-<script setup>
-const props = defineProps({
-  label: { type: String, default: '' },
-  color: { type: String, default: '#888' },
-  data: { type: Object, default: () => ({}) },
-})
+<script setup lang="ts">
+defineProps<{
+  label?: string
+  color?: string
+  data?: Record<string, any>
+}>()
 
 const skipKeys = ['label', 'pro', 'type', 'defaultData']
 

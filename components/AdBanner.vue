@@ -6,7 +6,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ads } from '../utils/ads'
 
 const showAd = computed(() => ads.googleAdSense.enabled && ads.googleAdSense.publisherId)
