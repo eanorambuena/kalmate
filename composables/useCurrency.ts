@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 
 const STORAGE_KEY = 'kalmate-currency'
 
@@ -10,11 +10,17 @@ function detectCurrency(): 'CLP' | 'USD' {
   return 'USD'
 }
 
-const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
-const currency = ref<'CLP' | 'USD'>(saved === 'CLP' || saved === 'USD' ? saved : detectCurrency())
+const currency = ref<'CLP' | 'USD'>(detectCurrency())
+
+onMounted(() => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved === 'CLP' || saved === 'USD') currency.value = saved
+  } catch {}
+})
 
 watch(currency, (c) => {
-  if (typeof localStorage !== 'undefined') localStorage.setItem(STORAGE_KEY, c)
+  try { localStorage.setItem(STORAGE_KEY, c) } catch {}
 })
 
 export function useCurrency() {
