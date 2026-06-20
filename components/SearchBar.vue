@@ -58,7 +58,7 @@ function selectSymbol(symbol: string) {
       placeholder="Search ticker... (e.g. AAPL, USDCLP=X)"
       aria-label="Search stocks and symbols"
       role="combobox"
-      aria-expanded="isOpen && results.length > 0"
+      :aria-expanded="isOpen && results.length > 0"
       aria-autocomplete="list"
       aria-controls="search-results"
       aria-activedescendant=""
