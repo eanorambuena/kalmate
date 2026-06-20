@@ -10,8 +10,10 @@ const HEADERS = {
   Referer: 'https://finance.yahoo.com/',
 }
 
+const TIMEOUT_MS = 10_000
+
 async function apiFetch(url: string) {
-  const res = await fetch(url, { headers: HEADERS })
+  const res = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(TIMEOUT_MS) })
   if (!res.ok) throw new Error(`Yahoo API ${res.status}: ${res.statusText}`)
   return res.json()
 }
