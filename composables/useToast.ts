@@ -7,7 +7,7 @@ export interface Toast {
 const toasts = ref<Toast[]>([])
 
 function add(message: string, type: Toast['type'] = 'info') {
-  const id = Math.random().toString(36).slice(2, 8)
+  const id = crypto.randomUUID()
   toasts.value.push({ id, message, type })
   setTimeout(() => remove(id), 3000)
 }

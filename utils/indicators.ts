@@ -1,10 +1,13 @@
 export function calcSMA(data: number[], period: number): number[] {
-  const result: number[] = []
+  const result: number[] = new Array(data.length).fill(0)
+  if (data.length === 0 || period < 1) return result
+  let sum = 0
   for (let i = 0; i < data.length; i++) {
-    if (i < period - 1) { result.push(0); continue }
-    let sum = 0
-    for (let j = i - period + 1; j <= i; j++) sum += data[j]
-    result.push(sum / period)
+    sum += data[i]
+    if (i >= period - 1) {
+      result[i] = sum / period
+      sum -= data[i - period + 1]
+    }
   }
   return result
 }
