@@ -48,7 +48,7 @@ const props = defineProps<{
           >
             <td class="px-3 py-2.5">
               <NuxtLink
-                :to="`/stock/${item.symbol}`"
+                :to="`/terminal/stock/${item.symbol}`"
                 class="text-[#00c853] font-mono font-bold hover:underline hover:text-[#00e060] transition-colors"
                 :aria-label="`${item.symbol} - ${item.name}`"
               >

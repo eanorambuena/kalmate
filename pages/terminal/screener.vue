@@ -186,7 +186,7 @@ onMounted(search)
             >
               <td class="px-3 py-2">
                 <NuxtLink
-                  :to="`/stock/${item.symbol}`"
+                  :to="`/terminal/stock/${item.symbol}`"
                   class="text-[#00c853] font-mono font-bold hover:underline"
                 >
                   {{ item.symbol }}

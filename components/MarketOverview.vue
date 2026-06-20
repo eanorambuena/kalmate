@@ -49,7 +49,7 @@ const indices = computed<IndexDisplay[]>(() => {
       <NuxtLink
         v-for="idx in indices"
         :key="idx.symbol"
-        :to="`/stock/${idx.symbol}`"
+        :to="`/terminal/stock/${idx.symbol}`"
         class="block rounded-lg p-3 transition-all duration-200 hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98]"
         :style="(idx.change ?? 0) >= 0 ? { '--glow': 'var(--glow-green)' } : { '--glow': 'var(--glow-red)' }"
         :aria-label="`${idx.name}: ${idx.price?.toFixed(2)} ${(idx.change ?? 0) >= 0 ? 'up' : 'down'} ${Math.abs(idx.change ?? 0).toFixed(2)}`"

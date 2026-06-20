@@ -8,8 +8,9 @@
     "build": "nuxi build",
     "generate": "nuxi generate",
     "preview": "nuxi preview",
-    "test": "node --experimental-strip-types --test test/pipeline.test.ts test/quotePoller.test.ts",
+    "test": "node --experimental-strip-types --test test/pipeline.test.ts test/quotePoller.test.ts test/links.test.ts",
     "test:all": "node --experimental-strip-types --test 'test/**/*.test.ts'",
+>>>>>>> df6f146 (fix: corregir links rotos a /terminal/stock/ + .env.example + test de links)
     "test:a11y": "lighthouse http://localhost:3000 --output-path=./reports/lighthouse-a11y.html --output=html --only-categories=accessibility --view",
     "test:perf": "lighthouse http://localhost:3000 --output-path=./reports/lighthouse-perf.html --output=html --only-categories=performance,best-practices,seo --view",
     "test:lighthouse": "lighthouse http://localhost:3000 --output-path=./reports/lighthouse.html --output=html --view",
