@@ -51,12 +51,13 @@ async function addHolding() {
         avgPrice: Number(newAvgPrice.value),
       },
     })
+    const symbol = newSymbol.value.toUpperCase()
     newSymbol.value = ''
     newShares.value = ''
     newAvgPrice.value = ''
     await fetchPortfolio()
     await fetchQuotes()
-    addToast(`${newSymbol.value.toUpperCase() || 'Position'} added`, 'success')
+    addToast(`${symbol || 'Position'} added`, 'success')
   } catch (e) {
     addToast('Failed to add position', 'error')
     console.error(e)
