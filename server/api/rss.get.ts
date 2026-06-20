@@ -1,4 +1,4 @@
-export default defineEventHandler(() => {
+export default defineEventHandler((event) => {
   const posts = [
     {
       title: 'What Is a Financial Terminal and Why Do You Need One?',
