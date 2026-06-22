@@ -33,7 +33,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'landing' })
 
-const posts = [
+const allPosts = [
   {
     slug: 'what-is-a-financial-terminal',
     title: 'What Is a Financial Terminal and Why Do You Need One?',
@@ -55,7 +55,33 @@ const posts = [
     date: 'June 5, 2026',
     category: 'Education',
   },
+  {
+    slug: 'first-pipeline-tutorial',
+    title: 'Your First Pipeline: Symbol Input → Kalman Filter → Chart Output',
+    excerpt: 'Step-by-step beginner tutorial: build a live price-smoothing pipeline in 5 minutes. Drag nodes, connect them, watch real-time AAPL data flow.',
+    date: 'June 21, 2026',
+    category: 'Tutorial',
+  },
+  {
+    slug: 'advanced-pipeline-mean-reversion',
+    title: 'Advanced Pipeline: Multi-Symbol Mean-Reversion with RSI + SMA',
+    excerpt: 'Build a mean-reversion strategy: Multi-Symbol Input → RSI → SMA → Alert Output. Get browser notifications when assets hit oversold levels.',
+    date: 'June 28, 2026',
+    category: 'Tutorial',
+  },
+  {
+    slug: 'pipeline-nodes-reference',
+    title: 'All 18 Pipeline Nodes Explained: When to Use Each',
+    excerpt: 'Complete reference: 7 Input nodes, 6 Process nodes (Kalman, SMA, EMA, RSI, Math, Forecast), 5 Output nodes. When to use each with examples.',
+    date: 'July 5, 2026',
+    category: 'Reference',
+  },
 ]
+
+const now = new Date()
+const posts = allPosts
+  .filter(p => new Date(p.date) <= now)
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
 useHead({
   title: 'Blog — Kalmate | Financial Education & Market Insights',

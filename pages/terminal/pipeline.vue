@@ -42,8 +42,17 @@ main#main-content {
     <PipelineEditor @help="showTutorial" />
     <PipelineTutorial :key="tutorialKey" />
     <template #fallback>
-      <div class="flex items-center justify-center h-96">
-        <p class="text-[#888] text-sm">Loading editor...</p>
+      <div class="max-w-3xl mx-auto px-6 py-24 text-center">
+        <h1 class="text-3xl font-bold text-white mb-4">Visual Pipeline Editor</h1>
+        <p class="text-[#ccc] mb-6">Drag and drop nodes to build custom data pipelines. Connect Symbol Input → Kalman Filter → Chart Output for live price smoothing, or combine RSI, SMA, and Alert nodes for automated trading signals.</p>
+        <div class="flex flex-wrap justify-center gap-2 text-sm text-[#888]">
+          <span class="bg-[#111] px-3 py-1 rounded">Symbol Input</span>
+          <span class="text-[#555]">→</span>
+          <span class="bg-[#111] px-3 py-1 rounded">Kalman Filter</span>
+          <span class="text-[#555]">→</span>
+          <span class="bg-[#111] px-3 py-1 rounded">Chart Output</span>
+        </div>
+        <p class="text-[#888] text-xs mt-6">Loading editor...</p>
       </div>
     </template>
   </ClientOnly>

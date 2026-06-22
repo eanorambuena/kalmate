@@ -41,6 +41,7 @@ useHead({
 
 const { el: featuresEl, visible: featuresVisible } = useScrollReveal(0.1, 100)
 const { el: techEl, visible: techVisible } = useScrollReveal(0.2, 200)
+const { el: blogEl, visible: blogVisible } = useScrollReveal(0.3, 100)
 
 const features = [
   { icon: '<svg class="w-6 h-6 text-[#00c853]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>', title: 'Market Dashboard', desc: 'Real-time quotes for equities, forex, bonds, commodities, and crypto. Organized by category with instant search.' },
@@ -52,6 +53,13 @@ const features = [
 ]
 
 const tech = ['Nuxt 3', 'Vue 3', 'TypeScript', 'Tailwind CSS', 'TradingView Charts', 'Yahoo Finance API', 'Cloudflare Pages', 'Nitro Server']
+
+const blogPosts = [
+  { slug: 'what-is-a-financial-terminal', title: 'What Is a Financial Terminal and Why Do You Need One?', excerpt: 'Bloomberg costs $24K/year. Kalmate is free. Compare costs, explore 29 symbols across 6 asset classes, and see real-time AAPL data in action.', category: 'Education', date: 'June 15, 2026' },
+  { slug: 'understanding-market-indicators', title: 'Understanding Market Indicators: SMA, EMA, and Kalman Filters', excerpt: 'See SMA(3) vs EMA(3) calculated step by step with real numbers. Learn when to use each indicator and try them live in Kalmate\'s Pipeline.', category: 'Tutorial', date: 'June 10, 2026' },
+  { slug: 'build-diversified-portfolio', title: 'How to Build a Diversified Portfolio in 2026', excerpt: 'Step-by-step guide with real symbols: SPY, QQQ, ^TNX, GC=F, BTC-USD. Track your diversified portfolio live in Kalmate\'s free Portfolio Tracker.', category: 'Education', date: 'June 5, 2026' },
+  { slug: 'first-pipeline-tutorial', title: 'Your First Pipeline: Symbol Input → Kalman Filter → Chart Output', excerpt: 'Step-by-step beginner tutorial: build a live price-smoothing pipeline in 5 minutes. Drag nodes, connect them, watch real-time AAPL data flow.', category: 'Tutorial', date: 'June 21, 2026' },
+]
 
 const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
 </script>
@@ -76,12 +84,15 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
             Free professional terminal powered by Yahoo Finance. Track equities, forex, bonds, commodities, and crypto with real-time data and professional-grade charts.
           </p>
           <div class="animate-fade-in-up flex flex-col items-start gap-3" style="animation-delay: 0.7s">
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 flex-wrap">
               <a href="/terminal/pipeline" class="inline-flex items-center gap-2 bg-[#00c853] text-black font-bold px-8 py-3.5 rounded-lg hover:bg-[#00e060] transition-colors text-sm tracking-wide whitespace-nowrap">
                 TRY PIPELINES →
               </a>
               <a href="/terminal" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm">
                 LAUNCH TERMINAL
+              </a>
+              <a href="/blog" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm">
+                READ BLOG →
               </a>
             </div>
             <a href="/terminal/stock/AAPL" class="text-[#ccc] hover:text-[#ccc] transition-colors text-xs font-mono tracking-wider no-underline">
@@ -126,6 +137,42 @@ const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')
             :class="techVisible ? 'animate-fade-in-up' : 'opacity-0'"
             :style="{ animationDelay: `${i * 0.08}s` }"
           >{{ t }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="blog" class="py-32 px-6" ref="blogEl">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-20" :class="blogVisible ? 'animate-fade-in-up' : 'opacity-0'">
+          <p class="text-[#00c853] text-sm font-mono tracking-widest mb-4">LATEST FROM BLOG</p>
+          <h2 class="text-4xl md:text-5xl font-bold text-white">Market Insights & Tutorials</h2>
+          <p class="text-[#ccc] mt-4 max-w-lg mx-auto">Deep dives into financial terminals, technical indicators, and portfolio strategies.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <article v-for="(post, i) in blogPosts" :key="post.slug"
+            class="bg-[#111] border border-[#222] rounded-2xl p-8 hover:border-[#00c853]/30 transition-all duration-300"
+            style="{ animationDelay: `${0.1 + i * 0.1}s` }"
+          >
+            <div class="flex items-center gap-3 text-xs text-[#888] mb-3">
+              <span>{{ post.date }}</span>
+              <span class="w-1 h-1 rounded-full bg-[#555]" />
+              <span class="text-[#00c853]">{{ post.category }}</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">
+              <a :href="`/blog/${post.slug}`" class="hover:text-[#00c853] transition-colors">
+                {{ post.title }}
+              </a>
+            </h3>
+            <p class="text-[#ccc] text-sm leading-relaxed mb-4">{{ post.excerpt }}</p>
+            <a :href="`/blog/${post.slug}`" class="text-[#00c853] text-sm font-medium hover:underline">
+              Read more →
+            </a>
+          </article>
+        </div>
+        <div class="text-center mt-12">
+          <a href="/blog" class="inline-flex items-center gap-2 border border-[#333] text-[#ccc] px-8 py-3.5 rounded-lg hover:border-[#555] transition-colors text-sm">
+            VIEW ALL POSTS →
+          </a>
         </div>
       </div>
     </section>
