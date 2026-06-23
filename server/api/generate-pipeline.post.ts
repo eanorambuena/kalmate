@@ -17,7 +17,7 @@ function buildPrompt(query: string): string {
 ${nodeList}
 Each node is identified by its "type". "Input" nodes provide data, "process" nodes transform it, "output" nodes display it.
 
-Generate a pipeline for: "${query}"
+The user query may be in Spanish or English. Generate a pipeline for: "${query}"
 
 Return ONLY valid JSON without markdown, without explanations, with this structure:
 {
@@ -41,18 +41,19 @@ RULES:
 - A priceFeed can connect to multiple nodes`
 }
 
-const VALID_KEYWORDS = [
-  'chart', 'candle', 'candlestick', 'sma', 'ema', 'rsi', 'kalman',
-  'moving average', 'forecast', 'price', 'symbol', 'indicator',
-  'compare', 'plot', 'show', 'display', 'track', 'portfolio',
-  'filter', 'smooth', 'signal', 'forex', 'stock', 'currency',
+const VALID_WORDS = [
+  'chart', 'candle', 'sma', 'ema', 'rsi', 'kalman', 'forecast',
+  'price', 'symbol', 'show', 'track', 'filter', 'signal',
+  'linea', 'grafico', 'vela', 'media', 'promedio', 'prediccion',
+  'mostrar', 'compar', 'suave', 'filtro', 'relativo',
 ]
 
 function isValidQuery(q: string): boolean {
-  const lowered = q.toLowerCase()
-  if (lowered.length < 3) return false
-  if (/[A-Z]{2,5}/.test(q)) return true
-  return VALID_KEYWORDS.some(k => lowered.includes(k))
+  const s = q.trim()
+  if (s.length < 2) return false
+  const lowered = s.toLowerCase()
+  if (/[A-Z]{2,5}/.test(s)) return true
+  return VALID_WORDS.some(w => lowered.includes(w))
 }
 
 export default defineEventHandler(async (event) => {
@@ -67,7 +68,7 @@ export default defineEventHandler(async (event) => {
     return { error: 'Describe qué pipeline quieres construir' }
   }
   if (!isValidQuery(query)) {
-    return { error: 'Describe qué pipeline quieres construir. Ej: "chart AAPL con SMA20" o "forecast EURUSD con kalman"' }
+    return { error: 'Describe qué pipeline quieres construir. Ej: "grafico AAPL con media 20" o "velas BTC"' }
   }
 
   const prompt = buildPrompt(query)
