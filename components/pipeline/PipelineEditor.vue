@@ -124,7 +124,7 @@
           @click="showAI = !showAI"
           title="Generate pipeline with AI"
         >
-          <Zap class="w-3.5 h-3.5" />
+          <Sparkles class="w-3.5 h-3.5" />
         </button>
         <button
           class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
@@ -187,7 +187,7 @@ import CandleNode from './nodes/CandleNode.vue'
 import ProModal from './ProModal.vue'
 import PipelineAI from './PipelineAI.vue'
 import PipelineSaver from './PipelineSaver.vue'
-import { Trash2, BarChart3, Play, Pause, MousePointer2, Zap, Folder } from '@lucide/vue'
+import { Trash2, BarChart3, Play, Pause, MousePointer2, Sparkles, Folder } from '@lucide/vue'
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode, candle: CandleNode }
 const flowContainer = ref<HTMLElement | null>(null)

@@ -49,7 +49,7 @@
             @click="doGenerate"
             title="Generate"
           >
-            <Zap class="w-4 h-4" v-if="!generating" />
+            <Sparkles class="w-4 h-4" v-if="!generating" />
             <span v-else class="animate-pulse text-[10px]">...</span>
           </button>
         </div>
@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { useAIPipeline } from '~/composables/useAIPipeline'
-import { Zap } from '@lucide/vue'
+import { Sparkles } from '@lucide/vue'
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{
