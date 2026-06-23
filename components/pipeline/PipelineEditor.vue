@@ -429,6 +429,8 @@ function onPipelineLoad(data: { nodes: any[]; edges: any[]; results: any; counte
 function onAIApply(plan: { nodes: any[]; edges: any[] }) {
   const idMap = new Map<number, string>()
   const newNodes: any[] = []
+  const catCount: Record<string, number> = { input: 0, process: 0, output: 0 }
+  const catY: Record<string, number> = { input: 80, process: 300, output: 520 }
   for (let i = 0; i < plan.nodes.length; i++) {
     const spec = plan.nodes[i]
     const def = nodeDefinitions.find(n => n.type === spec.type)
@@ -437,10 +439,12 @@ function onAIApply(plan: { nodes: any[]; edges: any[] }) {
     const id = `${spec.type}-${nodeCounter}`
     idMap.set(i, id)
     const nodeType = spec.type === 'chartOutput' ? 'chart' : spec.type === 'candleChart' ? 'candle' : 'custom'
+    const cat = def.category
+    const col = catCount[cat]++
     newNodes.push({
       id,
       type: nodeType,
-      position: spec.position || { x: 50 + i * 200, y: 150 },
+      position: spec.position || { x: 80 + col * 280, y: catY[cat] },
       zIndex: 10,
       data: { ...def.defaultData, ...spec.data, label: `${def.label} ${nodeCounter}`, type: spec.type, pro: def.pro },
     })
