@@ -9,9 +9,14 @@
 <script setup lang="ts">
 import { ads } from '../utils/ads'
 
-const showAd = computed(() => ads.googleAdSense.enabled && ads.googleAdSense.publisherId)
+const route = useRoute()
+const isEditorialPage = computed(() => {
+  return ads.googleAdSense.enabled && ads.googleAdSense.publisherId && !route.path.startsWith('/terminal')
+})
 
-if (ads.googleAdSense.enabled && ads.googleAdSense.publisherId && ads.googleAdSense.autoAds) {
+const showAd = isEditorialPage
+
+if (isEditorialPage.value) {
   useHead({
     script: [
       {
