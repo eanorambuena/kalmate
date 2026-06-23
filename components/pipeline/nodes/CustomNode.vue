@@ -87,8 +87,8 @@
       />
     </div>
 
-    <div v-if="displayPrice" class="text-center mb-2">
-      <span class="text-white font-mono text-sm font-bold">${{ displayPrice }}</span>
+    <div v-if="displayValue" class="text-center mb-2">
+      <span class="text-white font-mono text-sm font-bold" :class="displayClass">{{ displayValue }}</span>
     </div>
     <div v-else-if="result?.error" class="text-center mb-2">
       <span class="text-[#ff1744] text-[10px]">{{ result.error }}</span>
@@ -133,11 +133,25 @@ const def = computed(() => nodeDefinitions.find(n => n.type === props.data.type)
 const label = computed(() => props.data.label || def.value.label)
 const color = computed(() => def.value.color)
 const result = computed(() => props.data?.result)
-const displayPrice = computed(() => {
+const displayValue = computed(() => {
   const r = result.value
   if (!r) return null
   const p = r.source ?? r.price
-  return typeof p === 'number' ? p.toFixed(2) : null
+  if (typeof p === 'number') return '$' + p.toFixed(2)
+  if (r.signal === 1) return 'Overpriced'
+  if (r.signal === -1) return 'Underpriced'
+  if (Array.isArray(r.seriesA) && r.seriesA.length > 0) {
+    const last = r.seriesA[r.seriesA.length - 1]
+    return typeof last === 'number' ? '$' + last.toFixed(2) : null
+  }
+  return null
+})
+const displayClass = computed(() => {
+  const r = result.value
+  if (!r) return ''
+  if (r.signal === 1) return 'text-[#ff1744]'
+  if (r.signal === -1) return 'text-[#00c853]'
+  return ''
 })
 
 const editing = ref(false)
