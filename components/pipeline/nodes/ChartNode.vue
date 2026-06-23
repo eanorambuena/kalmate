@@ -28,6 +28,7 @@
     <div class="flex flex-col gap-1 mt-2">
       <div v-for="inp in inputs" :key="inp.id" class="flex items-center gap-1 relative pl-3">
         <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ position:'absolute', left:'0px', top:'50%' }" />
+        <Handle type="source" :position="Position.Left" :id="'left:' + inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0 !opacity-0" :style="{ position:'absolute', left:'0px', top:'50%' }" />
         <span class="text-[9px] text-[#aaa]">{{ inp.label }}</span>
       </div>
     </div>

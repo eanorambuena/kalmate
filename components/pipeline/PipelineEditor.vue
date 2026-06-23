@@ -316,11 +316,27 @@ function addNode(type: string) {
 }
 
 function onConnect(connection: any) {
-  edges.value = [...edges.value, {
-    ...connection,
-    id: `e-${connection.source}-${connection.target}`,
-    style: { stroke: '#555', strokeWidth: 2 },
-  }]
+  const { source, target, sourceHandle, targetHandle } = connection
+  if (sourceHandle?.startsWith('left:') || targetHandle?.startsWith('right:')) {
+    const newSource = target
+    const newTarget = source
+    const newSourceHandle = (targetHandle || '').replace('right:', '')
+    const newTargetHandle = (sourceHandle || '').replace('left:', '')
+    edges.value = [...edges.value, {
+      id: `e-${newSource}-${newTarget}`,
+      source: newSource,
+      target: newTarget,
+      sourceHandle: newSourceHandle,
+      targetHandle: newTargetHandle,
+      style: { stroke: '#555', strokeWidth: 2 },
+    }]
+  } else {
+    edges.value = [...edges.value, {
+      ...connection,
+      id: `e-${source}-${target}`,
+      style: { stroke: '#555', strokeWidth: 2 },
+    }]
+  }
 }
 
 function onCanvasClick(e: MouseEvent) {
