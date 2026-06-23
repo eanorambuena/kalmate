@@ -77,9 +77,9 @@
         </button>
         <button
           class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[10px] font-bold rounded hover:text-white transition-colors border border-transparent"
-          @click="clearAll"
+          @click="confirmClear"
         >
-          Clear
+          Clear All
         </button>
         <button
           class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[10px] font-bold rounded hover:text-white transition-colors border border-transparent"
@@ -385,6 +385,13 @@ async function runPipeline() {
     console.error(e)
   }
   running.value = false
+}
+
+function confirmClear() {
+  if (nodes.value.length === 0) return
+  if (confirm('Delete all nodes and connections?')) {
+    clearAll()
+  }
 }
 
 function clearAll() {
