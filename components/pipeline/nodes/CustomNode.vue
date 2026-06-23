@@ -87,6 +87,13 @@
       />
     </div>
 
+    <div v-if="displayPrice" class="text-center mb-2">
+      <span class="text-white font-mono text-sm font-bold">${{ displayPrice }}</span>
+    </div>
+    <div v-else-if="result?.error" class="text-center mb-2">
+      <span class="text-[#ff1744] text-[10px]">{{ result.error }}</span>
+    </div>
+
     <div class="flex items-start justify-between gap-1 mb-1">
       <div class="flex flex-col gap-1">
         <template v-if="def.type === 'portfolioInput'">
@@ -125,6 +132,13 @@ const props = defineProps({
 const def = computed(() => nodeDefinitions.find(n => n.type === props.data.type) || nodeDefinitions[0])
 const label = computed(() => props.data.label || def.value.label)
 const color = computed(() => def.value.color)
+const result = computed(() => props.data?.result)
+const displayPrice = computed(() => {
+  const r = result.value
+  if (!r) return null
+  const p = r.source ?? r.price
+  return typeof p === 'number' ? p.toFixed(2) : null
+})
 
 const editing = ref(false)
 const editLabel = ref('')
