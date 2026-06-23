@@ -165,7 +165,7 @@
         <MousePointer2 class="w-3 h-3 text-[#00c853]" />
           <span>Drag from output to input to connect</span>
           <span class="w-px h-3 bg-[#333]" />
-          <span>Click Clear button to delete</span>
+          <span>Click trash icon to delete edges</span>
       </div>
     </div>
 
