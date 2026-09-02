@@ -79,9 +79,9 @@ function cancelLabel() {
 }
 
 const candles = computed(() => {
-  const ohlc = result.value?.ohlc
-  if (!Array.isArray(ohlc) || ohlc.length < 2) return []
-  return ohlc.filter((h: any) => h.open > 0 && h.high > 0 && h.low > 0 && h.close > 0)
+  const candleSeries = result.value?.candleSeries ?? result.value?.ohlc
+  if (!Array.isArray(candleSeries) || candleSeries.length < 2) return []
+  return candleSeries.filter((h: any) => h.open > 0 && h.high > 0 && h.low > 0 && h.close > 0)
 })
 
 const svgW = 260, svgH = 110, pad = 5, maxCandles = 40
@@ -126,9 +126,9 @@ const overlays = computed(() => {
   type Overlay = { label: string; color: string; points: string }
   const out: Overlay[] = []
   const overlaysRaw: [string, string, string][] = [
-    [r.seriesB, 'Overlay A', '#2979ff'],
-    [r.seriesC, 'Overlay B', '#aa00ff'],
-    [r.seriesD, 'Overlay C', '#ff6d00'],
+    [r.overlayA ?? r.seriesB, 'Overlay A', '#2979ff'],
+    [r.overlayB ?? r.seriesC, 'Overlay B', '#aa00ff'],
+    [r.overlayC ?? r.seriesD, 'Overlay C', '#ff6d00'],
   ]
   for (const [data, label, color] of overlaysRaw) {
     if (!Array.isArray(data) || data.length < 2) continue
@@ -139,14 +139,14 @@ const overlays = computed(() => {
 })
 
 const lastPrice = computed(() => {
-  const ohlc = result.value?.ohlc
-  if (!Array.isArray(ohlc) || ohlc.length === 0) return null
-  return ohlc[ohlc.length - 1].close?.toFixed(2) ?? null
+  const candleSeries = result.value?.candleSeries ?? result.value?.ohlc
+  if (!Array.isArray(candleSeries) || candleSeries.length === 0) return null
+  return candleSeries[candleSeries.length - 1].close?.toFixed(2) ?? null
 })
 
 const openPrice = computed(() => {
-  const ohlc = result.value?.ohlc
-  if (!Array.isArray(ohlc) || ohlc.length === 0) return 0
-  return ohlc[ohlc.length - 1].open ?? 0
+  const candleSeries = result.value?.candleSeries ?? result.value?.ohlc
+  if (!Array.isArray(candleSeries) || candleSeries.length === 0) return 0
+  return candleSeries[candleSeries.length - 1].open ?? 0
 })
 </script>

@@ -216,10 +216,10 @@ onMounted(() => {
       const p = JSON.parse(saved)
       if (p.edges) {
         const oldToNew: Record<string, string> = {
-          series: 'seriesA',
-          overlay1: 'seriesB',
-          overlay2: 'seriesC',
-          overlay3: 'seriesD',
+          series: 'mainSeries',
+          overlay1: 'overlayA',
+          overlay2: 'overlayB',
+          overlay3: 'overlayC',
         }
         for (const e of p.edges) {
           if (oldToNew[e.targetHandle]) e.targetHandle = oldToNew[e.targetHandle]
@@ -367,6 +367,7 @@ function formatResult(val: any): string {
   if (val.error) return 'Error: ' + val.error
   if (typeof val === 'number') return val.toFixed(2)
   if (typeof val.price === 'number') return '$' + val.price.toFixed(2)
+  if (typeof val.scalar === 'number') return val.scalar.toFixed(2)
   if (typeof val.source === 'number') return '$' + val.source.toFixed(2)
   if (val.signal === 1) return 'Overpriced'
   if (val.signal === -1) return 'Underpriced'

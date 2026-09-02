@@ -27,8 +27,8 @@ Return ONLY valid JSON without markdown, without explanations, with this structu
     { "type": "candleChart", "data": {} }
   ],
   "edges": [
-    { "source": 0, "target": 1, "sourceHandle": "source", "targetHandle": "source" },
-    { "source": 1, "target": 2, "sourceHandle": "ohlc", "targetHandle": "seriesA" }
+    { "source": 0, "target": 1, "sourceHandle": "symbol", "targetHandle": "symbol" },
+    { "source": 1, "target": 2, "sourceHandle": "candleSeries", "targetHandle": "candleSeries" }
   ]
 }
 

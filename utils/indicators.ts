@@ -25,6 +25,7 @@ export function calcRSI(data: number[], period: number): number[] {
     if (i < period) { result.push(50); continue }
     const avgGain = gains.slice(i - period, i).reduce((a, b) => a + b, 0) / period
     const avgLoss = losses.slice(i - period, i).reduce((a, b) => a + b, 0) / period
+    if (avgGain === 0 && avgLoss === 0) { result.push(50); continue }
     if (avgLoss === 0) { result.push(100); continue }
     const rs = avgGain / avgLoss
     result.push(100 - 100 / (1 + rs))

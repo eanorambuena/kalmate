@@ -76,19 +76,19 @@ const seriesToPlot = computed(() => {
   const r = result.value
   if (!r) return []
   const series: Array<{ label: string; values: number[]; color: string }> = []
-  const mainSeries = r.seriesA || r.history || r.series || r.price
+  const mainSeries = r.mainSeries || r.priceSeries || r.seriesA || r.history || r.price
   if (Array.isArray(mainSeries) && mainSeries.length > 0) {
     series.push({ label: 'Main', values: mainSeries.map((d: any) => d.close ?? d), color: '#00c853' })
   }
-  const overlayA = r.seriesB || r.overlay1 || r.sma || r.smoothed
+  const overlayA = r.overlayA || r.seriesB || r.overlay1 || r.sma || r.smoothed
   if (Array.isArray(overlayA) && overlayA.length > 0) {
     series.push({ label: 'Overlay A', values: overlayA, color: '#2979ff' })
   }
-  const overlayB = r.seriesC || r.overlay2 || r.ema || r.forecast
+  const overlayB = r.overlayB || r.seriesC || r.overlay2 || r.ema || r.forecast
   if (Array.isArray(overlayB) && overlayB.length > 0) {
     series.push({ label: 'Overlay B', values: overlayB, color: '#aa00ff' })
   }
-  const overlayC = r.seriesD || r.overlay3 || r.trend
+  const overlayC = r.overlayC || r.seriesD || r.overlay3 || r.trend
   if (Array.isArray(overlayC) && overlayC.length > 0) {
     series.push({ label: 'Overlay C', values: overlayC, color: '#ff6d00' })
   }
@@ -96,7 +96,7 @@ const seriesToPlot = computed(() => {
 })
 
 const price = computed(() => {
-  const p = result.value?.source ?? result.value?.price
+  const p = result.value?.price ?? result.value?.source
   return typeof p === 'number' ? p.toFixed(2) : null
 })
 

@@ -138,12 +138,14 @@ const result = computed(() => props.data?.result)
 const displayValue = computed(() => {
   const r = result.value
   if (!r) return null
-  const p = r.source ?? r.price
+  const p = r.price ?? r.scalar ?? r.source
   if (typeof p === 'number') return '$' + p.toFixed(2)
   if (r.signal === 1) return 'Overpriced'
   if (r.signal === -1) return 'Underpriced'
-  if (Array.isArray(r.seriesA) && r.seriesA.length > 0) {
-    const last = r.seriesA[r.seriesA.length - 1]
+  const seriesKey = ['smaSeries', 'emaSeries', 'rsiSeries', 'smoothed', 'trend', 'forecastSeries', 'seriesA', 'history']
+    .find(k => Array.isArray(r[k]) && r[k].length > 0)
+  if (seriesKey) {
+    const last = r[seriesKey][r[seriesKey].length - 1]
     return typeof last === 'number' ? '$' + last.toFixed(2) : null
   }
   return null

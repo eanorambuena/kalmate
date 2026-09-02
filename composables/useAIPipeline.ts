@@ -83,7 +83,7 @@ function parseKeywords(query: string): PipelinePlan {
 
   nodes.push(mkNode('symbolInput', { symbol: ticker }, cnt))
   nodes.push(mkNode('priceFeed', {}, cnt))
-  edges.push({ source: 0, target: 1, sourceHandle: 'source', targetHandle: 'source' })
+  edges.push({ source: 0, target: 1, sourceHandle: 'symbol', targetHandle: 'symbol' })
 
   let nextIdx = 2
   const outputIdx: number[] = []
@@ -99,7 +99,7 @@ function parseKeywords(query: string): PipelinePlan {
   if (useCandles) {
     const candleIdx = nextIdx++
     nodes.push(mkNode('candleChart', {}, cnt))
-    edges.push({ source: 1, target: candleIdx, sourceHandle: 'ohlc', targetHandle: 'seriesA' })
+    edges.push({ source: 1, target: candleIdx, sourceHandle: 'candleSeries', targetHandle: 'candleSeries' })
     outputIdx.push(candleIdx)
   }
 
@@ -107,9 +107,9 @@ function parseKeywords(query: string): PipelinePlan {
     const smaIdx = nextIdx++
     const num = parseInt(query.match(/sma\s*(\d+)/i)?.[1] || query.match(/\b(\d+)\b/)?.[1] || '20')
     nodes.push(mkNode('smaIndicator', { period: num }, cnt))
-    edges.push({ source: 1, target: smaIdx, sourceHandle: 'history', targetHandle: 'source' })
+    edges.push({ source: 1, target: smaIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
     if (outputIdx.length > 0) {
-      edges.push({ source: smaIdx, target: outputIdx[0], sourceHandle: 'seriesA', targetHandle: 'seriesB' })
+      edges.push({ source: smaIdx, target: outputIdx[0], sourceHandle: 'smaSeries', targetHandle: 'overlayA' })
     }
   }
 
@@ -117,9 +117,9 @@ function parseKeywords(query: string): PipelinePlan {
     const emaIdx = nextIdx++
     const num = parseInt(query.match(/ema\s*(\d+)/i)?.[1] || '20')
     nodes.push(mkNode('emaIndicator', { period: num }, cnt))
-    edges.push({ source: 1, target: emaIdx, sourceHandle: 'history', targetHandle: 'source' })
+    edges.push({ source: 1, target: emaIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
     if (outputIdx.length > 0) {
-      edges.push({ source: emaIdx, target: outputIdx[0], sourceHandle: 'seriesA', targetHandle: 'seriesC' })
+      edges.push({ source: emaIdx, target: outputIdx[0], sourceHandle: 'emaSeries', targetHandle: 'overlayB' })
     }
   }
 
@@ -127,15 +127,15 @@ function parseKeywords(query: string): PipelinePlan {
     const rsiIdx = nextIdx++
     const num = parseInt(query.match(/rsi\s*(\d+)/i)?.[1] || '14')
     nodes.push(mkNode('rsiIndicator', { period: num }, cnt))
-    edges.push({ source: 1, target: rsiIdx, sourceHandle: 'history', targetHandle: 'source' })
+    edges.push({ source: 1, target: rsiIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
   }
 
   if (useKalman) {
     const kalmanIdx = nextIdx++
     nodes.push(mkNode('kalmanFilter', {}, cnt))
-    edges.push({ source: 1, target: kalmanIdx, sourceHandle: 'history', targetHandle: 'source' })
+    edges.push({ source: 1, target: kalmanIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
     if (outputIdx.length > 0) {
-      edges.push({ source: kalmanIdx, target: outputIdx[0], sourceHandle: 'seriesA', targetHandle: 'seriesD' })
+      edges.push({ source: kalmanIdx, target: outputIdx[0], sourceHandle: 'smoothed', targetHandle: 'overlayC' })
     }
   }
 
@@ -143,22 +143,22 @@ function parseKeywords(query: string): PipelinePlan {
     const fcIdx = nextIdx++
     const steps = parseInt(query.match(/(\d+)\s*(dia|day|step)/i)?.[1] || '15')
     nodes.push(mkNode('forecastNode', { steps }, cnt))
-    edges.push({ source: 1, target: fcIdx, sourceHandle: 'history', targetHandle: 'source' })
+    edges.push({ source: 1, target: fcIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
     if (outputIdx.length > 0) {
-      edges.push({ source: fcIdx, target: outputIdx[0], sourceHandle: 'seriesA', targetHandle: 'seriesB' })
+      edges.push({ source: fcIdx, target: outputIdx[0], sourceHandle: 'forecastSeries', targetHandle: 'overlayA' })
     }
   }
 
   if (useChart && !useCandles && !useForecast) {
     const chartIdx = nextIdx++
     nodes.push(mkNode('chartOutput', {}, cnt))
-    edges.push({ source: 1, target: chartIdx, sourceHandle: 'history', targetHandle: 'seriesA' })
+    edges.push({ source: 1, target: chartIdx, sourceHandle: 'priceSeries', targetHandle: 'mainSeries' })
   }
 
   if (!useCandles && !useChart && !useSma && !useEma && !useRsi && !useKalman && !useForecast) {
     const chartIdx = nextIdx++
     nodes.push(mkNode('chartOutput', {}, cnt))
-    edges.push({ source: 1, target: chartIdx, sourceHandle: 'history', targetHandle: 'seriesA' })
+    edges.push({ source: 1, target: chartIdx, sourceHandle: 'priceSeries', targetHandle: 'mainSeries' })
   }
 
   return { nodes, edges }

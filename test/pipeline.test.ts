@@ -1,6 +1,6 @@
 import { describe, it, before, mock } from 'node:test'
 import assert from 'node:assert/strict'
-import { calcSMA, calcRSI } from '../utils/indicators.ts'
+import { calcSMA, calcRSI, calcEMA } from '../utils/indicators.ts'
 import { runKalmanFilter, createDefaultParams, calibrateMLE } from '../utils/kalman.ts'
 import type { ExecutionContext } from '../utils/pipeline/types.ts'
 
@@ -31,10 +31,62 @@ describe('indicators', () => {
     assert.ok(rsi[rsi.length - 1] <= 100)
   })
 
-  it('calcRSI with flat prices returns 100', () => {
+  it('calcRSI with flat prices returns 50', () => {
     const flat = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
     const rsi = calcRSI(flat, 14)
+    assert.equal(rsi[rsi.length - 1], 50)
+  })
+
+  it('calcRSI is trend-direction aware', () => {
+    const uptrend = [44, 44, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]
+    const downtrend = [56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 44, 44]
+    const rsiUp = calcRSI(uptrend, 14)
+    const rsiDown = calcRSI(downtrend, 14)
+    assert.ok(rsiUp[rsiUp.length - 1] > 80)
+    assert.ok(rsiDown[rsiDown.length - 1] < 20)
+  })
+
+  it('calcRSI all-gains returns 100', () => {
+    const allGains = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114]
+    const rsi = calcRSI(allGains, 14)
     assert.equal(rsi[rsi.length - 1], 100)
+  })
+
+  it('calcEMA returns correct length and first value', () => {
+    const period = 5
+    const ema = calcEMA(prices, period)
+    assert.equal(ema.length, prices.length)
+    assert.equal(ema[0], prices[0])
+  })
+
+  it('calcEMA with period 1 equals raw prices', () => {
+    const ema = calcEMA(prices, 1)
+    assert.deepEqual(ema, prices)
+  })
+
+  it('calcEMA recurrence matches known values', () => {
+    const data = [10, 12, 11, 13, 14]
+    const ema = calcEMA(data, 3)
+    const k = 2 / (3 + 1)
+    let expected = data[0]
+    const known: number[] = []
+    for (let i = 0; i < data.length; i++) {
+      if (i === 0) {
+        expected = data[0]
+      } else {
+        expected = data[i] * k + expected * (1 - k)
+      }
+      known.push(expected)
+    }
+    known.forEach((v, i) => assert.ok(Math.abs(ema[i] - v) < 1e-9))
+  })
+
+  it('calcRSI returns finite values within 0-100 for all samples', () => {
+    const rsi = calcRSI(prices, 5)
+    for (const v of rsi) {
+      assert.ok(Number.isFinite(v))
+      assert.ok(v >= 0 && v <= 100)
+    }
   })
 })
 
@@ -67,6 +119,20 @@ describe('kalman filter', () => {
     const result = runKalmanFilter(short, params, 3)
     assert.ok(result.smoothed.length <= short.length)
   })
+
+  it('calibrateMLE does not produce NaN on flat prices', () => {
+    const flat = Array.from({ length: 110 }, (_, i) => 100)
+    const params = calibrateMLE(flat)
+    assert.ok(Number.isFinite(params.phi))
+    assert.ok(Number.isFinite(params.mu))
+    assert.ok(Number.isFinite(params.sigmaChi))
+    assert.ok(Number.isFinite(params.sigmaXi))
+    assert.ok(Number.isFinite(params.sigmaObs))
+    const result = runKalmanFilter(flat, params, 5)
+    for (const v of result.smoothed) {
+      assert.ok(Number.isFinite(v))
+    }
+  })
 })
 
 describe('executors', () => {
@@ -79,19 +145,19 @@ describe('executors', () => {
     executors = (mod as any).executors
   })
 
-  it('symbolInput returns source from data', async () => {
+  it('symbolInput returns symbol from data', async () => {
     const result = await executors.symbolInput(mkCtx({ data: { symbol: 'GOOGL' } }))
-    assert.equal(result.source, 'GOOGL')
+    assert.equal(result.symbol, 'GOOGL')
   })
 
   it('symbolInput defaults to AAPL', async () => {
     const result = await executors.symbolInput(mkCtx({ data: {} }))
-    assert.equal(result.source, 'AAPL')
+    assert.equal(result.symbol, 'AAPL')
   })
 
   it('priceFeed returns error when fetch fails', async () => {
     global.fetch = async () => ({ ok: false, status: 429, json: async () => ({ statusMessage: 'Rate limited' }) }) as any
-    const ctx = mkCtx({ inputs: { source: 'TEST' } })
+    const ctx = mkCtx({ inputs: { symbol: 'TEST' } })
     const result = await executors.priceFeed(ctx)
     assert.ok(result.error)
     assert.equal(result.symbol, 'TEST')
@@ -103,25 +169,25 @@ describe('executors', () => {
       ok: true,
       json: async () => [{ close: 100 }, { close: 101 }, { close: 102 }],
     }) as any
-    const ctx = mkCtx({ inputs: { source: 'AAPL' } })
+    const ctx = mkCtx({ inputs: { symbol: 'AAPL' } })
     const result = await executors.priceFeed(ctx)
     assert.equal(result.symbol, 'AAPL')
-    assert.equal(result.source, 102)
-    assert.deepEqual(result.history, [100, 101, 102])
+    assert.equal(result.price, 102)
+    assert.deepEqual(result.priceSeries, [100, 101, 102])
     global.fetch = origFetch
   })
 
   it('chartOutput passes through inputs', async () => {
-    const ctx = mkCtx({ inputs: { source: 150, history: [100, 150], seriesB: [110, 140] } })
+    const ctx = mkCtx({ inputs: { price: 150, mainSeries: [100, 150], overlayA: [110, 140] } })
     const result = await executors.chartOutput(ctx)
-    assert.equal(result.source, 150)
-    assert.deepEqual(result.history, [100, 150])
-    assert.deepEqual(result.seriesB, [110, 140])
+    assert.equal(result.price, 150)
+    assert.deepEqual(result.mainSeries, [100, 150])
+    assert.deepEqual(result.overlayA, [110, 140])
   })
 
-  it('priceDisplay returns source', async () => {
-    const result = await executors.priceDisplay(mkCtx({ inputs: { source: 200 } }))
-    assert.equal(result.source, 200)
+  it('priceDisplay returns price', async () => {
+    const result = await executors.priceDisplay(mkCtx({ inputs: { price: 200 } }))
+    assert.equal(result.price, 200)
   })
 
   it('alertOutput returns signal and threshold', async () => {
@@ -131,60 +197,89 @@ describe('executors', () => {
     assert.equal(result.threshold, 0.05)
   })
 
-  it('smaIndicator calculates SMA from history', async () => {
-    const ctx = mkCtx({ inputs: { history: prices }, data: { period: 5 } })
+  it('smaIndicator calculates SMA from price series', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period: 5 } })
     const result = await executors.smaIndicator(ctx)
-    assert.ok(Array.isArray(result.seriesA))
-    assert.equal(result.seriesA.length, prices.length)
+    assert.ok(Array.isArray(result.smaSeries))
+    assert.equal(result.smaSeries.length, prices.length)
   })
 
   it('smaIndicator returns error for short series', async () => {
-    const ctx = mkCtx({ inputs: { history: [100] } })
+    const ctx = mkCtx({ inputs: { priceSeries: [100] } })
     const result = await executors.smaIndicator(ctx)
     assert.ok(result.error)
   })
 
-  it('rsiIndicator returns last RSI value and history', async () => {
-    const ctx = mkCtx({ inputs: { history: prices }, data: { period: 14 } })
+  it('rsiIndicator returns last RSI value and series', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period: 14 } })
     const result = await executors.rsiIndicator(ctx)
-    assert.ok(typeof result.seriesA === 'number')
-    assert.ok(Array.isArray(result.rsi_history))
-    assert.equal(result.rsi_history.length, prices.length)
+    assert.ok(typeof result.rsiValue === 'number')
+    assert.ok(Array.isArray(result.rsiSeries))
+    assert.equal(result.rsiSeries.length, prices.length)
   })
 
   it('rsiIndicator returns error for short series', async () => {
-    const ctx = mkCtx({ inputs: { history: [100] } })
+    const ctx = mkCtx({ inputs: { priceSeries: [100] } })
     const result = await executors.rsiIndicator(ctx)
     assert.ok(result.error)
   })
 
   it('forecastNode returns forecast array', async () => {
-    const ctx = mkCtx({ inputs: { history: prices }, data: { steps: 10 } })
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 10 } })
     const result = await executors.forecastNode(ctx)
-    assert.ok(Array.isArray(result.seriesA))
-    assert.equal(result.seriesA.length, 10)
-    assert.ok(Array.isArray(result.seriesB))
-    assert.equal(result.seriesB.length, 10)
+    assert.ok(Array.isArray(result.forecastSeries))
+    assert.equal(result.forecastSeries.length, 10)
+    assert.ok(Array.isArray(result.confidenceSeries))
+    assert.equal(result.confidenceSeries.length, 10)
+  })
+
+  it('forecastNode values are positive and finite', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 10 } })
+    const result = await executors.forecastNode(ctx)
+    for (const v of result.forecastSeries) {
+      assert.ok(Number.isFinite(v))
+      assert.ok(v > 0)
+    }
+    for (const b of result.confidenceSeries) {
+      assert.ok(Number.isFinite(b))
+      assert.ok(b >= 0)
+    }
+  })
+
+  it('forecastNode confidence bands expand with steps', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 10 } })
+    const result = await executors.forecastNode(ctx)
+    for (let i = 1; i < result.confidenceSeries.length; i++) {
+      assert.ok(result.confidenceSeries[i] >= result.confidenceSeries[i - 1])
+    }
+  })
+
+  it('forecastNode follows positive trend', async () => {
+    const trending = Array.from({ length: 30 }, (_, i) => 100 + i * 2)
+    const ctx = mkCtx({ inputs: { priceSeries: trending }, data: { steps: 10 } })
+    const result = await executors.forecastNode(ctx)
+    const lastSmoothed = result.forecastSeries[0] - (result.forecastSeries[1] - result.forecastSeries[0])
+    assert.ok(result.forecastSeries[result.forecastSeries.length - 1] > lastSmoothed)
   })
 
   it('forecastNode returns error for short series', async () => {
-    const ctx = mkCtx({ inputs: { history: [100, 101, 102] } })
+    const ctx = mkCtx({ inputs: { priceSeries: [100, 101, 102] } })
     const result = await executors.forecastNode(ctx)
     assert.ok(result.error)
   })
 
-  it('kalmanFilter returns seriesA, seriesB, signal', async () => {
-    const ctx = mkCtx({ inputs: { history: prices } })
+  it('kalmanFilter returns smoothed, trend, signal', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices } })
     const result = await executors.kalmanFilter(ctx)
-    assert.ok(Array.isArray(result.seriesA))
-    assert.ok(Array.isArray(result.seriesB))
+    assert.ok(Array.isArray(result.smoothed))
+    assert.ok(Array.isArray(result.trend))
     assert.ok(Array.isArray(result.cycle))
     assert.ok(result.signal === 1 || result.signal === -1)
-    assert.equal(result.seriesA.length, prices.length)
+    assert.equal(result.smoothed.length, prices.length)
   })
 
   it('kalmanFilter returns error for short series', async () => {
-    const ctx = mkCtx({ inputs: { history: [100, 101] } })
+    const ctx = mkCtx({ inputs: { priceSeries: [100, 101] } })
     const result = await executors.kalmanFilter(ctx)
     assert.ok(result.error)
   })
@@ -228,118 +323,135 @@ describe('executors', () => {
 
   it('currencyInput returns symbol from data', async () => {
     const result = await executors.currencyInput(mkCtx({ data: { from: 'EUR', to: 'USD' } }))
-    assert.equal(result.source, 'EURUSD=X')
+    assert.equal(result.symbol, 'EURUSD=X')
   })
 
   it('currencyInput defaults to USDCLP', async () => {
     const result = await executors.currencyInput(mkCtx({ data: {} }))
-    assert.equal(result.source, 'USDCLP=X')
+    assert.equal(result.symbol, 'USDCLP=X')
   })
 
-  it('candleChart passes ohlc from seriesA', async () => {
+  it('candleChart passes candle series from candleSeries', async () => {
     const ohlcData = [{ open: 100, high: 105, low: 99, close: 103 }]
-    const result = await executors.candleChart(mkCtx({ inputs: { seriesA: ohlcData } }))
-    assert.deepEqual(result.ohlc, ohlcData)
+    const result = await executors.candleChart(mkCtx({ inputs: { candleSeries: ohlcData } }))
+    assert.deepEqual(result.candleSeries, ohlcData)
   })
 
   it('candleChart passes overlay series', async () => {
     const ohlcData = [{ open: 100, high: 105, low: 99, close: 103 }]
     const overlay = [101, 102, 103]
-    const result = await executors.candleChart(mkCtx({ inputs: { seriesA: ohlcData, seriesB: overlay } }))
-    assert.deepEqual(result.ohlc, ohlcData)
-    assert.deepEqual(result.seriesB, overlay)
+    const result = await executors.candleChart(mkCtx({ inputs: { candleSeries: ohlcData, overlayA: overlay } }))
+    assert.deepEqual(result.candleSeries, ohlcData)
+    assert.deepEqual(result.overlayA, overlay)
   })
 
-  it('candleChart returns null ohlc with no input', async () => {
+  it('candleChart returns null candle series with no input', async () => {
     const result = await executors.candleChart(mkCtx({ inputs: {} }))
-    assert.equal(result.ohlc, null)
+    assert.equal(result.candleSeries, null)
   })
 
-  it('emaIndicator calculates EMA from history', async () => {
-    const ctx = mkCtx({ inputs: { history: prices }, data: { period: 5 } })
+  it('emaIndicator calculates EMA from price series', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period: 5 } })
     const result = await executors.emaIndicator(ctx)
-    assert.ok(Array.isArray(result.seriesA))
-    assert.equal(result.seriesA.length, prices.length)
+    assert.ok(Array.isArray(result.emaSeries))
+    assert.equal(result.emaSeries.length, prices.length)
   })
 
   it('emaIndicator returns error for short series', async () => {
-    const ctx = mkCtx({ inputs: { history: [100] } })
+    const ctx = mkCtx({ inputs: { priceSeries: [100] } })
     const result = await executors.emaIndicator(ctx)
     assert.ok(result.error)
   })
 
   it('scalarInput returns value from data', async () => {
     const result = await executors.scalarInput(mkCtx({ data: { value: 42 } }))
-    assert.equal(result.source, 42)
+    assert.equal(result.scalar, 42)
   })
 
   it('scalarInput defaults to 1', async () => {
     const result = await executors.scalarInput(mkCtx({ data: {} }))
-    assert.equal(result.source, 1)
+    assert.equal(result.scalar, 1)
   })
 
   it('mathOp adds two scalars', async () => {
-    const result = await executors.mathOp(mkCtx({ inputs: { sourceA: 10, sourceB: 5 }, data: { op: '+' } }))
-    assert.equal(result.source, 15)
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: 10, operandB: 5 }, data: { op: '+' } }))
+    assert.equal(result.scalar, 15)
   })
 
   it('mathOp subtracts scalars', async () => {
-    const result = await executors.mathOp(mkCtx({ inputs: { sourceA: 10, sourceB: 5 }, data: { op: '-' } }))
-    assert.equal(result.source, 5)
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: 10, operandB: 5 }, data: { op: '-' } }))
+    assert.equal(result.scalar, 5)
   })
 
   it('mathOp multiplies scalars', async () => {
-    const result = await executors.mathOp(mkCtx({ inputs: { sourceA: 10, sourceB: 5 }, data: { op: '*' } }))
-    assert.equal(result.source, 50)
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: 10, operandB: 5 }, data: { op: '*' } }))
+    assert.equal(result.scalar, 50)
   })
 
   it('mathOp divides scalars', async () => {
-    const result = await executors.mathOp(mkCtx({ inputs: { sourceA: 10, sourceB: 5 }, data: { op: '/' } }))
-    assert.equal(result.source, 2)
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: 10, operandB: 5 }, data: { op: '/' } }))
+    assert.equal(result.scalar, 2)
   })
 
   it('mathOp handles division by zero', async () => {
-    const result = await executors.mathOp(mkCtx({ inputs: { sourceA: 10, sourceB: 0 }, data: { op: '/' } }))
-    assert.equal(result.source, 0)
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: 10, operandB: 0 }, data: { op: '/' } }))
+    assert.equal(result.scalar, 0)
   })
 
   it('mathOp defaults to addition when op is missing', async () => {
-    const result = await executors.mathOp(mkCtx({ inputs: { sourceA: 10, sourceB: 5 }, data: {} }))
-    assert.equal(result.source, 15)
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: 10, operandB: 5 }, data: {} }))
+    assert.equal(result.scalar, 15)
   })
 
   it('mathOp adds two arrays element-wise', async () => {
-    const result = await executors.mathOp(mkCtx({ inputs: { sourceA: [1, 2, 3], sourceB: [4, 5, 6] }, data: { op: '+' } }))
-    assert.ok(Array.isArray(result.source))
-    assert.deepEqual(result.source, [5, 7, 9])
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: [1, 2, 3], operandB: [4, 5, 6] }, data: { op: '+' } }))
+    assert.ok(Array.isArray(result.scalar))
+    assert.deepEqual(result.scalar, [5, 7, 9])
   })
 
   it('mathOp subtracts two arrays', async () => {
-    const result = await executors.mathOp(mkCtx({ inputs: { sourceA: [10, 20, 30], sourceB: [1, 2, 3] }, data: { op: '-' } }))
-    assert.ok(Array.isArray(result.source))
-    assert.deepEqual(result.source, [9, 18, 27])
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: [10, 20, 30], operandB: [1, 2, 3] }, data: { op: '-' } }))
+    assert.ok(Array.isArray(result.scalar))
+    assert.deepEqual(result.scalar, [9, 18, 27])
+  })
+
+  it('mathOp multiplies two arrays element-wise', async () => {
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: [2, 3, 4], operandB: [5, 6, 7] }, data: { op: '*' } }))
+    assert.deepEqual(result.scalar, [10, 18, 28])
+  })
+
+  it('mathOp divides two arrays element-wise', async () => {
+    const result = await executors.mathOp(mkCtx({ inputs: { operandA: [10, 20, 30], operandB: [2, 4, 5] }, data: { op: '/' } }))
+    assert.deepEqual(result.scalar, [5, 5, 6])
   })
 
   it('portfolioInput computes weighted average', async () => {
     const result = await executors.portfolioInput(mkCtx({
-      inputs: { sourceA: 100, sourceB: 200 },
+      inputs: { operandA: 100, operandB: 200 },
       data: { weights: [2, 1] },
     }))
-    // sourceA/sourceB keys parse to NaN index, default weight 1 each
-    assert.equal(result.source, (100 * 1 + 200 * 1) / 2)
+    assert.equal(result.scalar, (100 * 2 + 200 * 1) / 3)
   })
 
   it('portfolioInput handles single input', async () => {
     const result = await executors.portfolioInput(mkCtx({
-      inputs: { sourceA: 150 },
+      inputs: { operandA: 150 },
       data: { weights: [1] },
     }))
-    assert.equal(result.source, 150)
+    assert.equal(result.scalar, 150)
+  })
+
+  it('portfolioInput handles more than two inputs', async () => {
+    const result = await executors.portfolioInput(mkCtx({
+      inputs: { operandA: 100, operandB: 200, operandC: 300 },
+      data: { weights: [1, 1, 2] },
+    }))
+    assert.equal(result.scalar, (100 * 1 + 200 * 1 + 300 * 2) / 4)
   })
 
   it('portfolioInput returns 0 with no inputs', async () => {
     const result = await executors.portfolioInput(mkCtx({ data: { weights: [1, 1] } }))
-    assert.equal(result.source, 0)
+    assert.equal(result.scalar, 0)
   })
 })
 
@@ -363,7 +475,7 @@ describe('full pipeline execution', () => {
     }
     const results = await executePipeline(spec)
     assert.ok(results.s1)
-    assert.equal(results.s1.source, 'AAPL')
+    assert.equal(results.s1.symbol, 'AAPL')
     assert.ok(results.d1)
   })
 
@@ -375,7 +487,7 @@ describe('full pipeline execution', () => {
       edges: [],
     }
     const results = await executePipeline(spec)
-    assert.equal(results.s1.source, 'AAPL')
+    assert.equal(results.s1.symbol, 'AAPL')
   })
 
   it('handles disconnected nodes gracefully', async () => {
@@ -388,7 +500,7 @@ describe('full pipeline execution', () => {
     }
     const results = await executePipeline(spec)
     assert.ok(results.n1)
-    assert.equal(results.n2.source, null)
+    assert.equal(results.n2.price, null)
   })
 
   it('runs SMA + RSI pipeline with mock fetch', async () => {
@@ -412,10 +524,10 @@ describe('full pipeline execution', () => {
       ],
     }
     const results = await executePipeline(spec)
-    assert.ok(results.pf1.source > 0)
+    assert.ok(results.pf1.price > 0)
     assert.ok(results.pf1.symbol === 'AAPL')
-    assert.ok(results.sma1.seriesA.length > 0)
-    assert.ok(typeof results.rsi1.seriesA === 'number')
+    assert.ok(results.sma1.smaSeries.length > 0)
+    assert.ok(typeof results.rsi1.rsiValue === 'number')
     global.fetch = origFetch
   })
 
@@ -459,31 +571,30 @@ describe('full pipeline execution', () => {
     }
     const results = await executePipeline(spec)
     assert.ok(results.n1)
-    assert.equal(results.n1.source, 'TEST')
+    assert.equal(results.n1.symbol, 'TEST')
     assert.ok(results.n2.error)
     assert.equal(results.n2.symbol, 'TEST')
     global.fetch = fetchBefore
   })
 
-  it('runs currencyInput → mathOp → priceDisplay pipeline', async () => {
+  it('runs scalarInput → mathOp → priceDisplay pipeline', async () => {
     const spec = {
       nodes: [
-        { id: 'c1', type: 'currencyInput', position: { x: 0, y: 0 }, data: { from: 'USD', to: 'EUR' } },
-        { id: 's1', type: 'scalarInput', position: { x: 0, y: 80 }, data: { value: 1.2 } },
+        { id: 's1', type: 'scalarInput', position: { x: 0, y: 0 }, data: { value: 1.2 } },
+        { id: 'h1', type: 'scalarInput', position: { x: 0, y: 80 }, data: { value: 2 } },
         { id: 'm1', type: 'mathOp', position: { x: 200, y: 0 }, data: { op: '*' } },
         { id: 'p1', type: 'priceDisplay', position: { x: 400, y: 0 }, data: {} },
       ],
       edges: [
-        { id: 'e1', source: 'c1', target: 'm1', sourceHandle: 'source', targetHandle: 'sourceA' },
-        { id: 'e2', source: 's1', target: 'm1', sourceHandle: 'source', targetHandle: 'sourceB' },
-        { id: 'e3', source: 'm1', target: 'p1' },
+        { id: 'e1', source: 's1', target: 'm1', sourceHandle: 'scalar', targetHandle: 'operandA' },
+        { id: 'e2', source: 'h1', target: 'm1', sourceHandle: 'scalar', targetHandle: 'operandB' },
+        { id: 'e3', source: 'm1', target: 'p1', sourceHandle: 'scalar', targetHandle: 'price' },
       ],
     }
     const results = await executePipeline(spec)
-    assert.equal(results.c1.source, 'USDEUR=X')
-    assert.equal(results.s1.source, 1.2)
-    assert.ok(results.m1.source !== undefined)
-    assert.ok(results.p1.source !== null)
+    assert.equal(results.s1.scalar, 1.2)
+    assert.equal(results.m1.scalar, 2.4)
+    assert.equal(results.p1.price, 2.4)
   })
 
   it('runs scalarInput → mathOp (subtract) pipeline', async () => {
@@ -494,12 +605,12 @@ describe('full pipeline execution', () => {
         { id: 'm', type: 'mathOp', position: { x: 200, y: 0 }, data: { op: '-' } },
       ],
       edges: [
-        { id: 'e1', source: 'a', target: 'm', sourceHandle: 'source', targetHandle: 'sourceA' },
-        { id: 'e2', source: 'b', target: 'm', sourceHandle: 'source', targetHandle: 'sourceB' },
+        { id: 'e1', source: 'a', target: 'm', sourceHandle: 'scalar', targetHandle: 'operandA' },
+        { id: 'e2', source: 'b', target: 'm', sourceHandle: 'scalar', targetHandle: 'operandB' },
       ],
     }
     const results = await executePipeline(spec)
-    assert.equal(results.m.source, 70)
+    assert.equal(results.m.scalar, 70)
   })
 
   it('runs portfolioInput pipeline', async () => {
@@ -511,15 +622,15 @@ describe('full pipeline execution', () => {
         { id: 'd', type: 'priceDisplay', position: { x: 400, y: 0 }, data: {} },
       ],
       edges: [
-        { id: 'e1', source: 'a', target: 'p', sourceHandle: 'source', targetHandle: 'sourceA' },
-        { id: 'e2', source: 'b', target: 'p', sourceHandle: 'source', targetHandle: 'sourceB' },
-        { id: 'e3', source: 'p', target: 'd' },
+        { id: 'e1', source: 'a', target: 'p', sourceHandle: 'scalar', targetHandle: 'operandA' },
+        { id: 'e2', source: 'b', target: 'p', sourceHandle: 'scalar', targetHandle: 'operandB' },
+        { id: 'e3', source: 'p', target: 'd', sourceHandle: 'scalar', targetHandle: 'price' },
       ],
     }
     const results = await executePipeline(spec)
-    const expected = (100 * 1 + 200 * 1) / 2
-    assert.equal(results.p.source, expected)
-    assert.equal(results.d.source, expected)
+    const expected = (100 * 2 + 200 * 1) / 3
+    assert.equal(results.p.scalar, expected)
+    assert.equal(results.d.price, expected)
   })
 
   it('runs SMA + EMA + candleChart pipeline with mock fetch', async () => {
@@ -539,19 +650,19 @@ describe('full pipeline execution', () => {
       ],
       edges: [
         { id: 'e1', source: 's1', target: 'pf1' },
-        { id: 'e2', source: 'pf1', target: 'sma1', sourceHandle: 'history', targetHandle: 'source' },
-        { id: 'e3', source: 'pf1', target: 'ema1', sourceHandle: 'history', targetHandle: 'source' },
-        { id: 'e4', source: 'pf1', target: 'cc1', sourceHandle: 'ohlc', targetHandle: 'seriesA' },
-        { id: 'e5', source: 'sma1', target: 'cc1', sourceHandle: 'seriesA', targetHandle: 'seriesB' },
+        { id: 'e2', source: 'pf1', target: 'sma1', sourceHandle: 'priceSeries', targetHandle: 'priceSeries' },
+        { id: 'e3', source: 'pf1', target: 'ema1', sourceHandle: 'priceSeries', targetHandle: 'priceSeries' },
+        { id: 'e4', source: 'pf1', target: 'cc1', sourceHandle: 'candleSeries', targetHandle: 'candleSeries' },
+        { id: 'e5', source: 'sma1', target: 'cc1', sourceHandle: 'smaSeries', targetHandle: 'overlayA' },
       ],
     }
     const results = await executePipeline(spec)
-    assert.ok(results.pf1.source > 0)
-    assert.ok(results.sma1.seriesA.length > 0)
-    assert.ok(results.ema1.seriesA.length > 0)
-    assert.ok(results.cc1.ohlc)
-    assert.equal(results.cc1.ohlc.length, prices.length)
-    assert.ok(results.cc1.seriesB)
+    assert.ok(results.pf1.price > 0)
+    assert.ok(results.sma1.smaSeries.length > 0)
+    assert.ok(results.ema1.emaSeries.length > 0)
+    assert.ok(results.cc1.candleSeries)
+    assert.equal(results.cc1.candleSeries.length, prices.length)
+    assert.ok(results.cc1.overlayA)
     global.fetch = origFetch
   })
 })

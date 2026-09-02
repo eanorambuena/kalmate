@@ -149,8 +149,9 @@ export function calibrateMLE(prices: number[]): KalmanParams {
   const meanRet = returns.reduce((a, b) => a + b, 0) / returns.length
   const variance = returns.reduce((a, b) => a + (b - meanRet) ** 2, 0) / returns.length
   const sigma = Math.sqrt(variance)
-  const autoCorr = returns.slice(0, -1).reduce((a, r, i) => a + r * returns[i + 1], 0) /
-    returns.slice(0, -1).reduce((a, r) => a + r * r, 0)
+  const autoCorrNum = returns.slice(0, -1).reduce((a, r, i) => a + r * returns[i + 1], 0)
+  const autoCorrDen = returns.slice(0, -1).reduce((a, r) => a + r * r, 0)
+  const autoCorr = autoCorrDen > 1e-12 ? autoCorrNum / autoCorrDen : 0.5
 
   return {
     phi: Math.min(0.99, Math.max(0.01, autoCorr)),
