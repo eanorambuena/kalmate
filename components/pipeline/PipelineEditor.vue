@@ -387,7 +387,7 @@ function onConnect(connection: any) {
     const newSourceHandle = (targetHandle || '').replace('right:', '')
     const newTargetHandle = (sourceHandle || '').replace('left:', '')
     edges.value = [...edges.value, {
-      id: `e-${newSource}-${newTarget}`,
+      id: `e-${newSource}-${newSourceHandle}-${newTarget}-${newTargetHandle}`,
       source: newSource,
       target: newTarget,
       sourceHandle: newSourceHandle,
@@ -397,7 +397,7 @@ function onConnect(connection: any) {
   } else {
     edges.value = [...edges.value, {
       ...connection,
-      id: `e-${source}-${target}`,
+      id: `e-${source}-${sourceHandle}-${target}-${targetHandle}`,
       style: { stroke: '#555', strokeWidth: 2 },
     }]
   }
