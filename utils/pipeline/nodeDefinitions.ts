@@ -31,7 +31,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'currencyInput',
     label: 'Currency',
-    description: 'Exchange rate between two currencies (USD → CLP)',
+    description: 'Pick two currencies (e.g. USD→CLP) to build a ticker for their exchange rate',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -42,7 +42,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'scalarInput',
     label: 'Scalar',
-    description: 'Enter a constant number',
+    description: 'Enter any constant number (weight, threshold, coefficient) to feed into calculations',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -53,7 +53,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'symbolInput',
     label: 'Symbol Input',
-    description: 'Enter the ticker to analyze (e.g. AAPL, GOOGL)',
+    description: 'The ticker to analyze (e.g. AAPL, GOOGL). Start here for any stock or commodity pipeline',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -64,7 +64,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'priceFeed',
     label: 'Price Feed',
-    description: 'Gets current price + history from Yahoo Finance',
+    description: 'Fetches current price and 1 year of daily history for the symbol — the source of all price data',
     category: 'input',
     color: '#2979ff',
     pro: false,
@@ -79,7 +79,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'kalmanFilter',
     label: 'Kalman Filter',
-    description: 'Smooths price with Schwartz-Smith, detects fair value',
+    description: 'Smooths noisy price data using the Schwartz-Smith model to estimate fair value and trend direction',
     category: 'process',
     color: '#00c853',
     pro: false,
@@ -94,7 +94,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'chartOutput',
     label: 'Chart',
-    description: 'Visualize prices and time series on a chart',
+    description: 'Visualize one or more time series on a line chart with date axis — connect price and overlays here',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -110,7 +110,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'candleChart',
     label: 'Candle Chart',
-    description: 'Japanese candlestick OHLC chart',
+    description: 'Japanese candlestick chart showing open/high/low/close — best for visualizing price action over time',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -126,7 +126,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'display',
     label: 'Display',
-    description: 'Shows any scalar value (price, confidence, signal result)',
+    description: 'Shows any scalar value (price, confidence, weighted result) — connect outputs from math or indicators',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -137,7 +137,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'alertOutput',
     label: 'Alert',
-    description: 'Triggers alert when price threshold is crossed',
+    description: 'Triggers an alert when a signal node reports a value that crosses the threshold you set',
     category: 'output',
     color: '#ff69b4',
     pro: false,
@@ -148,7 +148,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'multiSymbolInput',
     label: 'Multi Symbol',
-    description: 'Multiple tickers separated by comma for batch analysis',
+    description: 'Enter several tickers separated by commas for batch comparison (e.g. AAPL,GOOGL,MSFT)',
     category: 'input',
     color: '#2979ff',
     pro: true,
@@ -159,7 +159,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'smaIndicator',
     label: 'SMA',
-    description: 'Simple moving average of price',
+    description: 'Simple Moving Average — smooths price by averaging the last N days. Use it to spot the general trend direction',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -170,7 +170,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'rsiIndicator',
     label: 'RSI',
-    description: 'Relative strength index (overbought/oversold)',
+    description: 'Relative Strength Index — measures momentum on a 0-100 scale. Above 70 = overbought, below 30 = oversold',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -184,7 +184,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'forecastNode',
     label: 'Forecast',
-    description: 'Predicts future price using Kalman filter',
+    description: 'Predicts future prices using a Kalman filter. Outputs the forecast, confidence bands, and a confidence %',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -198,7 +198,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'emaIndicator',
     label: 'EMA',
-    description: 'Exponential moving average of price',
+    description: 'Exponential Moving Average — like SMA but reacts faster to recent price changes. Use for earlier signals',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -209,7 +209,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'mathOp',
     label: 'Math Op',
-    description: 'Mathematical operation between two values (+, -, *, /)',
+    description: 'Combine two values with +, -, ×, ÷. Works on single numbers or arrays (element-wise)',
     category: 'process',
     color: '#00c853',
     pro: false,
@@ -223,7 +223,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'newsOutput',
     label: 'News',
-    description: 'Latest news for the ticker from Yahoo Finance',
+    description: 'Fetches the 5 latest headlines for the symbol from Yahoo Finance — useful as a sentiment context layer',
     category: 'process',
     color: '#00c853',
     pro: false,
@@ -234,7 +234,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'telegramOutput',
     label: 'Telegram',
-    description: 'Sends alerts to your Telegram when signal triggers',
+    description: 'Sends a Telegram message when a signal node triggers — connect an alert node here',
     category: 'output',
     color: '#ff69b4',
     pro: true,
@@ -245,7 +245,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'portfolioInput',
     label: 'Portfolio',
-    description: 'Weighted sum of multiple inputs with weights',
+    description: 'Weighted average of several scalar inputs — useful for combining signals from different indicators',
     category: 'process',
     color: '#00c853',
     pro: false,
@@ -260,7 +260,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'emailOutput',
     label: 'Email',
-    description: 'Sends email report with prices and signals',
+    description: 'Sends an email report with the latest price and signal — for automated daily digests',
     category: 'output',
     color: '#ff69b4',
     pro: true,
