@@ -5,31 +5,43 @@
         <div>
           <div class="text-[10px]">Input</div>
           <div class="space-y-0.5">
-            <NodePaletteButton
+            <button
               v-for="n in inputNodes" :key="n.type"
-              :type="n.type"
+              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
+              :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
               @click="addNode(n.type)"
-            />
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
+              {{ n.label }}
+            </button>
           </div>
         </div>
         <div>
           <div class="text-[10px]">Process</div>
           <div class="space-y-0.5">
-            <NodePaletteButton
+            <button
               v-for="n in processNodes" :key="n.type"
-              :type="n.type"
+              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
+              :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
               @click="addNode(n.type)"
-            />
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
+              {{ n.label }}
+            </button>
           </div>
         </div>
         <div>
           <div class="text-[10px]">Output</div>
           <div class="space-y-0.5">
-            <NodePaletteButton
+            <button
               v-for="n in outputNodes" :key="n.type"
-              :type="n.type"
+              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
+              :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
               @click="addNode(n.type)"
-            />
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
+              {{ n.label }}
+            </button>
           </div>
         </div>
         <div>
@@ -38,12 +50,16 @@
             <svg v-if="!isPro" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
           </div>
           <div class="space-y-0.5">
-            <NodePaletteButton
+            <button
               v-for="n in proNodes" :key="n.type"
-              :type="n.type"
-              :enabled="isPro"
+              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
+              :style="{ background: isPro ? n.color + '15' : '#111', color: isPro ? n.color : '#555', border: '1px solid ' + (isPro ? n.color + '25' : '#222') }"
+              :disabled="!isPro"
               @click="isPro ? addNode(n.type) : showProModal = true"
-            />
+            >
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: isPro ? n.color : '#444' }" />
+              {{ n.label }}
+            </button>
           </div>
         </div>
       </div>
@@ -171,7 +187,6 @@ import CandleNode from './nodes/CandleNode.vue'
 import ProModal from './ProModal.vue'
 import PipelineAI from './PipelineAI.vue'
 import PipelineSaver from './PipelineSaver.vue'
-import NodePaletteButton from './NodePaletteButton.vue'
 import { Trash2, BarChart3, Play, Pause, MousePointer2, Sparkles, Folder } from '@lucide/vue'
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode, candle: CandleNode }
