@@ -187,7 +187,18 @@ describe('executors', () => {
     assert.deepEqual(result.overlayA.map((p: any) => p.value), [110, 140])
   })
 
-  it('priceDisplay returns price', async () => {
+  it('display returns price', async () => {
+    const result = await executors.display(mkCtx({ inputs: { value: 200 } }))
+    assert.equal(result.price, 200)
+    assert.equal(result.value, 200)
+  })
+
+  it('display reads scalar fallback', async () => {
+    const result = await executors.display(mkCtx({ inputs: { scalar: 42 } }))
+    assert.equal(result.price, 42)
+  })
+
+  it('priceDisplay alias still works', async () => {
     const result = await executors.priceDisplay(mkCtx({ inputs: { price: 200 } }))
     assert.equal(result.price, 200)
   })
@@ -557,7 +568,7 @@ describe('full pipeline execution', () => {
     const spec = {
       nodes: [
         { id: 's1', type: 'symbolInput', position: { x: 0, y: 0 }, data: { symbol: 'AAPL' } },
-        { id: 'd1', type: 'priceDisplay', position: { x: 200, y: 0 }, data: {} },
+        { id: 'd1', type: 'display', position: { x: 200, y: 0 }, data: {} },
       ],
       edges: [
         { id: 'e1', source: 's1', target: 'd1' },
@@ -584,7 +595,7 @@ describe('full pipeline execution', () => {
     const spec = {
       nodes: [
         { id: 'n1', type: 'symbolInput', position: { x: 0, y: 0 }, data: {} },
-        { id: 'n2', type: 'priceDisplay', position: { x: 200, y: 0 }, data: {} },
+        { id: 'n2', type: 'display', position: { x: 200, y: 0 }, data: {} },
       ],
       edges: [],
     }
@@ -638,7 +649,7 @@ describe('full pipeline execution', () => {
     const spec = {
       nodes: [
         { id: 'a', type: 'symbolInput', position: { x: 0, y: 0 }, data: {} },
-        { id: 'b', type: 'priceDisplay', position: { x: 200, y: 0 }, data: {} },
+        { id: 'b', type: 'display', position: { x: 200, y: 0 }, data: {} },
       ],
       edges: [
         { id: 'e1', source: 'a', target: 'b' },
@@ -673,12 +684,12 @@ describe('full pipeline execution', () => {
         { id: 's1', type: 'scalarInput', position: { x: 0, y: 0 }, data: { value: 1.2 } },
         { id: 'h1', type: 'scalarInput', position: { x: 0, y: 80 }, data: { value: 2 } },
         { id: 'm1', type: 'mathOp', position: { x: 200, y: 0 }, data: { op: '*' } },
-        { id: 'p1', type: 'priceDisplay', position: { x: 400, y: 0 }, data: {} },
+        { id: 'p1', type: 'display', position: { x: 400, y: 0 }, data: {} },
       ],
       edges: [
         { id: 'e1', source: 's1', target: 'm1', sourceHandle: 'scalar', targetHandle: 'operandA' },
         { id: 'e2', source: 'h1', target: 'm1', sourceHandle: 'scalar', targetHandle: 'operandB' },
-        { id: 'e3', source: 'm1', target: 'p1', sourceHandle: 'scalar', targetHandle: 'price' },
+        { id: 'e3', source: 'm1', target: 'p1', sourceHandle: 'scalar', targetHandle: 'value' },
       ],
     }
     const results = await executePipeline(spec)
@@ -709,12 +720,12 @@ describe('full pipeline execution', () => {
         { id: 'a', type: 'scalarInput', position: { x: 0, y: 0 }, data: { value: 100 } },
         { id: 'b', type: 'scalarInput', position: { x: 0, y: 80 }, data: { value: 200 } },
         { id: 'p', type: 'portfolioInput', position: { x: 200, y: 0 }, data: { weights: [2, 1] } },
-        { id: 'd', type: 'priceDisplay', position: { x: 400, y: 0 }, data: {} },
+        { id: 'd', type: 'display', position: { x: 400, y: 0 }, data: {} },
       ],
       edges: [
         { id: 'e1', source: 'a', target: 'p', sourceHandle: 'scalar', targetHandle: 'operandA' },
         { id: 'e2', source: 'b', target: 'p', sourceHandle: 'scalar', targetHandle: 'operandB' },
-        { id: 'e3', source: 'p', target: 'd', sourceHandle: 'scalar', targetHandle: 'price' },
+        { id: 'e3', source: 'p', target: 'd', sourceHandle: 'scalar', targetHandle: 'value' },
       ],
     }
     const results = await executePipeline(spec)

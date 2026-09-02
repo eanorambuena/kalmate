@@ -59,8 +59,14 @@ export const executors: Record<string, NodeExecutor> = {
     }
   },
 
+  display: async (ctx) => {
+    const v = ctx.inputs.value ?? ctx.inputs.price ?? ctx.inputs.scalar ?? null
+    return { value: v, price: v }
+  },
+
   priceDisplay: async (ctx) => {
-    return { price: ctx.inputs.price ?? null }
+    const v = ctx.inputs.value ?? ctx.inputs.price ?? ctx.inputs.scalar ?? null
+    return { value: v, price: v }
   },
 
   alertOutput: async (ctx) => {
@@ -130,7 +136,10 @@ export const executors: Record<string, NodeExecutor> = {
       const DAY = 86_400_000
       const fcSeries = forecast.map((v, i) => ({ timestamp: lastTs + DAY * i, value: v }))
       const confSeries = confidence.map((v, i) => ({ timestamp: lastTs + DAY * i, value: v }))
-      return { forecastSeries: fcSeries, confidenceSeries: confSeries }
+      const lastBand = confidence[confidence.length - 1] ?? 0
+      const lastFc = forecast[forecast.length - 1] ?? lastSmoothed
+      const confPct = lastFc > 0 ? Math.min(99, Math.max(1, Math.round((lastBand / lastFc) * 100))) : 1
+      return { forecastSeries: fcSeries, confidenceSeries: confSeries, confidence: confPct }
     } catch (e: any) {
       return { forecastSeries: [], error: e?.message || 'Forecast error' }
     }

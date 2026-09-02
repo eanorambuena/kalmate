@@ -64,7 +64,7 @@ const CATEGORY: Record<string, string> = {
   symbolInput: 'input', priceFeed: 'input', currencyInput: 'input', scalarInput: 'input',
   smaIndicator: 'process', emaIndicator: 'process', rsiIndicator: 'process',
   kalmanFilter: 'process', forecastNode: 'process', mathOp: 'process', portfolioInput: 'process',
-  chartOutput: 'output', candleChart: 'output', priceDisplay: 'output', alertOutput: 'output',
+  chartOutput: 'output', candleChart: 'output', display: 'output', priceDisplay: 'output', alertOutput: 'output',
 }
 
 function mkNode(type: string, data: Record<string, any>, counter: Record<string, number>): NodeSpec {

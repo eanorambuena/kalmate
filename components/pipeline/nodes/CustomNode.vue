@@ -139,7 +139,7 @@ const result = computed(() => props.data?.result)
 const displayValue = computed(() => {
   const r = result.value
   if (!r) return null
-  const p = r.price ?? r.scalar ?? r.source
+  const p = r.value ?? r.price ?? r.scalar ?? r.source
   if (typeof p === 'number') return '$' + p.toFixed(2)
   if (r.signal === 1) return 'Overpriced'
   if (r.signal === -1) return 'Underpriced'
