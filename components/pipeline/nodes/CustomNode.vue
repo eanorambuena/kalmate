@@ -9,7 +9,7 @@
 
     <p class="text-white text-xs font-medium mb-0.5 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ label }}</p>
     <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-0.5 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
-    <p class="text-[#bbb] text-[10px] mb-2">{{ def.description }}</p>
+    <p class="text-[#bbb] text-[10px] mb-2 max-w-[160px] line-clamp-2 leading-snug">{{ def.description }}</p>
 
     <div v-if="def.type === 'symbolInput'" class="mb-2">
       <input
