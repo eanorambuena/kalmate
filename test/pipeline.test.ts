@@ -204,6 +204,25 @@ describe('executors', () => {
     assert.equal(result.smaSeries.length, prices.length)
   })
 
+  it('smaIndicator matches calcSMA exactly', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period: 5 } })
+    const result = await executors.smaIndicator(ctx)
+    assert.deepEqual(result.smaSeries, calcSMA(prices, 5))
+    assert.equal(result.smaSeries[4], (100 + 102 + 101 + 103 + 105) / 5)
+  })
+
+  it('smaIndicator applies period from data', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period: 3 } })
+    const result = await executors.smaIndicator(ctx)
+    assert.deepEqual(result.smaSeries, calcSMA(prices, 3))
+  })
+
+  it('smaIndicator uses default period 20 when not provided', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices } })
+    const result = await executors.smaIndicator(ctx)
+    assert.deepEqual(result.smaSeries, calcSMA(prices, 20))
+  })
+
   it('smaIndicator returns error for short series', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: [100] } })
     const result = await executors.smaIndicator(ctx)
@@ -216,6 +235,16 @@ describe('executors', () => {
     assert.ok(typeof result.rsiValue === 'number')
     assert.ok(Array.isArray(result.rsiSeries))
     assert.equal(result.rsiSeries.length, prices.length)
+  })
+
+  it('rsiIndicator matches calcRSI and rsiValue is last element', async () => {
+    const period = 14
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period } })
+    const result = await executors.rsiIndicator(ctx)
+    const expected = calcRSI(prices, period)
+    assert.deepEqual(result.rsiSeries, expected)
+    assert.equal(result.rsiValue, expected[expected.length - 1])
+    assert.ok(result.rsiValue >= 0 && result.rsiValue <= 100)
   })
 
   it('rsiIndicator returns error for short series', async () => {
@@ -251,6 +280,45 @@ describe('executors', () => {
     const result = await executors.forecastNode(ctx)
     for (let i = 1; i < result.confidenceSeries.length; i++) {
       assert.ok(result.confidenceSeries[i] >= result.confidenceSeries[i - 1])
+    }
+  })
+
+  it('forecastNode forecast length follows steps config', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 5 } })
+    const result = await executors.forecastNode(ctx)
+    assert.equal(result.forecastSeries.length, 5)
+    assert.equal(result.confidenceSeries.length, 5)
+  })
+
+  it('forecastNode uses default steps when not provided', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices } })
+    const result = await executors.forecastNode(ctx)
+    assert.equal(result.forecastSeries.length, 15)
+  })
+
+  it('forecastNode first forecast starts near the last price', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 5 } })
+    const result = await executors.forecastNode(ctx)
+    const lastPrice = prices[prices.length - 1]
+    const first = result.forecastSeries[0]
+    assert.ok(Math.abs(first - lastPrice) / lastPrice < 0.1, `first=${first}, last=${lastPrice}`)
+  })
+
+  it('forecastNode confidence grows proportionally to value', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 8 } })
+    const result = await executors.forecastNode(ctx)
+    for (let i = 0; i < result.forecastSeries.length; i++) {
+      assert.ok(result.confidenceSeries[i] > 0)
+      assert.ok(result.confidenceSeries[i] < result.forecastSeries[i])
+    }
+  })
+
+  it('forecastNode of a flat series stays near the flat level', async () => {
+    const flat = Array.from({ length: 30 }, () => 100)
+    const ctx = mkCtx({ inputs: { priceSeries: flat }, data: { steps: 10 } })
+    const result = await executors.forecastNode(ctx)
+    for (const v of result.forecastSeries) {
+      assert.ok(Math.abs(v - 100) / 100 < 0.15, `forecast=${v}`)
     }
   })
 
@@ -355,6 +423,25 @@ describe('executors', () => {
     const result = await executors.emaIndicator(ctx)
     assert.ok(Array.isArray(result.emaSeries))
     assert.equal(result.emaSeries.length, prices.length)
+  })
+
+  it('emaIndicator matches calcEMA exactly and first value equals price', async () => {
+    const period = 5
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period } })
+    const result = await executors.emaIndicator(ctx)
+    assert.deepEqual(result.emaSeries, calcEMA(prices, period))
+    assert.equal(result.emaSeries[0], prices[0])
+  })
+
+  it('emaIndicator smooths and lags the raw price', async () => {
+    const period = 3
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period } })
+    const result = await executors.emaIndicator(ctx)
+    const ema = result.emaSeries
+    for (let i = 1; i < ema.length; i++) {
+      const expected = prices[i] * (2 / (period + 1)) + ema[i - 1] * (1 - 2 / (period + 1))
+      assert.ok(Math.abs(ema[i] - expected) < 1e-9)
+    }
   })
 
   it('emaIndicator returns error for short series', async () => {
