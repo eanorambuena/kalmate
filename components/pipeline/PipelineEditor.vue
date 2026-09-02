@@ -318,8 +318,9 @@ function syncPortfolioInputs() {
 
 let autoRunTimer: any = null
 function scheduleAutoRun() {
-  if (!autorun.value) return
-  if (edges.value.length > 0 && nodes.value.some(n => n.data?.type === 'priceFeed' || n.data?.type === 'kalmanFilter')) {
+  if (!autorun.value || running.value) return
+  const computableTypes = new Set(['priceFeed', 'kalmanFilter', 'forecastNode', 'smaIndicator', 'emaIndicator', 'rsiIndicator', 'mathOp', 'portfolioInput', 'newsOutput'])
+  if (edges.value.length > 0 && nodes.value.some(n => computableTypes.has(n.data?.type))) {
     clearTimeout(autoRunTimer)
     autoRunTimer = setTimeout(() => runPipeline(), 300)
   }
