@@ -124,6 +124,7 @@
 <script setup lang="ts">
 import { Handle, Position } from '@vue-flow/core'
 import { nodeDefinitions, currencies } from '../../../utils/pipeline/nodeDefinitions'
+import { toSeriesValues } from '../../../utils/series'
 import { computed, ref, onMounted, nextTick } from 'vue'
 
 const props = defineProps({
@@ -145,7 +146,8 @@ const displayValue = computed(() => {
   const seriesKey = ['smaSeries', 'emaSeries', 'rsiSeries', 'smoothed', 'trend', 'forecastSeries', 'seriesA', 'history']
     .find(k => Array.isArray(r[k]) && r[k].length > 0)
   if (seriesKey) {
-    const last = r[seriesKey][r[seriesKey].length - 1]
+    const vals = toSeriesValues(r[seriesKey])
+    const last = vals[vals.length - 1]
     return typeof last === 'number' ? '$' + last.toFixed(2) : null
   }
   return null

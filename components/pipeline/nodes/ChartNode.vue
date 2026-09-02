@@ -7,9 +7,13 @@
     <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
     <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
     <div v-if="seriesToPlot.length > 0" class="w-full h-[120px] relative">
-      <svg viewBox="0 0 260 110" class="w-full h-full" preserveAspectRatio="none">
+      <svg viewBox="0 0 260 115" class="w-full h-full" preserveAspectRatio="none">
+        <line x1="5" y1="109" x2="255" y2="109" stroke="#333" stroke-width="1" />
         <path v-for="(s, idx) in seriesToPlot" :key="idx" :d="areaPath(s.values)" :fill="s.color" opacity="0.1" />
         <polyline v-for="(s, idx) in seriesToPlot" :key="idx + 100" :points="linePoints(s.values)" fill="none" :stroke="s.color" stroke-width="2" vector-effect="non-scaling-stroke" />
+        <g v-for="(t, idx) in xTicks" :key="'t' + idx">
+          <text :x="t.x" y="113" fill="#666" font-size="6" text-anchor="middle" font-family="monospace">{{ t.label }}</text>
+        </g>
       </svg>
       <div class="absolute top-2 right-2 flex flex-col gap-1 text-[9px]">
         <span v-for="(s, idx) in seriesToPlot" :key="idx" class="flex items-center gap-1" :style="{ color: s.color }">
@@ -39,6 +43,7 @@
 import { Handle, Position } from '@vue-flow/core'
 import { computed, ref, nextTick } from 'vue'
 import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
+import { toSeriesValues, toSeriesTimestamps } from '~/utils/series'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -72,27 +77,59 @@ function cancelLabel() {
 
 const result = computed(() => props.data?.result)
 
-const seriesToPlot = computed(() => {
+type Plot = { label: string; values: number[]; timestamps: number[]; color: string }
+
+function norm(series: any): { values: number[]; timestamps: number[] } {
+  return { values: toSeriesValues(series), timestamps: toSeriesTimestamps(series, toSeriesValues(series).length) }
+}
+
+const seriesToPlot = computed<Plot[]>(() => {
   const r = result.value
   if (!r) return []
-  const series: Array<{ label: string; values: number[]; color: string }> = []
-  const mainSeries = r.mainSeries || r.priceSeries || r.seriesA || r.history || r.price
-  if (Array.isArray(mainSeries) && mainSeries.length > 0) {
-    series.push({ label: 'Main', values: mainSeries.map((d: any) => d.close ?? d), color: '#00c853' })
+  const series: Plot[] = []
+  const main = norm(r.mainSeries || r.priceSeries || r.seriesA || r.history || r.price)
+  if (main.values.length > 0) {
+    series.push({ label: 'Main', values: main.values, timestamps: main.timestamps, color: '#00c853' })
   }
-  const overlayA = r.overlayA || r.seriesB || r.overlay1 || r.sma || r.smoothed
-  if (Array.isArray(overlayA) && overlayA.length > 0) {
-    series.push({ label: 'Overlay A', values: overlayA, color: '#2979ff' })
+  const overlayA = norm(r.overlayA || r.seriesB || r.overlay1 || r.sma || r.smoothed)
+  if (overlayA.values.length > 0) {
+    series.push({ label: 'Overlay A', values: overlayA.values, timestamps: overlayA.timestamps, color: '#2979ff' })
   }
-  const overlayB = r.overlayB || r.seriesC || r.overlay2 || r.ema || r.forecast
-  if (Array.isArray(overlayB) && overlayB.length > 0) {
-    series.push({ label: 'Overlay B', values: overlayB, color: '#aa00ff' })
+  const overlayB = norm(r.overlayB || r.seriesC || r.overlay2 || r.ema || r.forecast)
+  if (overlayB.values.length > 0) {
+    series.push({ label: 'Overlay B', values: overlayB.values, timestamps: overlayB.timestamps, color: '#aa00ff' })
   }
-  const overlayC = r.overlayC || r.seriesD || r.overlay3 || r.trend
-  if (Array.isArray(overlayC) && overlayC.length > 0) {
-    series.push({ label: 'Overlay C', values: overlayC, color: '#ff6d00' })
+  const overlayC = norm(r.overlayC || r.seriesD || r.overlay3 || r.trend)
+  if (overlayC.values.length > 0) {
+    series.push({ label: 'Overlay C', values: overlayC.values, timestamps: overlayC.timestamps, color: '#ff6d00' })
   }
   return series
+})
+
+const mainTimestamps = computed<number[]>(() =>
+  seriesToPlot.value.find(s => s.label === 'Main')?.timestamps ?? seriesToPlot.value[0]?.timestamps ?? [],
+)
+
+function fmtDate(ts: number): string {
+  const d = new Date(ts)
+  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+const xTicks = computed(() => {
+  const ts = mainTimestamps.value
+  if (ts.length === 0) return []
+  const n = ts.length - 1
+  const len = seriesToPlot.value[0]?.values.length ?? ts.length
+  const lastIdx = Math.max(len - 1, 0)
+  const xForTs = (tsIdx: number) => {
+    const idx = len > 1 ? Math.round((tsIdx / n) * lastIdx) : 0
+    return pad + (idx / lastIdx) * (svgW - pad * 2)
+  }
+  const picks = [0, Math.floor(n / 2), n]
+  return picks.map(tsIdx => ({
+    x: xForTs(tsIdx),
+    label: fmtDate(ts[tsIdx]),
+  }))
 })
 
 const price = computed(() => {
@@ -100,7 +137,7 @@ const price = computed(() => {
   return typeof p === 'number' ? p.toFixed(2) : null
 })
 
-const svgW = 260, svgH = 110, pad = 5
+const svgW = 260, svgH = 114, pad = 5
 
 const getMinMax = (series: Array<{ values: number[] }>) => {
   let min = Infinity, max = -Infinity

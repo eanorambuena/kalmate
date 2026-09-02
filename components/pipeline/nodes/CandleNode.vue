@@ -7,12 +7,16 @@
     <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
     <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
     <div v-if="candles.length > 0" class="w-full h-[120px] relative">
-      <svg viewBox="0 0 260 110" class="w-full h-full" preserveAspectRatio="none">
+      <svg viewBox="0 0 260 115" class="w-full h-full" preserveAspectRatio="none">
         <g v-for="(c, i) in visibleCandles.items" :key="i">
           <line :x1="c.x" :y1="c.highY" :x2="c.x" :y2="c.lowY" :stroke="c.color" stroke-width="1" />
           <rect :x="c.x - c.w / 2" :y="c.bodyTop" :width="c.w" :height="c.bodyH" :fill="c.color" />
         </g>
         <polyline v-for="(ov, idx) in overlays" :key="'ov-'+idx" :points="ov.points" fill="none" :stroke="ov.color" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        <line x1="5" y1="109" x2="255" y2="109" stroke="#333" stroke-width="1" />
+        <g v-for="(t, idx) in axisLabels" :key="'ax'+idx">
+          <text :x="t.x" y="113" fill="#666" font-size="6" text-anchor="middle" font-family="monospace">{{ t.label }}</text>
+        </g>
       </svg>
       <div class="absolute top-2 right-2 flex flex-col gap-1 text-[9px]">
         <span class="text-[#aaa] font-mono">{{ candles.length }} candles</span>
@@ -43,6 +47,7 @@
 import { Handle, Position } from '@vue-flow/core'
 import { computed, ref, nextTick } from 'vue'
 import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
+import { toSeriesValues } from '~/utils/series'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -132,10 +137,29 @@ const overlays = computed(() => {
   ]
   for (const [data, label, color] of overlaysRaw) {
     if (!Array.isArray(data) || data.length < 2) continue
-    const pts = data.slice(-maxCandles).map((v: number, i: number) => `${xAt(i)},${yScale(v)}`).join(' ')
+    const values = toSeriesValues(data)
+    const pts = values.slice(-maxCandles).map((v: number, i: number) => `${xAt(i)},${yScale(v)}`).join(' ')
     out.push({ label, color, points: pts })
   }
   return out
+})
+
+function fmtDate(ts?: number): string {
+  if (!ts) return ''
+  const d = new Date(ts)
+  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+const axisLabels = computed(() => {
+  const slice = candles.value.slice(-maxCandles)
+  if (slice.length === 0) return []
+  const candleW = (svgW - pad * 2) / slice.length
+  const first = slice[0]
+  const last = slice[slice.length - 1]
+  return [
+    { x: pad + candleW / 2, label: fmtDate(first.timestamp) },
+    { x: pad + (slice.length - 1) * candleW + candleW / 2, label: fmtDate(last.timestamp) },
+  ]
 })
 
 const lastPrice = computed(() => {
