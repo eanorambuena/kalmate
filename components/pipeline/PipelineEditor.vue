@@ -10,6 +10,10 @@
               class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
               :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
               @click="addNode(n.type)"
+              @mouseenter="showTip(n, $event)"
+              @mouseleave="hideTip"
+              @focus="showTip(n, $event)"
+              @blur="hideTip"
             >
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
               {{ n.label }}
@@ -24,6 +28,10 @@
               class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
               :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
               @click="addNode(n.type)"
+              @mouseenter="showTip(n, $event)"
+              @mouseleave="hideTip"
+              @focus="showTip(n, $event)"
+              @blur="hideTip"
             >
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
               {{ n.label }}
@@ -38,6 +46,10 @@
               class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
               :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
               @click="addNode(n.type)"
+              @mouseenter="showTip(n, $event)"
+              @mouseleave="hideTip"
+              @focus="showTip(n, $event)"
+              @blur="hideTip"
             >
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
               {{ n.label }}
@@ -56,6 +68,10 @@
               :style="{ background: isPro ? n.color + '15' : '#111', color: isPro ? n.color : '#555', border: '1px solid ' + (isPro ? n.color + '25' : '#222') }"
               :disabled="!isPro"
               @click="isPro ? addNode(n.type) : showProModal = true"
+              @mouseenter="showTip(n, $event)"
+              @mouseleave="hideTip"
+              @focus="showTip(n, $event)"
+              @blur="hideTip"
             >
               <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: isPro ? n.color : '#444' }" />
               {{ n.label }}
@@ -172,6 +188,42 @@
     <ProModal v-model="showProModal" />
     <PipelineAI v-model="showAI" @apply="onAIApply" />
     <PipelineSaver v-if="showSaver" @load="onPipelineLoad" @close="showSaver = false" />
+
+    <Teleport to="body">
+      <div
+        v-if="tip && tip.def"
+        class="fixed z-[100] w-64 pointer-events-none"
+        :style="{ left: tip.x + 'px', top: tip.y + 'px' }"
+        role="tooltip"
+      >
+        <div class="bg-[#161616] border border-[#333] rounded-lg p-3 shadow-xl">
+          <p class="text-white font-bold text-[11px] mb-1" :style="{ color: tip.def.color }">{{ tip.def.label }}</p>
+          <p class="text-[#bbb] text-[10px] leading-relaxed mb-2">{{ tip.def.description }}</p>
+
+          <div v-if="tip.def.inputs.length > 0" class="mb-1.5">
+            <p class="text-[9px] uppercase tracking-wider text-[#888] mb-1">Inputs</p>
+            <div class="space-y-1">
+              <div v-for="inp in tip.def.inputs" :key="inp.id" class="flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#2979ff] flex-shrink-0" />
+                <span class="text-[10px] text-[#ccc]">{{ inp.label }}</span>
+                <span class="text-[9px] text-[#777] font-mono ml-auto">{{ inp.type }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="tip.def.outputs.length > 0">
+            <p class="text-[9px] uppercase tracking-wider text-[#888] mb-1">Outputs</p>
+            <div class="space-y-1">
+              <div v-for="out in tip.def.outputs" :key="out.id" class="flex items-center gap-1.5">
+                <span class="text-[10px] text-[#ccc]">{{ out.label }}</span>
+                <span class="text-[9px] text-[#777] font-mono ml-auto">{{ out.type }}</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-[#ff69b4] flex-shrink-0" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -206,6 +258,7 @@ const showProModal = ref(false)
 const showResults = ref(true)
 const showAI = ref(false)
 const showSaver = ref(false)
+const tip = ref<{ def: any; x: number; y: number } | null>(null)
 let nodeCounter = 0
 
 onMounted(() => {
@@ -291,6 +344,17 @@ const inputNodes = computed(() => nodeDefinitions.filter(n => n.category === 'in
 const processNodes = computed(() => nodeDefinitions.filter(n => n.category === 'process' && !n.pro))
 const outputNodes = computed(() => nodeDefinitions.filter(n => n.category === 'output' && !n.pro))
 const proNodes = computed(() => nodeDefinitions.filter(n => n.pro))
+
+function showTip(node: any, event: MouseEvent | FocusEvent) {
+  const e = event as MouseEvent
+  const x = Math.min(e.clientX + 12, window.innerWidth - 280)
+  const y = Math.min(e.clientY + 12, window.innerHeight - 200)
+  tip.value = { def: node, x: Math.max(8, x), y: Math.max(8, y) }
+}
+
+function hideTip() {
+  tip.value = null
+}
 
 function addNode(type: string) {
   const def = nodeDefinitions.find(n => n.type === type)
