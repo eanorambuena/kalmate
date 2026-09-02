@@ -7,7 +7,7 @@
     <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
     <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
     <div v-if="candles.length > 0" class="w-full h-[120px] relative">
-      <svg viewBox="0 0 260 115" class="w-full h-full" preserveAspectRatio="none">
+      <svg viewBox="0 0 260 118" class="w-full h-full" preserveAspectRatio="none">
         <g v-for="(c, i) in visibleCandles.items" :key="i">
           <line :x1="c.x" :y1="c.highY" :x2="c.x" :y2="c.lowY" :stroke="c.color" stroke-width="1" />
           <rect :x="c.x - c.w / 2" :y="c.bodyTop" :width="c.w" :height="c.bodyH" :fill="c.color" />
@@ -15,7 +15,8 @@
         <polyline v-for="(ov, idx) in overlays" :key="'ov-'+idx" :points="ov.points" fill="none" :stroke="ov.color" stroke-width="1.5" vector-effect="non-scaling-stroke" />
         <line x1="5" y1="109" x2="255" y2="109" stroke="#333" stroke-width="1" />
         <g v-for="(t, idx) in axisLabels" :key="'ax'+idx">
-          <text :x="t.x" y="113" fill="#666" font-size="6" text-anchor="middle" font-family="monospace">{{ t.label }}</text>
+          <line :x1="t.x" y1="109" :x2="t.x" y2="112" stroke="#444" stroke-width="1" />
+          <text :x="t.x" y="116" fill="#888" font-size="6.5" text-anchor="middle" font-family="monospace">{{ t.label }}</text>
         </g>
       </svg>
       <div class="absolute top-2 right-2 flex flex-col gap-1 text-[9px]">
@@ -144,10 +145,14 @@ const overlays = computed(() => {
   return out
 })
 
-function fmtDate(ts?: number): string {
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function fmtTick(ts?: number, useMonthLabels?: boolean): string {
   if (!ts) return ''
   const d = new Date(ts)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const month = MONTHS[d.getMonth()]
+  if (useMonthLabels) return `${month} '${String(d.getFullYear()).slice(2)}`
+  return `${month} ${d.getDate()}`
 }
 
 const axisLabels = computed(() => {
@@ -156,10 +161,17 @@ const axisLabels = computed(() => {
   const candleW = (svgW - pad * 2) / slice.length
   const first = slice[0]
   const last = slice[slice.length - 1]
-  return [
-    { x: pad + candleW / 2, label: fmtDate(first.timestamp) },
-    { x: pad + (slice.length - 1) * candleW + candleW / 2, label: fmtDate(last.timestamp) },
+  const spanMs = last.timestamp - first.timestamp
+  const useMonthLabels = spanMs > 250 * 86_400_000
+  const q = Math.floor(slice.length / 2)
+  const labels = [
+    { x: pad + candleW / 2, label: fmtTick(first.timestamp, useMonthLabels) },
   ]
+  if (q > 0 && q < slice.length - 1) {
+    labels.push({ x: pad + q * candleW + candleW / 2, label: fmtTick(slice[q].timestamp, useMonthLabels) })
+  }
+  labels.push({ x: pad + (slice.length - 1) * candleW + candleW / 2, label: fmtTick(last.timestamp, useMonthLabels) })
+  return labels
 })
 
 const lastPrice = computed(() => {

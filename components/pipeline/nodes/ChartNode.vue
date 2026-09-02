@@ -7,12 +7,13 @@
     <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
     <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
     <div v-if="seriesToPlot.length > 0" class="w-full h-[120px] relative">
-      <svg viewBox="0 0 260 115" class="w-full h-full" preserveAspectRatio="none">
+      <svg viewBox="0 0 260 118" class="w-full h-full" preserveAspectRatio="none">
         <line x1="5" y1="109" x2="255" y2="109" stroke="#333" stroke-width="1" />
         <path v-for="(s, idx) in seriesToPlot" :key="idx" :d="areaPath(s.values)" :fill="s.color" opacity="0.1" />
         <polyline v-for="(s, idx) in seriesToPlot" :key="idx + 100" :points="linePoints(s.values)" fill="none" :stroke="s.color" stroke-width="2" vector-effect="non-scaling-stroke" />
         <g v-for="(t, idx) in xTicks" :key="'t' + idx">
-          <text :x="t.x" y="113" fill="#666" font-size="6" text-anchor="middle" font-family="monospace">{{ t.label }}</text>
+          <line :x1="t.x" y1="109" :x2="t.x" y2="112" stroke="#444" stroke-width="1" />
+          <text :x="t.x" y="116" fill="#888" font-size="6.5" text-anchor="middle" font-family="monospace">{{ t.label }}</text>
         </g>
       </svg>
       <div class="absolute top-2 right-2 flex flex-col gap-1 text-[9px]">
@@ -110,14 +111,18 @@ const mainTimestamps = computed<number[]>(() =>
   seriesToPlot.value.find(s => s.label === 'Main')?.timestamps ?? seriesToPlot.value[0]?.timestamps ?? [],
 )
 
-function fmtDate(ts: number): string {
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function fmtTick(ts: number, useMonthLabels: boolean): string {
   const d = new Date(ts)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const month = MONTHS[d.getMonth()]
+  if (useMonthLabels) return `${month} '${String(d.getFullYear()).slice(2)}`
+  return `${month} ${d.getDate()}`
 }
 
 const xTicks = computed(() => {
   const ts = mainTimestamps.value
-  if (ts.length === 0) return []
+  if (ts.length < 2) return []
   const n = ts.length - 1
   const len = seriesToPlot.value[0]?.values.length ?? ts.length
   const lastIdx = Math.max(len - 1, 0)
@@ -125,10 +130,15 @@ const xTicks = computed(() => {
     const idx = len > 1 ? Math.round((tsIdx / n) * lastIdx) : 0
     return pad + (idx / lastIdx) * (svgW - pad * 2)
   }
-  const picks = [0, Math.floor(n / 2), n]
+  const spanDays = (ts[n] - ts[0]) / 86_400_000
+  const useMonthLabels = spanDays > 250
+  const tickCount = useMonthLabels ? 5 : 3
+  const picks: number[] = []
+  if (tickCount === 1) picks.push(0)
+  else for (let i = 0; i < tickCount; i++) picks.push(Math.round((i / (tickCount - 1)) * n))
   return picks.map(tsIdx => ({
     x: xForTs(tsIdx),
-    label: fmtDate(ts[tsIdx]),
+    label: fmtTick(ts[tsIdx], useMonthLabels),
   }))
 })
 
