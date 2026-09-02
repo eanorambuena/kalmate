@@ -1,6 +1,7 @@
 import type { PipelineSpec, ExecutionContext, NodeExecutor } from './types.ts'
 import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman.ts'
 import { calcSMA, calcRSI, calcEMA } from '../indicators.ts'
+import { toSeries, toSeriesValues, toSeriesTimestamps, withTimestamps } from '../series.ts'
 
 export const executors: Record<string, NodeExecutor> = {
   currencyInput: async (ctx) => {
@@ -20,9 +21,16 @@ export const executors: Record<string, NodeExecutor> = {
       const data = await res.json()
       if (!res.ok) return { price: 0, priceSeries: [], error: data?.statusMessage || `HTTP ${res.status}`, symbol }
       if (!Array.isArray(data)) return { price: 0, priceSeries: [], error: 'Unexpected response format', symbol }
-      const prices = data.map(h => h.close).filter(p => p > 0)
-      const currentPrice = prices[prices.length - 1]
-      return { price: currentPrice, priceSeries: prices, candleSeries: data, symbol }
+      const candles = data.filter((h: any) => h.close > 0)
+      const values = candles.map((h: any) => h.close)
+      const timestamps = toSeriesTimestamps(candles, values.length)
+      const currentPrice = values[values.length - 1]
+      return {
+        price: currentPrice,
+        priceSeries: withTimestamps(values, timestamps),
+        candleSeries: candles,
+        symbol,
+      }
     } catch (e: any) {
       return { price: 0, priceSeries: [], error: e?.message || 'Fetch failed', symbol }
     }
@@ -31,13 +39,13 @@ export const executors: Record<string, NodeExecutor> = {
   chartOutput: async (ctx) => {
     const main = ctx.inputs.mainSeries || ctx.inputs.priceSeries || ctx.inputs.series || null
     const arr = Array.isArray(main) ? main : null
-    const lastPrice = arr && arr.length > 0 ? arr[arr.length - 1] : null
+    const lastPrice = arr && arr.length > 0 ? toSeriesValues(arr)[toSeriesValues(arr).length - 1] : null
     return {
       price: ctx.inputs.price ?? lastPrice,
-      mainSeries: arr,
-      overlayA: ctx.inputs.overlayA ?? ctx.inputs.seriesB ?? null,
-      overlayB: ctx.inputs.overlayB ?? ctx.inputs.seriesC ?? null,
-      overlayC: ctx.inputs.overlayC ?? ctx.inputs.seriesD ?? null,
+      mainSeries: arr ? toSeries(arr) : null,
+      overlayA: ctx.inputs.overlayA != null ? toSeries(ctx.inputs.overlayA) : null,
+      overlayB: ctx.inputs.overlayB != null ? toSeries(ctx.inputs.overlayB) : null,
+      overlayC: ctx.inputs.overlayC != null ? toSeries(ctx.inputs.overlayC) : null,
     }
   },
 
@@ -61,33 +69,39 @@ export const executors: Record<string, NodeExecutor> = {
 
   smaIndicator: async (ctx) => {
     const series = ctx.inputs.priceSeries || ctx.inputs.history || ctx.inputs.source || ctx.data.source || ctx.data.series
-    if (!Array.isArray(series) || series.length < 2) {
+    const values = toSeriesValues(series)
+    if (!Array.isArray(series) || values.length < 2) {
       return { smaSeries: [], error: 'Need price series' }
     }
     const period = ctx.data.period || 20
-    const sma = calcSMA(series, period)
-    return { smaSeries: sma }
+    const timestamps = toSeriesTimestamps(series, values.length)
+    const sma = calcSMA(values, period)
+    return { smaSeries: withTimestamps(sma, timestamps) }
   },
 
   rsiIndicator: async (ctx) => {
     const series = ctx.inputs.priceSeries || ctx.inputs.history || ctx.inputs.source || ctx.data.source || ctx.data.series
-    if (!Array.isArray(series) || series.length < 2) {
+    const values = toSeriesValues(series)
+    if (!Array.isArray(series) || values.length < 2) {
       return { rsiSeries: [], error: 'Need price series' }
     }
     const period = ctx.data.period || 14
-    const rsi = calcRSI(series, period)
+    const timestamps = toSeriesTimestamps(series, values.length)
+    const rsi = calcRSI(values, period)
     const lastRsi = rsi[rsi.length - 1] ?? 50
-    return { rsiValue: lastRsi, rsiSeries: rsi }
+    return { rsiValue: lastRsi, rsiSeries: withTimestamps(rsi, timestamps) }
   },
 
   emaIndicator: async (ctx) => {
     const series = ctx.inputs.priceSeries || ctx.inputs.history || ctx.inputs.source || ctx.data.source || ctx.data.series
-    if (!Array.isArray(series) || series.length < 2) {
+    const values = toSeriesValues(series)
+    if (!Array.isArray(series) || values.length < 2) {
       return { emaSeries: [], error: 'Need price series' }
     }
     const period = ctx.data.period || 20
-    const ema = calcEMA(series, period)
-    return { emaSeries: ema }
+    const timestamps = toSeriesTimestamps(series, values.length)
+    const ema = calcEMA(values, period)
+    return { emaSeries: withTimestamps(ema, timestamps) }
   },
 
   forecastNode: async (ctx) => {

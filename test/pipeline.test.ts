@@ -173,7 +173,9 @@ describe('executors', () => {
     const result = await executors.priceFeed(ctx)
     assert.equal(result.symbol, 'AAPL')
     assert.equal(result.price, 102)
-    assert.deepEqual(result.priceSeries, [100, 101, 102])
+    assert.deepEqual(result.priceSeries.map((p: any) => p.value), [100, 101, 102])
+    assert.equal(result.priceSeries[0].timestamp, result.priceSeries[1].timestamp - 86400000)
+    assert.deepEqual(result.candleSeries, [{ close: 100 }, { close: 101 }, { close: 102 }])
     global.fetch = origFetch
   })
 
@@ -181,8 +183,8 @@ describe('executors', () => {
     const ctx = mkCtx({ inputs: { price: 150, mainSeries: [100, 150], overlayA: [110, 140] } })
     const result = await executors.chartOutput(ctx)
     assert.equal(result.price, 150)
-    assert.deepEqual(result.mainSeries, [100, 150])
-    assert.deepEqual(result.overlayA, [110, 140])
+    assert.deepEqual(result.mainSeries.map((p: any) => p.value), [100, 150])
+    assert.deepEqual(result.overlayA.map((p: any) => p.value), [110, 140])
   })
 
   it('priceDisplay returns price', async () => {
@@ -207,20 +209,20 @@ describe('executors', () => {
   it('smaIndicator matches calcSMA exactly', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period: 5 } })
     const result = await executors.smaIndicator(ctx)
-    assert.deepEqual(result.smaSeries, calcSMA(prices, 5))
-    assert.equal(result.smaSeries[4], (100 + 102 + 101 + 103 + 105) / 5)
+    assert.deepEqual(result.smaSeries.map((p: any) => p.value), calcSMA(prices, 5))
+    assert.equal(result.smaSeries.map((p: any) => p.value)[4], (100 + 102 + 101 + 103 + 105) / 5)
   })
 
   it('smaIndicator applies period from data', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period: 3 } })
     const result = await executors.smaIndicator(ctx)
-    assert.deepEqual(result.smaSeries, calcSMA(prices, 3))
+    assert.deepEqual(result.smaSeries.map((p: any) => p.value), calcSMA(prices, 3))
   })
 
   it('smaIndicator uses default period 20 when not provided', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices } })
     const result = await executors.smaIndicator(ctx)
-    assert.deepEqual(result.smaSeries, calcSMA(prices, 20))
+    assert.deepEqual(result.smaSeries.map((p: any) => p.value), calcSMA(prices, 20))
   })
 
   it('smaIndicator returns error for short series', async () => {
@@ -242,7 +244,7 @@ describe('executors', () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period } })
     const result = await executors.rsiIndicator(ctx)
     const expected = calcRSI(prices, period)
-    assert.deepEqual(result.rsiSeries, expected)
+    assert.deepEqual(result.rsiSeries.map((p: any) => p.value), expected)
     assert.equal(result.rsiValue, expected[expected.length - 1])
     assert.ok(result.rsiValue >= 0 && result.rsiValue <= 100)
   })
@@ -429,15 +431,15 @@ describe('executors', () => {
     const period = 5
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period } })
     const result = await executors.emaIndicator(ctx)
-    assert.deepEqual(result.emaSeries, calcEMA(prices, period))
-    assert.equal(result.emaSeries[0], prices[0])
+    assert.deepEqual(result.emaSeries.map((p: any) => p.value), calcEMA(prices, period))
+    assert.equal(result.emaSeries.map((p: any) => p.value)[0], prices[0])
   })
 
   it('emaIndicator smooths and lags the raw price', async () => {
     const period = 3
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { period } })
     const result = await executors.emaIndicator(ctx)
-    const ema = result.emaSeries
+    const ema = result.emaSeries.map((p: any) => p.value)
     for (let i = 1; i < ema.length; i++) {
       const expected = prices[i] * (2 / (period + 1)) + ema[i - 1] * (1 - 2 / (period + 1))
       assert.ok(Math.abs(ema[i] - expected) < 1e-9)
