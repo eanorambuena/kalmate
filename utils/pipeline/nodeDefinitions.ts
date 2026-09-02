@@ -115,7 +115,7 @@ export const nodeDefinitions: NodeDefinition[] = [
     color: '#ff69b4',
     pro: false,
     inputs: [
-      { id: 'candleSeries', label: 'Candles', type: 'series' },
+      { id: 'candleSeries', label: 'Candle Series', type: 'series' },
       { id: 'overlayA', label: 'Overlay A', type: 'series' },
       { id: 'overlayB', label: 'Overlay B', type: 'series' },
       { id: 'overlayC', label: 'Overlay C', type: 'series' },
