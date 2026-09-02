@@ -9,6 +9,7 @@
     <div v-if="seriesToPlot.length > 0" class="w-full h-[120px] relative">
       <svg viewBox="0 0 260 118" class="w-full h-full" preserveAspectRatio="none">
         <line x1="5" y1="109" x2="255" y2="109" stroke="#333" stroke-width="1" />
+        <path v-if="confidenceBand" :d="confidenceBand.d" :fill="confidenceBand.color" opacity="0.15" />
         <path v-for="(s, idx) in seriesToPlot" :key="idx" :d="areaPath(s.values)" :fill="s.color" opacity="0.1" />
         <polyline v-for="(s, idx) in seriesToPlot" :key="idx + 100" :points="linePoints(s.values)" fill="none" :stroke="s.color" stroke-width="2" vector-effect="non-scaling-stroke" />
         <g v-for="(t, idx) in xTicks" :key="'t' + idx">
@@ -169,6 +170,26 @@ const linePoints = (values: number[]) => {
     return `${x},${y}`
   }).join(' ')
 }
+
+const confidenceBand = computed<{ d: string; color: string } | null>(() => {
+  const r = result.value
+  if (!r) return null
+  const forecastValues = toSeriesValues(r.forecastSeries || r.forecast)
+  const confidenceValues = toSeriesValues(r.confidenceSeries || r.confidence)
+  const len = Math.min(forecastValues.length, confidenceValues.length)
+  if (len < 2) return null
+  const fv = forecastValues.slice(0, len)
+  const cv = confidenceValues.slice(0, len)
+  const { min, range } = getMinMax(seriesToPlot.value)
+  const last = len - 1
+  const upper = fv.map((v, i) => ({ x: pad + (i / last) * (svgW - pad * 2), y: svgH - pad - ((v + cv[i] - min) / range) * (svgH - pad * 2) }))
+  const lower = fv.map((v, i) => ({ x: pad + (i / last) * (svgW - pad * 2), y: svgH - pad - ((v - cv[i] - min) / range) * (svgH - pad * 2) }))
+  let d = `M${upper[0].x},${upper[0].y}`
+  for (let i = 1; i < len; i++) d += ` L${upper[i].x},${upper[i].y}`
+  for (let i = last; i >= 0; i--) d += ` L${lower[i].x},${lower[i].y}`
+  d += ' Z'
+  return { d, color: '#aa00ff' }
+})
 
 const areaPath = (values: number[]) => {
   if (values.length < 2) return ''
