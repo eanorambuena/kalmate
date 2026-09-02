@@ -106,16 +106,17 @@ export const executors: Record<string, NodeExecutor> = {
 
   forecastNode: async (ctx) => {
     const series = ctx.inputs.priceSeries || ctx.inputs.history || ctx.inputs.source || ctx.data.source || ctx.data.series
-    if (!Array.isArray(series) || series.length < 10) {
+    const values = toSeriesValues(series)
+    if (!Array.isArray(series) || values.length < 10) {
       return { forecastSeries: [], error: 'Need at least 10 price points' }
     }
     try {
       const steps = ctx.data.steps || 15
-      const params = series.length > 100 ? calibrateMLE(series) : createDefaultParams()
-      const result = runKalmanFilter(series, params, steps)
-      const lastPrices = series.slice(-10)
+      const params = values.length > 100 ? calibrateMLE(values) : createDefaultParams()
+      const result = runKalmanFilter(values, params, steps)
+      const lastPrices = values.slice(-10)
       const avgStep = lastPrices.reduce((s, v, i, a) => i > 0 ? s + (v - a[i - 1]) : s, 0) / (lastPrices.length - 1)
-      const lastSmoothed = result.smoothed[result.smoothed.length - 1] || series[series.length - 1]
+      const lastSmoothed = result.smoothed[result.smoothed.length - 1] || values[values.length - 1]
       const forecast: number[] = []
       const confidence: number[] = []
       for (let i = 1; i <= steps; i++) {
@@ -124,7 +125,12 @@ export const executors: Record<string, NodeExecutor> = {
         const band = val * (0.01 + 0.015 * i)
         confidence.push(band)
       }
-      return { forecastSeries: forecast, confidenceSeries: confidence }
+      const baseTs = toSeriesTimestamps(series, values.length)
+      const lastTs = baseTs.length > 0 ? baseTs[baseTs.length - 1] : Date.now()
+      const DAY = 86_400_000
+      const fcSeries = forecast.map((v, i) => ({ timestamp: lastTs + DAY * i, value: v }))
+      const confSeries = confidence.map((v, i) => ({ timestamp: lastTs + DAY * i, value: v }))
+      return { forecastSeries: fcSeries, confidenceSeries: confSeries }
     } catch (e: any) {
       return { forecastSeries: [], error: e?.message || 'Forecast error' }
     }
@@ -132,17 +138,19 @@ export const executors: Record<string, NodeExecutor> = {
 
   kalmanFilter: async (ctx) => {
     const series = ctx.inputs.priceSeries || ctx.inputs.history || ctx.inputs.source || ctx.inputs.price
+    const values = toSeriesValues(series)
     if (!series) return { smoothed: [], trend: [], signal: 0, error: 'No series input' }
     if (!Array.isArray(series)) return { smoothed: [], trend: [], signal: 0, error: 'Series is not an array' }
-    if (series.length < 5) return { smoothed: [], trend: [], signal: 0, error: `Series too short: ${series.length}` }
+    if (values.length < 5) return { smoothed: [], trend: [], signal: 0, error: `Series too short: ${values.length}` }
     try {
-      const params = series.length > 100 ? calibrateMLE(series) : createDefaultParams()
-      const result = runKalmanFilter(series, params, 5)
+      const params = values.length > 100 ? calibrateMLE(values) : createDefaultParams()
+      const result = runKalmanFilter(values, params, 5)
       const lastCycle = result.cycle[result.cycle.length - 1] || 0
+      const timestamps = toSeriesTimestamps(series, values.length)
       return {
-        smoothed: result.smoothed,
-        trend: result.trend,
-        cycle: result.cycle,
+        smoothed: withTimestamps(result.smoothed, timestamps),
+        trend: withTimestamps(result.trend, timestamps),
+        cycle: withTimestamps(result.cycle, timestamps),
         signal: lastCycle > 0 ? 1 : -1,
       }
     } catch (e: any) {

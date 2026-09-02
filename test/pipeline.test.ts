@@ -267,13 +267,13 @@ describe('executors', () => {
   it('forecastNode values are positive and finite', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 10 } })
     const result = await executors.forecastNode(ctx)
-    for (const v of result.forecastSeries) {
-      assert.ok(Number.isFinite(v))
-      assert.ok(v > 0)
+    for (const p of result.forecastSeries) {
+      assert.ok(Number.isFinite(p.value))
+      assert.ok(p.value > 0)
     }
     for (const b of result.confidenceSeries) {
-      assert.ok(Number.isFinite(b))
-      assert.ok(b >= 0)
+      assert.ok(Number.isFinite(b.value))
+      assert.ok(b.value >= 0)
     }
   })
 
@@ -281,7 +281,7 @@ describe('executors', () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 10 } })
     const result = await executors.forecastNode(ctx)
     for (let i = 1; i < result.confidenceSeries.length; i++) {
-      assert.ok(result.confidenceSeries[i] >= result.confidenceSeries[i - 1])
+      assert.ok(result.confidenceSeries[i].value >= result.confidenceSeries[i - 1].value)
     }
   })
 
@@ -302,7 +302,7 @@ describe('executors', () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 5 } })
     const result = await executors.forecastNode(ctx)
     const lastPrice = prices[prices.length - 1]
-    const first = result.forecastSeries[0]
+    const first = result.forecastSeries[0].value
     assert.ok(Math.abs(first - lastPrice) / lastPrice < 0.1, `first=${first}, last=${lastPrice}`)
   })
 
@@ -310,8 +310,8 @@ describe('executors', () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 8 } })
     const result = await executors.forecastNode(ctx)
     for (let i = 0; i < result.forecastSeries.length; i++) {
-      assert.ok(result.confidenceSeries[i] > 0)
-      assert.ok(result.confidenceSeries[i] < result.forecastSeries[i])
+      assert.ok(result.confidenceSeries[i].value > 0)
+      assert.ok(result.confidenceSeries[i].value < result.forecastSeries[i].value)
     }
   })
 
@@ -319,8 +319,8 @@ describe('executors', () => {
     const flat = Array.from({ length: 30 }, () => 100)
     const ctx = mkCtx({ inputs: { priceSeries: flat }, data: { steps: 10 } })
     const result = await executors.forecastNode(ctx)
-    for (const v of result.forecastSeries) {
-      assert.ok(Math.abs(v - 100) / 100 < 0.15, `forecast=${v}`)
+    for (const p of result.forecastSeries) {
+      assert.ok(Math.abs(p.value - 100) / 100 < 0.15, `forecast=${p.value}`)
     }
   })
 
@@ -328,8 +328,9 @@ describe('executors', () => {
     const trending = Array.from({ length: 30 }, (_, i) => 100 + i * 2)
     const ctx = mkCtx({ inputs: { priceSeries: trending }, data: { steps: 10 } })
     const result = await executors.forecastNode(ctx)
-    const lastSmoothed = result.forecastSeries[0] - (result.forecastSeries[1] - result.forecastSeries[0])
-    assert.ok(result.forecastSeries[result.forecastSeries.length - 1] > lastSmoothed)
+    const v = result.forecastSeries.map((p: any) => p.value)
+    const lastSmoothed = v[0] - (v[1] - v[0])
+    assert.ok(v[v.length - 1] > lastSmoothed)
   })
 
   it('forecastNode returns error for short series', async () => {
