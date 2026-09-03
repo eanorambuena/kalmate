@@ -34,3 +34,24 @@ export function toTimeDomain(
   if (!Number.isFinite(min) || !(max > min)) return null
   return { min, max }
 }
+
+export interface SplitDomainArgs {
+  global?: TimeDomain | null
+  mainTimes?: number[]
+  fraction?: number
+}
+
+export function splitTimeDomain({ global, mainTimes, fraction = 0.5 }: SplitDomainArgs): TimeDomain | null {
+  if (!global) return global
+  if (!mainTimes || mainTimes.length === 0) return global
+  const mainLast = mainTimes[mainTimes.length - 1]
+  if (mainLast <= global.min) return global
+  const naturalFraction = (mainLast - global.min) / (global.max - global.min)
+  if (naturalFraction >= fraction) return global
+  return { min: global.min, max: global.min + (mainLast - global.min) / fraction }
+}
+
+export function xLimit(svgW: number, pad: number): number {
+  return svgW - pad
+}
+

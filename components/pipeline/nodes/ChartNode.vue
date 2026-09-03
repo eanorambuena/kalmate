@@ -46,7 +46,7 @@ import { Handle, Position } from '@vue-flow/core'
 import { computed, ref, nextTick } from 'vue'
 import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
 import { toSeriesValues, toSeriesTimestamps } from '~/utils/series'
-import { pointX, toTimeDomain } from '~/utils/chart-scale'
+import { pointX, toTimeDomain, splitTimeDomain, xLimit } from '~/utils/chart-scale'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -114,7 +114,9 @@ const mainTimestamps = computed<number[]>(() =>
   seriesToPlot.value.find(s => s.label === 'Main')?.timestamps ?? seriesToPlot.value[0]?.timestamps ?? [],
 )
 
-const timeDomain = computed(() => toTimeDomain(seriesToPlot.value))
+const timeDomain = computed(() =>
+  splitTimeDomain({ global: toTimeDomain(seriesToPlot.value), mainTimes: mainTimestamps.value, fraction: 0.5 }),
+)
 
 const xForP = (ts: number | undefined, idx: number, len: number) =>
   pointX(ts, idx, len, timeDomain.value, svgW, pad)
@@ -165,32 +167,43 @@ const getMinMax = (series: Array<{ values: number[] }>) => {
 const linePoints = (values: number[], timestamps: number[] = []) => {
   if (values.length < 2) return ''
   const { min, range } = getMinMax(seriesToPlot.value)
-  return values.map((v: number, i: number) => {
-    const x = xForP(timestamps[i], i, values.length)
-    const y = svgH - pad - ((v - min) / range) * (svgH - pad * 2)
-    return `${x},${y}`
-  }).join(' ')
+  const limit = xLimit(svgW, pad)
+  const pts = values
+    .map((v: number, i: number) => {
+      const x = xForP(timestamps[i], i, values.length)
+      return { x, y: svgH - pad - ((v - min) / range) * (svgH - pad * 2), _i: i }
+    })
+    .filter(p => p.x <= limit)
+  if (pts.length < 2) return ''
+  return pts.map(p => `${p.x},${p.y}`).join(' ')
 }
 
 const confidenceBand = computed<{ d: string; color: string } | null>(() => {
   const r = result.value
   if (!r) return null
-  const fcRaw = r.forecastSeries || r.forecast
-  const forecastValues = toSeriesValues(fcRaw)
+  const forecastRaw = r.forecastSeries || r.forecast
+  const forecastValues = toSeriesValues(forecastRaw)
   const confidenceValues = toSeriesValues(r.confidenceSeries || r.confidence)
-  const forecastTimestamps = toSeriesTimestamps(fcRaw, forecastValues.length)
+  const forecastTimestamps = toSeriesTimestamps(forecastRaw, forecastValues.length)
   const len = Math.min(forecastValues.length, confidenceValues.length)
   if (len < 2) return null
-  const fv = forecastValues.slice(0, len)
-  const cv = confidenceValues.slice(0, len)
-  const ts = forecastTimestamps.slice(0, len)
+  const forecastVals = forecastValues.slice(0, len)
+  const confidenceVals = confidenceValues.slice(0, len)
+  const times = forecastTimestamps.slice(0, len)
   const { min, range } = getMinMax(seriesToPlot.value)
-  const last = len - 1
-  const upper = fv.map((v, i) => ({ x: xForP(ts[i], i, len), y: svgH - pad - ((v + cv[i] - min) / range) * (svgH - pad * 2) }))
-  const lower = fv.map((v, i) => ({ x: xForP(ts[i], i, len), y: svgH - pad - ((v - cv[i] - min) / range) * (svgH - pad * 2) }))
+  const limit = xLimit(svgW, pad)
+  const upper: { x: number; y: number }[] = []
+  const lower: { x: number; y: number }[] = []
+  for (let i = 0; i < len; i++) {
+    const x = xForP(times[i], i, len)
+    if (x > limit) continue
+    upper.push({ x, y: svgH - pad - ((forecastVals[i] + confidenceVals[i] - min) / range) * (svgH - pad * 2) })
+    lower.push({ x, y: svgH - pad - ((forecastVals[i] - confidenceVals[i] - min) / range) * (svgH - pad * 2) })
+  }
+  if (upper.length < 2) return null
   let d = `M${upper[0].x},${upper[0].y}`
-  for (let i = 1; i < len; i++) d += ` L${upper[i].x},${upper[i].y}`
-  for (let i = last; i >= 0; i--) d += ` L${lower[i].x},${lower[i].y}`
+  for (let i = 1; i < upper.length; i++) d += ` L${upper[i].x},${upper[i].y}`
+  for (let i = lower.length - 1; i >= 0; i--) d += ` L${lower[i].x},${lower[i].y}`
   d += ' Z'
   return { d, color: '#aa00ff' }
 })
@@ -199,12 +212,16 @@ const areaPath = (values: number[], timestamps: number[] = []) => {
   if (values.length < 2) return ''
   const { min, range } = getMinMax(seriesToPlot.value)
   const bottom = svgH - pad
-  let d = `M${xForP(timestamps[0], 0, values.length)},${bottom}`
+  const limit = xLimit(svgW, pad)
+  const pts: { x: number; y: number }[] = []
   values.forEach((v: number, i: number) => {
     const x = xForP(timestamps[i], i, values.length)
-    const y = svgH - pad - ((v - min) / range) * (svgH - pad * 2)
-    d += ` L${x},${y}`
+    if (x > limit) return
+    pts.push({ x, y: svgH - pad - ((v - min) / range) * (svgH - pad * 2) })
   })
-  d += ` L${xForP(timestamps[timestamps.length - 1], values.length - 1, values.length)},${bottom} Z`
+  if (pts.length < 2) return ''
+  let d = `M${pts[0].x},${bottom}`
+  for (const p of pts) d += ` L${p.x},${p.y}`
+  d += ` L${pts[pts.length - 1].x},${bottom} Z`
   return d
 }</script>

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { pointX, toTimeDomain } from '../utils/chart-scale.ts'
+import { pointX, toTimeDomain, splitTimeDomain, xLimit } from '../utils/chart-scale.ts'
 
 const SVG_W = 260
 const PAD = 5
@@ -14,15 +14,15 @@ function mainTs(n: number): number[] {
 
 describe('chart-scale', () => {
   it('main occupies the left and forecast the right on a shared time domain', () => {
-    const main = mainTs(15)
-    const fc = mainTs(15).map(t => t + 15 * DAY).slice(0, 10)
-    const domain = toTimeDomain([{ timestamps: main }, { timestamps: fc }])
+    const mainTimes = mainTs(15)
+    const forecast = mainTs(15).map(t => t + 15 * DAY).slice(0, 10)
+    const domain = toTimeDomain([{ timestamps: mainTimes }, { timestamps: forecast }])
     assert.ok(domain)
-    const mainLastX = pointX(main[main.length - 1], main.length - 1, main.length, domain, SVG_W, PAD)
-    const fcFirstX = pointX(fc[0], 0, fc.length, domain, SVG_W, PAD)
-    assert.ok(fcFirstX > mainLastX, 'forecast must start to the right of the main series')
-    assert.ok(main[0] === domain.min, 'domain starts at the main series start')
-    assert.ok(fc[fc.length - 1] === domain.max, 'domain ends at the forecast end')
+    const mainLastX = pointX(mainTimes[mainTimes.length - 1], mainTimes.length - 1, mainTimes.length, domain, SVG_W, PAD)
+    const forecastFirstX = pointX(forecast[0], 0, forecast.length, domain, SVG_W, PAD)
+    assert.ok(forecastFirstX > mainLastX, 'forecast must start to the right of the main series')
+    assert.ok(mainTimes[0] === domain.min, 'domain starts at the main series start')
+    assert.ok(forecast[forecast.length - 1] === domain.max, 'domain ends at the forecast end')
   })
 
   it('a single series spans the full width', () => {
@@ -48,5 +48,43 @@ describe('chart-scale', () => {
     assert.equal(toTimeDomain([{ timestamps: [] }]), null)
     assert.equal(toTimeDomain([{ timestamps: [BASE, BASE] }]), null)
     assert.ok(toTimeDomain([{ timestamps: [BASE] }, { timestamps: [BASE + DAY] }]))
+  })
+
+  it('splitTimeDomain forces the main series to occupy at least the left half', () => {
+    // few historical points + many future forecast steps => natural fraction is small
+    const mainTimes = mainTs(5)
+    const forecast = mainTs(5).map(t => t + 5 * DAY).slice(0, 20)
+    const global = toTimeDomain([{ timestamps: mainTimes }, { timestamps: forecast }])!
+    const domain = splitTimeDomain({ global, mainTimes, fraction: 0.5 })!
+    const mainLastX = pointX(mainTimes[mainTimes.length - 1], mainTimes.length - 1, mainTimes.length, domain, SVG_W, PAD)
+    const splitX = PAD + 0.5 * (SVG_W - PAD * 2)
+    assert.ok(Math.abs(mainLastX - splitX) < 1e-6, 'last main point sits at the 50% mark')
+  })
+
+  it('splitTimeDomain keeps the natural domain when main already spans >= half', () => {
+    // many main points + short forecast => main naturally > 50%
+    const mainTimes = mainTs(30)
+    const forecast = mainTs(30).map(t => t + 30 * DAY).slice(0, 3)
+    const global = toTimeDomain([{ timestamps: mainTimes }, { timestamps: forecast }])!
+    const domain = splitTimeDomain({ global, mainTimes, fraction: 0.5 })!
+    assert.deepEqual(domain, global)
+  })
+
+  it('forecast points beyond the right limit are truncated (x > limit)', () => {
+    const mainTimes = mainTs(5)
+    const forecast = mainTs(5).map(t => t + 5 * DAY).slice(0, 20)
+    const global = toTimeDomain([{ timestamps: mainTimes }, { timestamps: forecast }])!
+    const domain = splitTimeDomain({ global, mainTimes, fraction: 0.5 })!
+    const limit = xLimit(SVG_W, PAD)
+    let visible = 0
+    let truncated = 0
+    for (let i = 0; i < forecast.length; i++) {
+      const x = pointX(forecast[i], i, forecast.length, domain, SVG_W, PAD)
+      if (x <= limit) visible++
+      else truncated++
+    }
+    assert.ok(visible >= 2, 'a contiguous leading portion of the forecast is drawn')
+    assert.ok(truncated > 0, 'the overflow tail of the forecast is cut off')
+    assert.equal(visible + truncated, forecast.length)
   })
 })
