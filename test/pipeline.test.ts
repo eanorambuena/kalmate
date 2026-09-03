@@ -806,6 +806,60 @@ describe('full pipeline execution', () => {
     global.fetch = origFetch
   })
 
+  it('chart shows price main series together with forecast overlay on the future horizon', async () => {
+    const origFetch = global.fetch
+    global.fetch = async () => ({
+      ok: true,
+      json: async () => prices.map(p => ({ close: p })),
+    }) as any
+
+    const spec = {
+      nodes: [
+        { id: 's1', type: 'symbolInput', position: { x: 0, y: 0 }, data: { symbol: 'AAPL' } },
+        { id: 'pf1', type: 'priceFeed', position: { x: 200, y: 0 }, data: {} },
+        { id: 'fc1', type: 'forecastNode', position: { x: 400, y: 0 }, data: { steps: 10 } },
+        { id: 'ch1', type: 'chartOutput', position: { x: 600, y: 0 }, data: {} },
+      ],
+      edges: [
+        { id: 'e1', source: 's1', target: 'pf1' },
+        { id: 'e2', source: 'pf1', target: 'fc1', sourceHandle: 'priceSeries', targetHandle: 'priceSeries' },
+        { id: 'e3', source: 'pf1', target: 'ch1', sourceHandle: 'priceSeries', targetHandle: 'mainSeries' },
+        { id: 'e4', source: 'fc1', target: 'ch1', sourceHandle: 'forecastSeries', targetHandle: 'overlayA' },
+        { id: 'e5', source: 'fc1', target: 'ch1', sourceHandle: 'confidenceSeries', targetHandle: 'overlayB' },
+      ],
+    }
+    const results = await executePipeline(spec)
+
+    assert.ok(results.pf1.price > 0)
+    assert.ok(results.fc1.forecastSeries.length >= 10)
+    assert.ok(results.fc1.confidenceSeries.length >= 10)
+
+    const mainSeries = results.ch1.mainSeries
+    const overlayA = results.ch1.overlayA
+    const forecast = results.ch1.forecastSeries
+
+    assert.ok(mainSeries, 'main series present (historical prices)')
+    assert.ok(overlayA, 'forecast overlay present')
+    assert.ok(forecast, 'forecast series present')
+    assert.equal(overlayA.length, forecast.length)
+
+    const lastMainTs = mainSeries[mainSeries.length - 1].timestamp
+    const firstFcTs = forecast[0].timestamp
+
+    assert.ok(
+      firstFcTs > lastMainTs,
+      `forecast must start on the future horizon after the last price (fc=${firstFcTs}, last=${lastMainTs})`,
+    )
+    assert.ok(
+      forecast[forecast.length - 1].timestamp > firstFcTs,
+      'forecast extends across multiple future steps',
+    )
+
+    for (let i = 0; i < overlayA.length; i++) {
+      assert.ok(overlayA[i].value > 0, 'forecast overlay values are positive')
+    }
+    global.fetch = origFetch
+  })
   it('forecast → chart propagates forecastSeries and confidenceSeries', async () => {
     const origFetch = global.fetch
     global.fetch = async () => ({
