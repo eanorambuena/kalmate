@@ -766,4 +766,38 @@ describe('full pipeline execution', () => {
     assert.ok(results.cc1.overlayA)
     global.fetch = origFetch
   })
+
+  it('forecast → chart propagates forecastSeries and confidenceSeries', async () => {
+    const origFetch = global.fetch
+    global.fetch = async () => ({
+      ok: true,
+      json: async () => prices.map(p => ({ close: p })),
+    }) as any
+
+    const spec = {
+      nodes: [
+        { id: 's1', type: 'symbolInput', position: { x: 0, y: 0 }, data: { symbol: 'AAPL' } },
+        { id: 'pf1', type: 'priceFeed', position: { x: 200, y: 0 }, data: {} },
+        { id: 'fc1', type: 'forecastNode', position: { x: 400, y: 0 }, data: { steps: 10 } },
+        { id: 'ch1', type: 'chartOutput', position: { x: 600, y: 0 }, data: {} },
+      ],
+      edges: [
+        { id: 'e1', source: 's1', target: 'pf1' },
+        { id: 'e2', source: 'pf1', target: 'fc1', sourceHandle: 'priceSeries', targetHandle: 'priceSeries' },
+        { id: 'e3', source: 'fc1', target: 'ch1', sourceHandle: 'forecastSeries', targetHandle: 'overlayA' },
+        { id: 'e4', source: 'fc1', target: 'ch1', sourceHandle: 'confidenceSeries', targetHandle: 'overlayB' },
+      ],
+    }
+    const results = await executePipeline(spec)
+    assert.ok(results.pf1.price > 0)
+    assert.ok(results.fc1.forecastSeries.length >= 10)
+    assert.ok(results.fc1.confidenceSeries.length >= 10)
+    assert.ok(results.ch1.overlayA)
+    assert.ok(results.ch1.overlayB)
+    assert.ok(results.ch1.forecastSeries)
+    assert.equal(results.ch1.forecastSeries.length, results.fc1.forecastSeries.length)
+    assert.ok(results.ch1.confidenceSeries)
+    assert.equal(results.ch1.confidenceSeries.length, results.fc1.confidenceSeries.length)
+    global.fetch = origFetch
+  })
 })
