@@ -111,7 +111,15 @@ overlayB=confidence (más frágil, puede dar falsos positivos con SMA/EMA).
 
 ## Estado
 - [x] `ChartNode.vue`: `confidenceBand` + `<path>` de banda (commit `6399e9f`)
-- [ ] Paso 1: conectar `confidenceSeries` en `useAIPipeline.ts`
-- [ ] Paso 2: propagar `sourceHandle` en `runner.ts` (o fallback overlayA/B)
-- [ ] Paso 3: afinar lectura de aliases en `confidenceBand`
-- [ ] Paso 4: tests verdes + commits por concern + push
+- [x] Paso 1: conectar `confidenceSeries` en `useAIPipeline.ts` (commit `91e1517`)
+- [x] Paso 2: propagar `sourceHandle` en `runner.ts` + `chartOutput` expone `forecastSeries`/`confidenceSeries` (commit `870866e`)
+- [x] Paso 3: afinar lectura de aliases en `confidenceBand` + omitir línea overlayB redundante (commit `25d6b32`)
+- [x] Paso 4: test de integración propagación + commits por concern + push (commit `fef6e68`, 97 tests verdes)
+
+## Follow-up pendiente (no bloqueante, otro día)
+El fallback `parseKeywords` en `useAIPipeline.ts` para una query de **forecast puro**
+(sin palabras `chart`/`candle`) no crea ningún nodo `chartOutput`, dejando el
+forecast huérfano. Esto es **pre-existente** (afecta también a `forecastSeries→overlayA`)
+y quedó fuera de alcance. Considerar crear el nodo chart (priceFeed→mainSeries,
+forecast→overlayA, confidence→overlayB) dentro del bloque `if (useForecast)` cuando
+`outputIdx` está vacío.
