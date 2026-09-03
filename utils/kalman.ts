@@ -152,13 +152,14 @@ export function calibrateMLE(prices: number[]): KalmanParams {
   const autoCorrNum = returns.slice(0, -1).reduce((a, r, i) => a + r * returns[i + 1], 0)
   const autoCorrDen = returns.slice(0, -1).reduce((a, r) => a + r * r, 0)
   const autoCorr = autoCorrDen > 1e-12 ? autoCorrNum / autoCorrDen : 0.5
+  const baseSigma = Math.max(sigma, 1e-8)
 
   return {
     phi: Math.min(0.99, Math.max(0.01, autoCorr)),
     mu: meanRet,
-    sigmaChi: sigma * 0.8,
-    sigmaXi: sigma * 0.3,
-    sigmaObs: sigma * 0.15,
+    sigmaChi: baseSigma * 0.8,
+    sigmaXi: baseSigma * 0.3,
+    sigmaObs: baseSigma * 0.15,
     rho: -0.3,
   }
 }
