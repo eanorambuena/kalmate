@@ -859,11 +859,11 @@ describe('full pipeline execution', () => {
 
     const lastMainTs = mainSeries[mainSeries.length - 1].timestamp
     const lastMainValue = mainSeries[mainSeries.length - 1].value
-    const firstFcTs = forecast[0].timestamp
+    const forecastFirstTs = forecast[0].timestamp
 
     assert.ok(
-      firstFcTs === lastMainTs,
-      `forecast shares the anchor timestamp with the last price (fc=${firstFcTs}, last=${lastMainTs})`,
+      forecastFirstTs === lastMainTs,
+      `forecast shares the anchor timestamp with the last price (forecast=${forecastFirstTs}, last=${lastMainTs})`,
     )
     assert.equal(
       forecast[0].value,
@@ -875,7 +875,7 @@ describe('full pipeline execution', () => {
       'forecast future steps extend on the horizon after the anchor',
     )
     assert.ok(
-      forecast[forecast.length - 1].timestamp > firstFcTs,
+      forecast[forecast.length - 1].timestamp > forecastFirstTs,
       'forecast extends across multiple future steps',
     )
 

@@ -140,8 +140,8 @@ export const executors: Record<string, NodeExecutor> = {
       const fcSeries = fcValues.map((v, i) => ({ timestamp: lastTs + DAY * i, value: v }))
       const confSeries = [{ timestamp: lastTs, value: 0 }, ...confidence.slice(0, n).map((v, i) => ({ timestamp: lastTs + DAY * (i + 1), value: v }))]
       const lastBand = confidence[confidence.length - 1] ?? 0
-      const lastFc = fcValues[fcValues.length - 1] ?? values[values.length - 1]
-      const confPct = lastFc > 0 ? Math.min(99, Math.max(1, Math.round((lastBand / lastFc) * 100))) : 1
+      const lastForecast = fcValues[fcValues.length - 1] ?? values[values.length - 1]
+      const confPct = lastForecast > 0 ? Math.min(99, Math.max(1, Math.round((lastBand / lastForecast) * 100))) : 1
       return { forecastSeries: fcSeries, confidenceSeries: confSeries, confidence: confPct }
     } catch (e: any) {
       return { forecastSeries: [], error: e?.message || 'Forecast error' }
