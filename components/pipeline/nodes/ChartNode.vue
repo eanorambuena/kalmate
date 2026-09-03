@@ -97,7 +97,8 @@ const seriesToPlot = computed<Plot[]>(() => {
   if (overlayA.values.length > 0) {
     series.push({ label: 'Overlay A', values: overlayA.values, timestamps: overlayA.timestamps, color: '#2979ff' })
   }
-  const overlayB = norm(r.overlayB || r.seriesC || r.overlay2 || r.ema || r.forecast)
+  const isConfidence = (r.confidenceSeries || r.confidence) != null
+  const overlayB = !isConfidence ? norm(r.overlayB || r.seriesC || r.overlay2 || r.ema || r.forecast) : { values: [], timestamps: [] }
   if (overlayB.values.length > 0) {
     series.push({ label: 'Overlay B', values: overlayB.values, timestamps: overlayB.timestamps, color: '#aa00ff' })
   }
