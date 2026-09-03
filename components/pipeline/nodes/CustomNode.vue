@@ -88,8 +88,12 @@
     </div>
 
     <div v-if="def.type === 'forecastNode'" class="mb-2 space-y-1.5">
+      <div class="flex items-center gap-1">
+        <span class="text-[9px] text-[#888]">Model</span>
+      </div>
       <select
         v-model="data.algorithm"
+        :title="algorithmTips[data.algorithm] || 'Select a forecast model'"
         class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"
         @change="onAlgorithmChange"
       >
@@ -207,6 +211,13 @@ const algorithmLabels: Record<string, string> = {
   linear: 'Linear Forecast',
   holt: 'Holt Forecast',
   arima: 'ARIMA Forecast',
+}
+
+const algorithmTips: Record<string, string> = {
+  kalman: 'Kalman (Schwartz-Smith): best all-rounder for noisy, drifting prices. Tracks the underlying trend while smoothing out short-term noise.',
+  linear: 'Linear regression: projects a straight line from the whole history. Best for steady, clear directional trends.',
+  holt: 'Holt exponential smoothing: double-smoothed level + trend. Good for smooth trends with less noise.',
+  arima: 'ARIMA(1,1,0): models the recent momentum and gradually decays it toward the mean. Best when price is mean-reverting.',
 }
 
 function onAlgorithmChange() {
