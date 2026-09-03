@@ -6,6 +6,12 @@
     </div>
     <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
     <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
+    <div class="flex items-center gap-1 mb-2">
+      <span class="text-[9px] text-[#888]" inputmode="none">Horizon</span>
+      <select v-model="horizon" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-[10px] text-white outline-none focus:border-[#00c853]">
+        <option v-for="opt in horizonOptions" :key="opt" :value="opt">{{ opt === 'ALL' ? 'All' : opt }}</option>
+      </select>
+    </div>
     <div v-if="seriesToPlot.length > 0" class="w-full h-[120px] relative">
       <svg viewBox="0 0 260 118" class="w-full h-full" preserveAspectRatio="none">
         <line x1="5" y1="109" x2="255" y2="109" stroke="#333" stroke-width="1" />
@@ -61,6 +67,21 @@ const editing = ref(false)
 const editLabel = ref('')
 const inputEl = ref<HTMLInputElement>()
 
+const HORIZONS: Record<string, number> = {
+  '1M': 30,
+  '3M': 90,
+  '6M': 180,
+  '1Y': 365,
+  '2Y': 730,
+}
+const horizonOptions = ['1M', '3M', '6M', '1Y', '2Y', 'ALL']
+const horizon = ref('1Y')
+const horizonCutoff = computed(() => {
+  const days = HORIZONS[horizon.value]
+  if (!days) return 0
+  return Date.now() - days * 86_400_000
+})
+
 function startEdit() {
   editLabel.value = displayLabel.value
   editing.value = true
@@ -83,7 +104,21 @@ const result = computed(() => props.data?.result)
 type Plot = { label: string; values: number[]; timestamps: number[]; color: string }
 
 function norm(series: any): { values: number[]; timestamps: number[] } {
-  return { values: toSeriesValues(series), timestamps: toSeriesTimestamps(series, toSeriesValues(series).length) }
+  const values = toSeriesValues(series)
+  const timestamps = toSeriesTimestamps(series, values.length)
+  const cut = horizonCutoff.value
+  if (cut > 0) {
+    const kept: number[] = []
+    const keptTs: number[] = []
+    for (let i = 0; i < values.length; i++) {
+      if (timestamps[i] >= cut) {
+        kept.push(values[i])
+        keptTs.push(timestamps[i])
+      }
+    }
+    return { values: kept, timestamps: keptTs }
+  }
+  return { values, timestamps }
 }
 
 const seriesToPlot = computed<Plot[]>(() => {
