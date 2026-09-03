@@ -120,26 +120,18 @@ export const executors: Record<string, NodeExecutor> = {
     }
     try {
       const steps = ctx.data.steps || 15
-      const params = values.length > 100 ? calibrateMLE(values) : createDefaultParams()
+      const params = calibrateMLE(values)
       const result = runKalmanFilter(values, params, steps)
-      const lastPrices = values.slice(-10)
-      const avgStep = lastPrices.reduce((s, v, i, a) => i > 0 ? s + (v - a[i - 1]) : s, 0) / (lastPrices.length - 1)
-      const lastSmoothed = result.smoothed[result.smoothed.length - 1] || values[values.length - 1]
-      const forecast: number[] = []
-      const confidence: number[] = []
-      for (let i = 1; i <= steps; i++) {
-        const val = lastSmoothed + avgStep * i
-        forecast.push(val)
-        const band = val * (0.01 + 0.015 * i)
-        confidence.push(band)
-      }
+      const predicted = result.predicted
+      const confidence = result.confidence
+      const n = Math.min(predicted.length, confidence.length)
       const baseTs = toSeriesTimestamps(series, values.length)
       const lastTs = baseTs.length > 0 ? baseTs[baseTs.length - 1] : Date.now()
       const DAY = 86_400_000
-      const fcSeries = forecast.map((v, i) => ({ timestamp: lastTs + DAY * i, value: v }))
-      const confSeries = confidence.map((v, i) => ({ timestamp: lastTs + DAY * i, value: v }))
+      const fcSeries = predicted.slice(0, n).map((v, i) => ({ timestamp: lastTs + DAY * (i + 1), value: v }))
+      const confSeries = confidence.slice(0, n).map((v, i) => ({ timestamp: lastTs + DAY * (i + 1), value: v }))
       const lastBand = confidence[confidence.length - 1] ?? 0
-      const lastFc = forecast[forecast.length - 1] ?? lastSmoothed
+      const lastFc = predicted[predicted.length - 1] ?? values[values.length - 1]
       const confPct = lastFc > 0 ? Math.min(99, Math.max(1, Math.round((lastBand / lastFc) * 100))) : 1
       return { forecastSeries: fcSeries, confidenceSeries: confSeries, confidence: confPct }
     } catch (e: any) {
