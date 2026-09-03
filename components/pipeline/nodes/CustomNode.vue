@@ -87,6 +87,27 @@
       />
     </div>
 
+    <div v-if="def.type === 'forecastNode'" class="mb-2 space-y-1.5">
+      <select
+        v-model="data.algorithm"
+        class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853] appearance-none cursor-pointer"
+        @change="onAlgorithmChange"
+      >
+        <option value="kalman">Kalman (Schwartz-Smith)</option>
+        <option value="linear">Linear Regression</option>
+        <option value="holt">Holt Exponential Smoothing</option>
+        <option value="arima">ARIMA (1,1,0)</option>
+      </select>
+      <input
+        v-model.number="data.steps"
+        type="number"
+        class="w-full bg-[#222] border border-[#444] rounded px-2 py-1 text-white text-[10px] font-mono outline-none focus:border-[#00c853]"
+        placeholder="Steps"
+        min="1"
+        max="100"
+      />
+    </div>
+
     <div v-if="displayValue" class="text-center mb-2">
       <span class="text-white font-mono text-sm font-bold" :class="displayClass">{{ displayValue }}</span>
     </div>
@@ -181,9 +202,26 @@ function cancelLabel() {
   editing.value = false
 }
 
+const algorithmLabels: Record<string, string> = {
+  kalman: 'Kalman Forecast',
+  linear: 'Linear Forecast',
+  holt: 'Holt Forecast',
+  arima: 'ARIMA Forecast',
+}
+
+function onAlgorithmChange() {
+  const algo = props.data.algorithm
+  if (algo && algorithmLabels[algo]) {
+    props.data.label = algorithmLabels[algo]
+  }
+}
+
 onMounted(() => {
   if (def.value.type === 'portfolioInput' && (!props.data.weights || props.data.weights.length === 0)) {
     props.data.weights = [1, 1]
+  }
+  if (def.value.type === 'forecastNode' && props.data.algorithm && algorithmLabels[props.data.algorithm]) {
+    props.data.label = algorithmLabels[props.data.algorithm]
   }
 })
 
