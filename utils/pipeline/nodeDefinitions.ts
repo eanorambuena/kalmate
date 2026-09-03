@@ -184,7 +184,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'forecastNode',
     label: 'Forecast',
-    description: 'Predicts future prices using a Kalman filter. Outputs the forecast, confidence bands, and a confidence %',
+    description: 'Predicts future prices using an industry-standard algorithm (Kalman, linear regression, Holt exponential smoothing, or ARIMA). Outputs the forecast, confidence bands, and a confidence %',
     category: 'process',
     color: '#00c853',
     pro: true,
@@ -193,7 +193,7 @@ export const nodeDefinitions: NodeDefinition[] = [
       { id: 'forecastSeries', label: 'Forecast', type: 'series' },
       { id: 'confidenceSeries', label: 'Confidence', type: 'series' },
     ],
-    defaultData: { steps: 15 },
+    defaultData: { steps: 15, algorithm: 'kalman' },
   },
   {
     type: 'emaIndicator',
