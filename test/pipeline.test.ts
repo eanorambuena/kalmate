@@ -858,6 +858,12 @@ describe('full pipeline execution', () => {
     for (let i = 0; i < overlayA.length; i++) {
       assert.ok(overlayA[i].value > 0, 'forecast overlay values are positive')
     }
+
+    const confidence = results.ch1.confidenceSeries
+    assert.ok(confidence, 'confidence band present')
+    assert.equal(confidence.length, forecast.length)
+    assert.ok(confidence[0].timestamp === forecast[0].timestamp, 'confidence band aligned with forecast in time')
+    assert.ok(confidence[0].timestamp > lastMainTs, 'confidence band starts on the future horizon')
     global.fetch = origFetch
   })
   it('forecast → chart propagates forecastSeries and confidenceSeries', async () => {

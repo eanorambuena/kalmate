@@ -10,8 +10,8 @@
       <svg viewBox="0 0 260 118" class="w-full h-full" preserveAspectRatio="none">
         <line x1="5" y1="109" x2="255" y2="109" stroke="#333" stroke-width="1" />
         <path v-if="confidenceBand" :d="confidenceBand.d" :fill="confidenceBand.color" opacity="0.15" />
-        <path v-for="(s, idx) in seriesToPlot" :key="idx" :d="areaPath(s.values)" :fill="s.color" opacity="0.1" />
-        <polyline v-for="(s, idx) in seriesToPlot" :key="idx + 100" :points="linePoints(s.values)" fill="none" :stroke="s.color" stroke-width="2" vector-effect="non-scaling-stroke" />
+        <path v-for="(s, idx) in seriesToPlot" :key="idx" :d="areaPath(s.values, s.timestamps)" :fill="s.color" opacity="0.1" />
+        <polyline v-for="(s, idx) in seriesToPlot" :key="idx + 100" :points="linePoints(s.values, s.timestamps)" fill="none" :stroke="s.color" stroke-width="2" vector-effect="non-scaling-stroke" />
         <g v-for="(t, idx) in xTicks" :key="'t' + idx">
           <line :x1="t.x" y1="109" :x2="t.x" y2="112" stroke="#444" stroke-width="1" />
           <text :x="t.x" y="116" fill="#888" font-size="6.5" text-anchor="middle" font-family="monospace">{{ t.label }}</text>
@@ -46,6 +46,7 @@ import { Handle, Position } from '@vue-flow/core'
 import { computed, ref, nextTick } from 'vue'
 import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
 import { toSeriesValues, toSeriesTimestamps } from '~/utils/series'
+import { pointX, toTimeDomain } from '~/utils/chart-scale'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -113,6 +114,11 @@ const mainTimestamps = computed<number[]>(() =>
   seriesToPlot.value.find(s => s.label === 'Main')?.timestamps ?? seriesToPlot.value[0]?.timestamps ?? [],
 )
 
+const timeDomain = computed(() => toTimeDomain(seriesToPlot.value))
+
+const xForP = (ts: number | undefined, idx: number, len: number) =>
+  pointX(ts, idx, len, timeDomain.value, svgW, pad)
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 function fmtTick(ts: number, useMonthLabels: boolean): string {
@@ -126,12 +132,6 @@ const xTicks = computed(() => {
   const ts = mainTimestamps.value
   if (ts.length < 2) return []
   const n = ts.length - 1
-  const len = seriesToPlot.value[0]?.values.length ?? ts.length
-  const lastIdx = Math.max(len - 1, 0)
-  const xForTs = (tsIdx: number) => {
-    const idx = len > 1 ? Math.round((tsIdx / n) * lastIdx) : 0
-    return pad + (idx / lastIdx) * (svgW - pad * 2)
-  }
   const spanDays = (ts[n] - ts[0]) / 86_400_000
   const useMonthLabels = spanDays > 250
   const tickCount = useMonthLabels ? 5 : 3
@@ -139,7 +139,7 @@ const xTicks = computed(() => {
   if (tickCount === 1) picks.push(0)
   else for (let i = 0; i < tickCount; i++) picks.push(Math.round((i / (tickCount - 1)) * n))
   return picks.map(tsIdx => ({
-    x: xForTs(tsIdx),
+    x: xForP(ts[tsIdx], tsIdx, ts.length),
     label: fmtTick(ts[tsIdx], useMonthLabels),
   }))
 })
@@ -162,11 +162,11 @@ const getMinMax = (series: Array<{ values: number[] }>) => {
   return { min, max, range: max - min || 1 }
 }
 
-const linePoints = (values: number[]) => {
+const linePoints = (values: number[], timestamps: number[] = []) => {
   if (values.length < 2) return ''
   const { min, range } = getMinMax(seriesToPlot.value)
   return values.map((v: number, i: number) => {
-    const x = pad + (i / (values.length - 1)) * (svgW - pad * 2)
+    const x = xForP(timestamps[i], i, values.length)
     const y = svgH - pad - ((v - min) / range) * (svgH - pad * 2)
     return `${x},${y}`
   }).join(' ')
@@ -175,16 +175,19 @@ const linePoints = (values: number[]) => {
 const confidenceBand = computed<{ d: string; color: string } | null>(() => {
   const r = result.value
   if (!r) return null
-  const forecastValues = toSeriesValues(r.forecastSeries || r.forecast)
+  const fcRaw = r.forecastSeries || r.forecast
+  const forecastValues = toSeriesValues(fcRaw)
   const confidenceValues = toSeriesValues(r.confidenceSeries || r.confidence)
+  const forecastTimestamps = toSeriesTimestamps(fcRaw, forecastValues.length)
   const len = Math.min(forecastValues.length, confidenceValues.length)
   if (len < 2) return null
   const fv = forecastValues.slice(0, len)
   const cv = confidenceValues.slice(0, len)
+  const ts = forecastTimestamps.slice(0, len)
   const { min, range } = getMinMax(seriesToPlot.value)
   const last = len - 1
-  const upper = fv.map((v, i) => ({ x: pad + (i / last) * (svgW - pad * 2), y: svgH - pad - ((v + cv[i] - min) / range) * (svgH - pad * 2) }))
-  const lower = fv.map((v, i) => ({ x: pad + (i / last) * (svgW - pad * 2), y: svgH - pad - ((v - cv[i] - min) / range) * (svgH - pad * 2) }))
+  const upper = fv.map((v, i) => ({ x: xForP(ts[i], i, len), y: svgH - pad - ((v + cv[i] - min) / range) * (svgH - pad * 2) }))
+  const lower = fv.map((v, i) => ({ x: xForP(ts[i], i, len), y: svgH - pad - ((v - cv[i] - min) / range) * (svgH - pad * 2) }))
   let d = `M${upper[0].x},${upper[0].y}`
   for (let i = 1; i < len; i++) d += ` L${upper[i].x},${upper[i].y}`
   for (let i = last; i >= 0; i--) d += ` L${lower[i].x},${lower[i].y}`
@@ -192,17 +195,16 @@ const confidenceBand = computed<{ d: string; color: string } | null>(() => {
   return { d, color: '#aa00ff' }
 })
 
-const areaPath = (values: number[]) => {
+const areaPath = (values: number[], timestamps: number[] = []) => {
   if (values.length < 2) return ''
   const { min, range } = getMinMax(seriesToPlot.value)
   const bottom = svgH - pad
-  let d = `M${pad},${bottom}`
+  let d = `M${xForP(timestamps[0], 0, values.length)},${bottom}`
   values.forEach((v: number, i: number) => {
-    const x = pad + (i / (values.length - 1)) * (svgW - pad * 2)
+    const x = xForP(timestamps[i], i, values.length)
     const y = svgH - pad - ((v - min) / range) * (svgH - pad * 2)
     d += ` L${x},${y}`
   })
-  d += ` L${pad + (svgW - pad * 2)},${bottom} Z`
+  d += ` L${xForP(timestamps[timestamps.length - 1], values.length - 1, values.length)},${bottom} Z`
   return d
-}
-</script>
+}</script>
