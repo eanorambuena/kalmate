@@ -2,6 +2,7 @@ import type { PipelineSpec, ExecutionContext, NodeExecutor } from './types.ts'
 import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman.ts'
 import { calcSMA, calcRSI, calcEMA } from '../indicators.ts'
 import { toSeries, toSeriesValues, toSeriesTimestamps, withTimestamps } from '../series.ts'
+import { runForecast } from '../forecast.ts'
 
 export const executors: Record<string, NodeExecutor> = {
   currencyInput: async (ctx) => {
@@ -120,10 +121,8 @@ export const executors: Record<string, NodeExecutor> = {
     }
     try {
       const steps = ctx.data.steps || 15
-      const params = calibrateMLE(values)
-      const result = runKalmanFilter(values, params, steps)
-      const predicted = result.predicted
-      const confidence = result.confidence
+      const algorithm = ctx.data.algorithm || 'kalman'
+      const { forecast: predicted, confidence } = runForecast(values, steps, algorithm)
       const n = Math.min(predicted.length, confidence.length)
       const baseTs = toSeriesTimestamps(series, values.length)
       const lastTs = baseTs.length > 0 ? baseTs[baseTs.length - 1] : Date.now()
