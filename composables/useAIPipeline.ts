@@ -146,6 +146,7 @@ function parseKeywords(query: string): PipelinePlan {
     edges.push({ source: 1, target: fcIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
     if (outputIdx.length > 0) {
       edges.push({ source: fcIdx, target: outputIdx[0], sourceHandle: 'forecastSeries', targetHandle: 'overlayA' })
+      edges.push({ source: fcIdx, target: outputIdx[0], sourceHandle: 'confidenceSeries', targetHandle: 'overlayB' })
     }
   }
 
