@@ -18,7 +18,7 @@ export const executors: Record<string, NodeExecutor> = {
   priceFeed: async (ctx) => {
     const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
     try {
-      const res = await fetch(`/api/history?symbol=${symbol}&range=1y&interval=1d`)
+      const res = await fetch(`/api/history?symbol=${symbol}&range=5y&interval=1d`)
       const data = await res.json()
       if (!res.ok) return { price: 0, priceSeries: [], error: data?.statusMessage || `HTTP ${res.status}`, symbol }
       if (!Array.isArray(data)) return { price: 0, priceSeries: [], error: 'Unexpected response format', symbol }
