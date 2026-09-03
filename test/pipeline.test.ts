@@ -2,6 +2,7 @@ import { describe, it, before, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { calcSMA, calcRSI, calcEMA } from '../utils/indicators.ts'
 import { runKalmanFilter, createDefaultParams, calibrateMLE } from '../utils/kalman.ts'
+import { runForecast } from '../utils/forecast.ts'
 import type { ExecutionContext } from '../utils/pipeline/types.ts'
 
 const prices = [100, 102, 101, 103, 105, 104, 106, 108, 107, 109, 110, 112, 111, 113, 115]
@@ -348,6 +349,44 @@ describe('executors', () => {
     const ctx = mkCtx({ inputs: { priceSeries: [100, 101, 102] } })
     const result = await executors.forecastNode(ctx)
     assert.ok(result.error)
+  })
+
+  it('forecastNode supports all algorithms with valid output', async () => {
+    for (const algorithm of ['kalman', 'linear', 'holt', 'arima']) {
+      const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 8, algorithm } })
+      const result = await executors.forecastNode(ctx)
+      assert.equal(result.forecastSeries.length, 8, `${algorithm} forecast length`)
+      assert.equal(result.confidenceSeries.length, 8, `${algorithm} confidence length`)
+      for (const p of result.forecastSeries) {
+        assert.ok(Number.isFinite(p.value) && p.value > 0, `${algorithm} forecast finite/positive`)
+      }
+      for (const b of result.confidenceSeries) {
+        assert.ok(Number.isFinite(b.value) && b.value >= 0, `${algorithm} confidence finite`)
+      }
+      for (let i = 0; i < result.confidenceSeries.length; i++) {
+        assert.ok(result.confidenceSeries[i].value < result.forecastSeries[i].value, `${algorithm} confidence < forecast @${i}`)
+      }
+    }
+  })
+
+  it('forecastNode algorithm follows an upward trend', async () => {
+    const trending = Array.from({ length: 30 }, (_, i) => 100 + i * 2)
+    for (const algorithm of ['kalman', 'linear', 'holt', 'arima']) {
+      const ctx = mkCtx({ inputs: { priceSeries: trending }, data: { steps: 6, algorithm } })
+      const result = await executors.forecastNode(ctx)
+      const last = trending[trending.length - 1]
+      const first = result.forecastSeries[0].value
+      const lastF = result.forecastSeries[result.forecastSeries.length - 1].value
+      assert.ok(first > last, `${algorithm} forecast starts above last price`)
+      assert.ok(lastF > first, `${algorithm} forecast keeps rising`)
+    }
+  })
+
+  it('forecastNode algorithm defaults to kalman when not provided', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 6 } })
+    const result = await executors.forecastNode(ctx)
+    assert.equal(result.forecastSeries.length, 6)
+    assert.equal(result.confidenceSeries.length, 6)
   })
 
   it('kalmanFilter returns smoothed, trend, signal', async () => {
