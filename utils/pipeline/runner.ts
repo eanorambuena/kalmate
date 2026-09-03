@@ -46,6 +46,8 @@ export const executors: Record<string, NodeExecutor> = {
       overlayA: ctx.inputs.overlayA != null ? toSeries(ctx.inputs.overlayA) : null,
       overlayB: ctx.inputs.overlayB != null ? toSeries(ctx.inputs.overlayB) : null,
       overlayC: ctx.inputs.overlayC != null ? toSeries(ctx.inputs.overlayC) : null,
+      forecastSeries: ctx.inputs.forecastSeries != null ? toSeries(ctx.inputs.forecastSeries) : null,
+      confidenceSeries: ctx.inputs.confidenceSeries != null ? toSeries(ctx.inputs.confidenceSeries) : null,
     }
   },
 
@@ -280,6 +282,9 @@ export async function executePipeline(spec: PipelineSpec): Promise<Record<string
         if (srcResult) {
           if (edge.sourceHandle && edge.targetHandle) {
             inputs[edge.targetHandle] = srcResult[edge.sourceHandle]
+            if (edge.sourceHandle !== edge.targetHandle && !(edge.sourceHandle in inputs)) {
+              inputs[edge.sourceHandle] = srcResult[edge.sourceHandle]
+            }
           } else {
             Object.assign(inputs, srcResult)
           }
