@@ -127,10 +127,20 @@ export const executors: Record<string, NodeExecutor> = {
       const baseTs = toSeriesTimestamps(series, values.length)
       const lastTs = baseTs.length > 0 ? baseTs[baseTs.length - 1] : Date.now()
       const DAY = 86_400_000
-      const fcSeries = predicted.slice(0, n).map((v, i) => ({ timestamp: lastTs + DAY * (i + 1), value: v }))
-      const confSeries = confidence.slice(0, n).map((v, i) => ({ timestamp: lastTs + DAY * (i + 1), value: v }))
+      // Anchor the forecast to the LAST observed price (C0 contact): the
+      // prediction must emanate from the end of the historical series, not
+      // from a model value with a level bias. Rebase the model path so it
+      // starts exactly at the last price while preserving its slope.
+      const anchor = values[values.length - 1]
+      const stepSlope = n > 1 ? predicted[1] - predicted[0] : anchor - (values[values.length - 2] ?? anchor)
+      const modelStart = predicted[0] - stepSlope
+      const shift = anchor - modelStart
+      const fcValues = [anchor]
+      for (let i = 0; i < n; i++) fcValues.push(predicted[i] + shift)
+      const fcSeries = fcValues.map((v, i) => ({ timestamp: lastTs + DAY * i, value: v }))
+      const confSeries = [{ timestamp: lastTs, value: 0 }, ...confidence.slice(0, n).map((v, i) => ({ timestamp: lastTs + DAY * (i + 1), value: v }))]
       const lastBand = confidence[confidence.length - 1] ?? 0
-      const lastFc = predicted[predicted.length - 1] ?? values[values.length - 1]
+      const lastFc = fcValues[fcValues.length - 1] ?? values[values.length - 1]
       const confPct = lastFc > 0 ? Math.min(99, Math.max(1, Math.round((lastBand / lastFc) * 100))) : 1
       return { forecastSeries: fcSeries, confidenceSeries: confSeries, confidence: confPct }
     } catch (e: any) {

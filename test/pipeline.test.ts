@@ -271,9 +271,9 @@ describe('executors', () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 10 } })
     const result = await executors.forecastNode(ctx)
     assert.ok(Array.isArray(result.forecastSeries))
-    assert.equal(result.forecastSeries.length, 10)
+    assert.equal(result.forecastSeries.length, 11, 'forecast includes the anchor + steps')
     assert.ok(Array.isArray(result.confidenceSeries))
-    assert.equal(result.confidenceSeries.length, 10)
+    assert.equal(result.confidenceSeries.length, 11)
   })
 
   it('forecastNode values are positive and finite', async () => {
@@ -300,28 +300,40 @@ describe('executors', () => {
   it('forecastNode forecast length follows steps config', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 5 } })
     const result = await executors.forecastNode(ctx)
-    assert.equal(result.forecastSeries.length, 5)
-    assert.equal(result.confidenceSeries.length, 5)
+    assert.equal(result.forecastSeries.length, 6)
+    assert.equal(result.confidenceSeries.length, 6)
   })
 
   it('forecastNode uses default steps when not provided', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices } })
     const result = await executors.forecastNode(ctx)
-    assert.equal(result.forecastSeries.length, 15)
+    assert.equal(result.forecastSeries.length, 16)
   })
 
-  it('forecastNode first forecast starts near the last price', async () => {
+  it('forecastNode starts exactly at the last observed price (C0 contact)', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 5 } })
     const result = await executors.forecastNode(ctx)
     const lastPrice = prices[prices.length - 1]
-    const first = result.forecastSeries[0].value
-    assert.ok(Math.abs(first - lastPrice) / lastPrice < 0.1, `first=${first}, last=${lastPrice}`)
+    const anchor = result.forecastSeries[0].value
+    assert.equal(anchor, lastPrice, 'forecast must emanate from the last price, no level bias')
   })
 
-  it('forecastNode confidence grows proportionally to value', async () => {
+  it('forecastNode first future step continues the model slope (C1 contact)', async () => {
+    const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 5 } })
+    const result = await executors.forecastNode(ctx)
+    const anchor = result.forecastSeries[0].value
+    const step1 = result.forecastSeries[1].value
+    const horizonMove = step1 - anchor
+    const lastObservedMove = prices[prices.length - 1] - prices[prices.length - 2]
+    assert.ok(horizonMove > 0, 'continuation keeps an upward direction for this trend')
+    assert.ok(Math.abs(horizonMove) < Math.abs(lastObservedMove) * 3 + 1, 'first step slope is not absurd vs recent move')
+  })
+
+  it('forecastNode confidence band is anchored at zero on the last price', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 8 } })
     const result = await executors.forecastNode(ctx)
-    for (let i = 0; i < result.forecastSeries.length; i++) {
+    assert.equal(result.confidenceSeries[0].value, 0, 'no uncertainty at the observed anchor')
+    for (let i = 1; i < result.forecastSeries.length; i++) {
       assert.ok(result.confidenceSeries[i].value > 0)
       assert.ok(result.confidenceSeries[i].value < result.forecastSeries[i].value)
     }
@@ -355,8 +367,8 @@ describe('executors', () => {
     for (const algorithm of ['kalman', 'linear', 'holt', 'arima']) {
       const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 8, algorithm } })
       const result = await executors.forecastNode(ctx)
-      assert.equal(result.forecastSeries.length, 8, `${algorithm} forecast length`)
-      assert.equal(result.confidenceSeries.length, 8, `${algorithm} confidence length`)
+      assert.equal(result.forecastSeries.length, 9, `${algorithm} forecast length`)
+      assert.equal(result.confidenceSeries.length, 9, `${algorithm} confidence length`)
       for (const p of result.forecastSeries) {
         assert.ok(Number.isFinite(p.value) && p.value > 0, `${algorithm} forecast finite/positive`)
       }
@@ -375,8 +387,10 @@ describe('executors', () => {
       const ctx = mkCtx({ inputs: { priceSeries: trending }, data: { steps: 6, algorithm } })
       const result = await executors.forecastNode(ctx)
       const last = trending[trending.length - 1]
-      const first = result.forecastSeries[0].value
+      const anchor = result.forecastSeries[0].value
+      const first = result.forecastSeries[1].value
       const lastF = result.forecastSeries[result.forecastSeries.length - 1].value
+      assert.equal(anchor, last, `${algorithm} forecast anchored at last price`)
       assert.ok(first > last, `${algorithm} forecast starts above last price`)
       assert.ok(lastF > first, `${algorithm} forecast keeps rising`)
     }
@@ -385,8 +399,8 @@ describe('executors', () => {
   it('forecastNode algorithm defaults to kalman when not provided', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: prices }, data: { steps: 6 } })
     const result = await executors.forecastNode(ctx)
-    assert.equal(result.forecastSeries.length, 6)
-    assert.equal(result.confidenceSeries.length, 6)
+    assert.equal(result.forecastSeries.length, 7)
+    assert.equal(result.confidenceSeries.length, 7)
   })
 
   it('kalmanFilter returns smoothed, trend, signal', async () => {
@@ -844,11 +858,21 @@ describe('full pipeline execution', () => {
     assert.equal(overlayA.length, forecast.length)
 
     const lastMainTs = mainSeries[mainSeries.length - 1].timestamp
+    const lastMainValue = mainSeries[mainSeries.length - 1].value
     const firstFcTs = forecast[0].timestamp
 
     assert.ok(
-      firstFcTs > lastMainTs,
-      `forecast must start on the future horizon after the last price (fc=${firstFcTs}, last=${lastMainTs})`,
+      firstFcTs === lastMainTs,
+      `forecast shares the anchor timestamp with the last price (fc=${firstFcTs}, last=${lastMainTs})`,
+    )
+    assert.equal(
+      forecast[0].value,
+      lastMainValue,
+      'forecast must begin at the last observed price (C0 contact, no level bias)',
+    )
+    assert.ok(
+      forecast[1].timestamp > lastMainTs,
+      'forecast future steps extend on the horizon after the anchor',
     )
     assert.ok(
       forecast[forecast.length - 1].timestamp > firstFcTs,
@@ -863,7 +887,8 @@ describe('full pipeline execution', () => {
     assert.ok(confidence, 'confidence band present')
     assert.equal(confidence.length, forecast.length)
     assert.ok(confidence[0].timestamp === forecast[0].timestamp, 'confidence band aligned with forecast in time')
-    assert.ok(confidence[0].timestamp > lastMainTs, 'confidence band starts on the future horizon')
+    assert.equal(confidence[0].value, 0, 'confidence band anchored at zero on the last price')
+    assert.ok(confidence[1].timestamp > lastMainTs, 'confidence band extends onto the future horizon')
     global.fetch = origFetch
   })
   it('forecast → chart propagates forecastSeries and confidenceSeries', async () => {

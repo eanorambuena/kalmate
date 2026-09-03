@@ -116,6 +116,21 @@ overlayB=confidence (más frágil, puede dar falsos positivos con SMA/EMA).
 - [x] Paso 3: afinar lectura de aliases en `confidenceBand` + omitir línea overlayB redundante (commit `25d6b32`)
 - [x] Paso 4: test de integración propagación + commits por concern + push (commit `fef6e68`, 97 tests verdes)
 
+## Fix de contacto C⁰/C¹ (ancla al final de la serie)
+El forecast anterior despegaba desde un valor del modelo con **bias de nivel**
+(no coincidía con el último precio observado), y además no incluía el punto de
+partida, dejando un hueco temporal entre el final de la serie main y el inicio del
+forecast. Solución en `utils/pipeline/runner.ts::forecastNode`:
+- El `forecastSeries` ahora incluye el **ancla** = último precio observado como
+  primer punto (mismo timestamp `lastTs` y mismo valor), logrando C⁰ exacto.
+- Se **rebaselina** la predicción (`shift = last - modeloEnAncla`) para que el primer
+  paso futuro continúe la pendiente del modelo partiendo del ancla (C¹).
+- La `confidenceSeries` ancla en `0` en el punto observado (certeza total) y crece
+  hacia adelante.
+- Tests añadidos en `test/pipeline.test.ts`: contacto C⁰ exacto, continuidad del
+  primer paso (C¹), banda anclada en 0, y el test de integración verifica que el
+  forecast comparte timestamp/valor con el último punto main.
+
 ## Follow-up pendiente (no bloqueante, otro día)
 El fallback `parseKeywords` en `useAIPipeline.ts` para una query de **forecast puro**
 (sin palabras `chart`/`candle`) no crea ningún nodo `chartOutput`, dejando el
