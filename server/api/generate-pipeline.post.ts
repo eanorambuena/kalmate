@@ -1,5 +1,9 @@
 import { nodeDefinitions } from '../../utils/pipeline/nodeDefinitions'
 import { validatePipelinePlan } from '../../utils/pipeline/validatePlan'
+import { isRateLimited } from '../../utils/rateLimit'
+
+const RATE_LIMIT = 10
+const RATE_WINDOW_MS = 60_000
 
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions'
 const MODEL = 'llama-3.3-70b-versatile'
@@ -66,6 +70,11 @@ export default defineEventHandler(async (event) => {
   const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
     return { error: 'GROQ_API_KEY not configured' }
+  }
+
+  const ip = getRequestIP(event, { xForwardedFor: true }) || 'unknown'
+  if (isRateLimited(`generate-pipeline:${ip}`, RATE_LIMIT, RATE_WINDOW_MS)) {
+    return { error: 'Too many pipeline generations. Wait a minute and try again.' }
   }
 
   const body = await readBody<{ query?: string }>(event)
