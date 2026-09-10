@@ -196,6 +196,25 @@ export const nodeDefinitions: NodeDefinition[] = [
     defaultData: { steps: 15, algorithm: 'kalman' },
   },
   {
+    type: 'recommendationNode',
+    label: 'Recommendation',
+    description: 'Combines long-term trend, mean-reversion (fair value), RSI timing, and a fundamental score into a Buy/Hold/Sell verdict — instead of predicting a price, it estimates whether a trade now has edge',
+    category: 'process',
+    color: '#00c853',
+    pro: true,
+    inputs: [
+      { id: 'trend', label: 'Trend', type: 'series' },
+      { id: 'cycle', label: 'Cycle', type: 'series' },
+      { id: 'rsiValue', label: 'RSI', type: 'signal' },
+      { id: 'fundamentalScore', label: 'Fundamentals', type: 'scalar' },
+    ],
+    outputs: [
+      { id: 'score', label: 'Score', type: 'signal' },
+      { id: 'verdict', label: 'Verdict', type: 'any' },
+    ],
+    defaultData: {},
+  },
+  {
     type: 'emaIndicator',
     label: 'EMA',
     description: 'Exponential Moving Average — like SMA but reacts faster to recent price changes. Use for earlier signals',

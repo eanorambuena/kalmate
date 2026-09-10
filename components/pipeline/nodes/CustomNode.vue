@@ -112,7 +112,12 @@
       />
     </div>
 
-    <div v-if="displayValue" class="text-center mb-2">
+    <div v-if="def.type === 'recommendationNode' && result?.verdict" class="text-center mb-2">
+      <span class="font-mono text-sm font-bold" :class="verdictClass">{{ result.verdict }}</span>
+      <p class="text-[#888] text-[9px] mt-0.5">score {{ result.score }}</p>
+      <p v-if="result.missing?.length" class="text-[#666] text-[9px] mt-0.5">using neutral default for: {{ result.missing.join(', ') }}</p>
+    </div>
+    <div v-else-if="displayValue" class="text-center mb-2">
       <span class="text-white font-mono text-sm font-bold" :class="displayClass">{{ displayValue }}</span>
     </div>
     <div v-else-if="result?.error" class="text-center mb-2">
@@ -183,6 +188,12 @@ const displayClass = computed(() => {
   if (r.signal === 1) return 'text-[#ff1744]'
   if (r.signal === -1) return 'text-[#00c853]'
   return ''
+})
+const verdictClass = computed(() => {
+  const v = result.value?.verdict
+  if (v === 'Strong Buy' || v === 'Buy') return 'text-[#00c853]'
+  if (v === 'Strong Sell' || v === 'Sell') return 'text-[#ff1744]'
+  return 'text-[#bbb]'
 })
 
 const editing = ref(false)

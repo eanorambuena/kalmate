@@ -579,6 +579,47 @@ describe('executors', () => {
     assert.deepEqual(result.scalar, [5, 5, 6])
   })
 
+  it('recommendationNode gives Strong Buy when trend, cycle, RSI and fundamentals all agree bullish', async () => {
+    const trend = [100, 102, 104, 106, 108, 110]
+    const cycle = [-0.01, -0.02, -0.03, -0.04, -0.05, -0.06]
+    const result = await executors.recommendationNode(mkCtx({
+      inputs: { trend, cycle, rsiValue: 25, fundamentalScore: 85 },
+    }))
+    assert.equal(result.verdict, 'Strong Buy')
+    assert.ok(result.score > 60)
+    assert.deepEqual(result.missing, [])
+  })
+
+  it('recommendationNode gives Strong Sell when trend, cycle, RSI and fundamentals all agree bearish', async () => {
+    const trend = [110, 108, 106, 104, 102, 100]
+    const cycle = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06]
+    const result = await executors.recommendationNode(mkCtx({
+      inputs: { trend, cycle, rsiValue: 75, fundamentalScore: 15 },
+    }))
+    assert.equal(result.verdict, 'Strong Sell')
+    assert.ok(result.score < -60)
+  })
+
+  it('recommendationNode treats bad fundamentals as a veto on an otherwise bullish chart', async () => {
+    const trend = [100, 102, 104, 106, 108, 110]
+    const cycle = [-0.01, -0.02, -0.03, -0.04, -0.05, -0.06]
+    const withGoodFundamentals = await executors.recommendationNode(mkCtx({
+      inputs: { trend, cycle, rsiValue: 25, fundamentalScore: 90 },
+    }))
+    const withBadFundamentals = await executors.recommendationNode(mkCtx({
+      inputs: { trend, cycle, rsiValue: 25, fundamentalScore: 5 },
+    }))
+    assert.ok(withBadFundamentals.score < withGoodFundamentals.score)
+    assert.notEqual(withBadFundamentals.verdict, 'Strong Buy')
+  })
+
+  it('recommendationNode defaults missing inputs to neutral and reports them', async () => {
+    const result = await executors.recommendationNode(mkCtx({ inputs: {} }))
+    assert.equal(result.verdict, 'Hold')
+    assert.equal(result.score, 0)
+    assert.deepEqual(result.missing.sort(), ['cycle', 'fundamentalScore', 'rsiValue', 'trend'])
+  })
+
   it('portfolioInput computes weighted average', async () => {
     const result = await executors.portfolioInput(mkCtx({
       inputs: { operandA: 100, operandB: 200 },

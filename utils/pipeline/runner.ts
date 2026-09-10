@@ -170,6 +170,80 @@ export const executors: Record<string, NodeExecutor> = {
     }
   },
 
+  recommendationNode: async (ctx) => {
+    const trendSeries = ctx.inputs.trend
+    const cycleSeries = ctx.inputs.cycle
+    const rsiInput = ctx.inputs.rsiValue
+    const fundamentalInput = ctx.inputs.fundamentalScore
+    const missing: string[] = []
+
+    // Long-term direction: relative change of the equilibrium trend over
+    // its recent window. This is deliberately NOT a price forecast — it
+    // only asks "is fair value drifting up or down", which is far more
+    // robust than predicting a price level.
+    let trendScore = 0
+    const trendValues = toSeriesValues(trendSeries)
+    if (Array.isArray(trendSeries) && trendValues.length >= 2) {
+      const window = trendValues.slice(-Math.min(30, trendValues.length))
+      const first = window[0]
+      const last = window[window.length - 1]
+      const relChange = first !== 0 ? (last - first) / Math.abs(first) : 0
+      trendScore = Math.tanh(relChange / 0.05)
+    } else {
+      missing.push('trend')
+    }
+
+    // Mean reversion: the Kalman "cycle" (short-term deviation from fair
+    // value). Negative cycle = price below equilibrium = undervalued = bullish.
+    let cycleScore = 0
+    const cycleValues = toSeriesValues(cycleSeries)
+    if (Array.isArray(cycleSeries) && cycleValues.length > 0) {
+      const lastCycle = cycleValues[cycleValues.length - 1]
+      cycleScore = -Math.tanh(lastCycle / 0.03)
+    } else {
+      missing.push('cycle')
+    }
+
+    // RSI as a timing nudge, not a predictor: oversold nudges bullish,
+    // overbought nudges bearish, scaled around the neutral 50 midpoint.
+    let rsiScore = 0
+    const rsi = typeof rsiInput === 'number' ? rsiInput : toSeriesValues(rsiInput)[toSeriesValues(rsiInput).length - 1]
+    if (typeof rsi === 'number' && Number.isFinite(rsi)) {
+      rsiScore = Math.max(-1, Math.min(1, (50 - rsi) / 50))
+    } else {
+      missing.push('rsiValue')
+    }
+
+    // Fundamentals act as the veto: a great chart on a broken business
+    // still nets out near/below neutral. 50 = neutral (unconnected default).
+    let fundamentalScore = 0
+    const fundamental = typeof fundamentalInput === 'number' ? fundamentalInput : 50
+    if (fundamentalInput == null) missing.push('fundamentalScore')
+    fundamentalScore = Math.max(-1, Math.min(1, (fundamental - 50) / 50))
+
+    const raw = 0.30 * trendScore + 0.30 * cycleScore + 0.15 * rsiScore + 0.25 * fundamentalScore
+    const score = Math.round(Math.max(-1, Math.min(1, raw)) * 100)
+
+    let verdict: string
+    if (score >= 60) verdict = 'Strong Buy'
+    else if (score >= 25) verdict = 'Buy'
+    else if (score > -25) verdict = 'Hold'
+    else if (score > -60) verdict = 'Sell'
+    else verdict = 'Strong Sell'
+
+    return {
+      score,
+      verdict,
+      components: {
+        trend: Math.round(trendScore * 100) / 100,
+        cycle: Math.round(cycleScore * 100) / 100,
+        rsi: Math.round(rsiScore * 100) / 100,
+        fundamental: Math.round(fundamentalScore * 100) / 100,
+      },
+      missing,
+    }
+  },
+
   mathOp: async (ctx) => {
     const a = ctx.inputs.operandA ?? ctx.data.operandA ?? 0
     const b = ctx.inputs.operandB ?? ctx.data.operandB ?? 0
