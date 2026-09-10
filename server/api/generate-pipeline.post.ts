@@ -5,7 +5,6 @@ const MODEL = 'llama-3.3-70b-versatile'
 
 function buildPrompt(query: string): string {
   const nodeList = nodeDefinitions
-    .filter(n => !n.pro)
     .map(n => {
       const ins = n.inputs.map(i => `${i.id}(${i.type})`).join(', ') || 'none'
       const outs = n.outputs.map(o => `${o.id}(${o.type})`).join(', ') || 'none'
