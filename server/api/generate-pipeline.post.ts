@@ -6,7 +6,13 @@ const RATE_LIMIT = 10
 const RATE_WINDOW_MS = 60_000
 
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions'
-const MODEL = 'llama-3.3-70b-versatile'
+const GROQ_MODEL = 'llama-3.3-70b-versatile'
+// Cloudflare Workers AI — free tier (10,000 Neurons/day, no card required),
+// billed to the same Cloudflare account beyond that instead of a brand-new
+// per-token vendor. Requires an `[ai] binding = "AI"` entry in wrangler.toml.
+const WORKERS_AI_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+
+const SYSTEM_PROMPT = 'You are a financial pipeline generator. Always respond with a single valid JSON object and nothing else — no markdown, no commentary.'
 
 function buildPrompt(query: string): string {
   const nodeList = nodeDefinitions
@@ -66,12 +72,50 @@ function isValidQuery(q: string): boolean {
   return VALID_WORDS.some(w => lowered.includes(w))
 }
 
-export default defineEventHandler(async (event) => {
-  const apiKey = process.env.GROQ_API_KEY
-  if (!apiKey) {
-    return { error: 'GROQ_API_KEY not configured' }
+async function callGroq(prompt: string, apiKey: string): Promise<string> {
+  const res = await fetch(GROQ_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.1,
+      max_tokens: 1024,
+      // Groq's OpenAI-compatible JSON mode — guarantees a syntactically
+      // valid JSON response instead of relying on prompt instructions alone.
+      response_format: { type: 'json_object' },
+    }),
+  })
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '')
+    throw new Error(res.status === 429 ? 'Groq rate limited' : `Groq API error ${res.status}: ${errText}`)
   }
+  const data = await res.json()
+  return data.choices?.[0]?.message?.content || ''
+}
 
+// NOT VERIFIED LIVE: this was built where the network policy blocks fetching
+// Cloudflare's own docs, so the exact env.AI.run() request/response shape
+// below is from documented-but-unconfirmed-here patterns — test with
+// `wrangler pages dev` (or after deploy) before relying on it.
+async function callWorkersAI(prompt: string, ai: any): Promise<string> {
+  const result = await ai.run(WORKERS_AI_MODEL, {
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: prompt },
+    ],
+    response_format: { type: 'json_object' },
+  })
+  return result?.response || ''
+}
+
+export default defineEventHandler(async (event) => {
   const ip = getRequestIP(event, { xForwardedFor: true }) || 'unknown'
   if (isRateLimited(`generate-pipeline:${ip}`, RATE_LIMIT, RATE_WINDOW_MS)) {
     return { error: 'Too many pipeline generations. Wait a minute and try again.' }
@@ -87,48 +131,43 @@ export default defineEventHandler(async (event) => {
   }
 
   const prompt = buildPrompt(query)
+  const groqKey = process.env.GROQ_API_KEY
+  // NOT VERIFIED LIVE — see callWorkersAI. If this path (event.context.cloudflare.env)
+  // is wrong for this Nitro version, workersAI stays undefined and we fall through
+  // to the existing error / client-side keyword fallback, same as today.
+  const workersAI = (event.context as any)?.cloudflare?.env?.AI
+
+  let text = ''
+  let lastError = ''
+
+  if (groqKey) {
+    try {
+      text = await callGroq(prompt, groqKey)
+    } catch (e: any) {
+      lastError = e.message || 'Groq request failed'
+    }
+  }
+
+  if (!text && workersAI) {
+    try {
+      text = await callWorkersAI(prompt, workersAI)
+    } catch (e: any) {
+      lastError = lastError || e.message || 'Workers AI request failed'
+    }
+  }
+
+  if (!text) {
+    return { error: lastError || 'No AI provider available (set GROQ_API_KEY, or deploy with a Workers AI binding)' }
+  }
 
   try {
-    const res = await fetch(GROQ_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: 'system', content: 'You are a financial pipeline generator. Always respond with a single valid JSON object and nothing else — no markdown, no commentary.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.1,
-        max_tokens: 1024,
-        // Groq's OpenAI-compatible JSON mode — guarantees a syntactically
-        // valid JSON response instead of relying on prompt instructions alone.
-        response_format: { type: 'json_object' },
-      }),
-    })
-
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '')
-      if (res.status === 429) {
-        return { error: 'Rate limited. Try again in a moment.' }
-      }
-      return { error: `Groq API error ${res.status}: ${errText}` }
-    }
-
-    const data = await res.json()
-    const text = data.choices?.[0]?.message?.content || ''
-
     const jsonStart = text.indexOf('{')
     const jsonEnd = text.lastIndexOf('}')
     if (jsonStart === -1 || jsonEnd === -1) {
       return { error: 'AI response contained no JSON' }
     }
 
-    const jsonStr = text.substring(jsonStart, jsonEnd + 1)
-    const plan = JSON.parse(jsonStr)
-
+    const plan = JSON.parse(text.substring(jsonStart, jsonEnd + 1))
     if (!plan.nodes || !Array.isArray(plan.nodes) || !plan.edges || !Array.isArray(plan.edges)) {
       return { error: 'Invalid pipeline structure from AI' }
     }
@@ -145,6 +184,6 @@ export default defineEventHandler(async (event) => {
     }
     return { nodes, edges }
   } catch (error: any) {
-    return { error: error.message || 'Failed to generate pipeline' }
+    return { error: error.message || 'Failed to parse AI response' }
   }
 })
