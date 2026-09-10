@@ -1,4 +1,5 @@
 import { nodeDefinitions } from '../../utils/pipeline/nodeDefinitions'
+import { validatePipelinePlan } from '../../utils/pipeline/validatePlan'
 
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions'
 const MODEL = 'llama-3.3-70b-versatile'
@@ -124,7 +125,17 @@ export default defineEventHandler(async (event) => {
       return { error: 'Invalid pipeline structure from AI' }
     }
 
-    return plan
+    // Never trust the model to have used real node types or handle ids —
+    // strip anything that doesn't match the actual pipeline node registry
+    // instead of shipping a plan the editor/runner can't execute correctly.
+    const { nodes, edges, warnings } = validatePipelinePlan(plan, nodeDefinitions)
+    if (nodes.length === 0) {
+      return { error: 'AI generated no valid nodes. Try rephrasing your query.' }
+    }
+    if (warnings.length > 0) {
+      console.warn('[generate-pipeline] dropped invalid AI output:', warnings)
+    }
+    return { nodes, edges }
   } catch (error: any) {
     return { error: error.message || 'Failed to generate pipeline' }
   }
