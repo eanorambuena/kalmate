@@ -170,6 +170,62 @@ export const executors: Record<string, NodeExecutor> = {
     }
   },
 
+  incomeStatement: async (ctx) => {
+    const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
+    try {
+      const res = await fetch(`/api/fundamentals?symbol=${symbol}`)
+      const data = await res.json()
+      if (!res.ok) return { fundamentals: null, error: data?.statusMessage || `HTTP ${res.status}`, symbol }
+      return { fundamentals: data, symbol }
+    } catch (e: any) {
+      return { fundamentals: null, error: e?.message || 'Fetch failed', symbol }
+    }
+  },
+
+  // Deliberately simple: five yes/no-ish checks a retail investor would eyeball
+  // on an income statement, not a discounted-cash-flow model. Each check that
+  // fires bumps the score away from the neutral midpoint (50).
+  fundamentalAnalysis: async (ctx) => {
+    const f = ctx.inputs.fundamentals
+    if (!f || typeof f !== 'object') {
+      return { fundamentalScore: 50, checks: 0, error: 'No fundamentals input' }
+    }
+    let points = 0
+    let checks = 0
+
+    if (typeof f.netMargin === 'number') {
+      checks++
+      if (f.netMargin > 0.10) points++
+      else if (f.netMargin < 0) points--
+    }
+    if (typeof f.revenueGrowth === 'number') {
+      checks++
+      if (f.revenueGrowth > 0.05) points++
+      else if (f.revenueGrowth < 0) points--
+    }
+    if (typeof f.debtToEquity === 'number') {
+      checks++
+      if (f.debtToEquity < 100) points++
+      else if (f.debtToEquity > 200) points--
+    }
+    if (typeof f.currentRatio === 'number') {
+      checks++
+      if (f.currentRatio > 1) points++
+      else if (f.currentRatio < 0.8) points--
+    }
+    if (typeof f.trailingPE === 'number') {
+      checks++
+      if (f.trailingPE > 0 && f.trailingPE < 25) points++
+      else if (f.trailingPE <= 0 || f.trailingPE > 40) points--
+    }
+
+    if (checks === 0) {
+      return { fundamentalScore: 50, checks: 0, error: 'Not enough fundamentals data for a read' }
+    }
+    const score = Math.round(50 + (points / checks) * 50)
+    return { fundamentalScore: Math.max(0, Math.min(100, score)), points, checks }
+  },
+
   recommendationNode: async (ctx) => {
     const trendSeries = ctx.inputs.trend
     const cycleSeries = ctx.inputs.cycle
