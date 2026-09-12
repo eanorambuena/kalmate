@@ -2,7 +2,6 @@ name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches: [main]
 
 jobs:
   deploy:
@@ -39,7 +38,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy to Cloudflare
-        run: npx wrangler pages deploy dist --project-name=kalmate --branch main
+        # Non-main branches deploy as Cloudflare Pages preview deployments
+        # (their own <branch>.kalmate.pages.dev URL) instead of overwriting
+        # the production deployment that "main" serves.
+        run: npx wrangler pages deploy .output/public --project-name=kalmate --branch "${{ github.ref_name }}"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
