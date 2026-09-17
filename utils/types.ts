@@ -50,6 +50,33 @@ export interface AlertCondition {
   lastChecked?: string
 }
 
+export interface FundamentalsData {
+  symbol: string
+  totalRevenue?: number
+  netIncome?: number
+  grossProfit?: number
+  operatingIncome?: number
+  netMargin?: number
+  grossMargin?: number
+  operatingMargin?: number
+  revenueGrowth?: number
+  earningsGrowth?: number
+  returnOnEquity?: number
+  debtToEquity?: number
+  currentRatio?: number
+  trailingPE?: number
+  forwardPE?: number
+  priceToBook?: number
+  marketCap?: number
+  incomeStatementHistory: Array<{
+    endDate?: string
+    totalRevenue?: number
+    netIncome?: number
+    grossProfit?: number
+    operatingIncome?: number
+  }>
+}
+
 export interface ChileIndicator {
   codigo: string
   nombre: string
