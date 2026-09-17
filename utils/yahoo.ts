@@ -104,7 +104,7 @@ function num(v: any): number | undefined {
 // needed for a rough gut-check, not a full analyst-grade fundamentals dataset.
 export async function getFundamentals(symbol: string): Promise<FundamentalsData> {
   const modules = 'incomeStatementHistory,financialData,defaultKeyStatistics,summaryDetail'
-  const data = await apiFetch(`${BASE}/v10/finance/quoteSummary/${symbol}?modules=${modules}`)
+  const data = await apiFetch(`${BASE}/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}`)
   const result = data.quoteSummary?.result?.[0]
   if (!result) throw new Error(`No fundamentals data for ${symbol}`)
 

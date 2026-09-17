@@ -1,3 +1,4 @@
+import type { FundamentalsData } from '../../utils/types'
 import { getFundamentals } from '../../utils/yahoo'
 import { getCached, setCache } from '../../utils/cache'
 
@@ -9,8 +10,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'symbol parameter required' })
   }
 
-  const cacheKey = `fundamentals:${symbol}`
-  const cached = getCached<any>(cacheKey)
+  if (!/^[A-Z0-9\-\.]{1,10}$/.test(symbol)) {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid symbol format' })
+  }
+
+  const cacheKey = `fundamentals:${symbol.toUpperCase()}`
+  const cached = getCached<FundamentalsData>(cacheKey)
   if (cached) return cached
 
   try {

@@ -44,6 +44,7 @@ RULES:
 const VALID_WORDS = [
   'chart', 'candle', 'sma', 'ema', 'rsi', 'kalman', 'forecast',
   'price', 'symbol', 'show', 'track', 'filter', 'signal',
+  'fundamental', 'recommendation', 'buy', 'sell', 'hold',
   'linea', 'grafico', 'vela', 'media', 'promedio', 'prediccion',
   'mostrar', 'compar', 'suave', 'filtro', 'relativo',
 ]

@@ -263,7 +263,8 @@ export const executors: Record<string, NodeExecutor> = {
     // RSI as a timing nudge, not a predictor: oversold nudges bullish,
     // overbought nudges bearish, scaled around the neutral 50 midpoint.
     let rsiScore = 0
-    const rsi = typeof rsiInput === 'number' ? rsiInput : toSeriesValues(rsiInput)[toSeriesValues(rsiInput).length - 1]
+    const rsiValues = toSeriesValues(rsiInput)
+    const rsi = typeof rsiInput === 'number' ? rsiInput : rsiValues[rsiValues.length - 1]
     if (typeof rsi === 'number' && Number.isFinite(rsi)) {
       rsiScore = Math.max(-1, Math.min(1, (50 - rsi) / 50))
     } else {
