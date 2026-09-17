@@ -87,6 +87,7 @@ export const nodeDefinitions: NodeDefinition[] = [
     outputs: [
       { id: 'smoothed', label: 'Smoothed', type: 'series' },
       { id: 'trend', label: 'Trend', type: 'series' },
+      { id: 'cycle', label: 'Cycle', type: 'series' },
       { id: 'signal', label: 'Signal', type: 'signal' },
     ],
     defaultData: {},
