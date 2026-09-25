@@ -112,7 +112,20 @@
       />
     </div>
 
-    <div v-if="displayValue" class="text-center mb-2">
+    <div v-if="def.type === 'recommendationNode' && result?.verdict" class="text-center mb-2">
+      <span class="font-mono text-sm font-bold" :class="verdictClass">{{ result.verdict }}</span>
+      <p class="text-[#888] text-[9px] mt-0.5">score {{ result.score }}</p>
+      <p v-if="result.missing?.length" class="text-[#666] text-[9px] mt-0.5">using neutral default for: {{ result.missing.join(', ') }}</p>
+    </div>
+    <div v-else-if="def.type === 'fundamentalAnalysis' && typeof result?.fundamentalScore === 'number'" class="text-center mb-2">
+      <span class="font-mono text-sm font-bold" :class="fundamentalScoreClass">{{ result.fundamentalScore }}/100</span>
+      <p class="text-[#888] text-[9px] mt-0.5">{{ result.checks || 0 }} checks · basic gut-check, not a full analysis</p>
+    </div>
+    <div v-else-if="def.type === 'incomeStatement' && result?.fundamentals" class="text-center mb-2">
+      <span class="text-white font-mono text-xs font-bold">Rev {{ formatCompact(result.fundamentals.totalRevenue) }}</span>
+      <p class="text-[#888] text-[9px] mt-0.5">net margin {{ result.fundamentals.netMargin != null ? (result.fundamentals.netMargin * 100).toFixed(1) + '%' : '—' }}</p>
+    </div>
+    <div v-else-if="displayValue" class="text-center mb-2">
       <span class="text-white font-mono text-sm font-bold" :class="displayClass">{{ displayValue }}</span>
     </div>
     <div v-else-if="result?.error" class="text-center mb-2">
@@ -184,6 +197,27 @@ const displayClass = computed(() => {
   if (r.signal === -1) return 'text-[#00c853]'
   return ''
 })
+const verdictClass = computed(() => {
+  const v = result.value?.verdict
+  if (v === 'Strong Buy' || v === 'Buy') return 'text-[#00c853]'
+  if (v === 'Strong Sell' || v === 'Sell') return 'text-[#ff1744]'
+  return 'text-[#bbb]'
+})
+const fundamentalScoreClass = computed(() => {
+  const s = result.value?.fundamentalScore
+  if (typeof s !== 'number') return 'text-[#bbb]'
+  if (s >= 60) return 'text-[#00c853]'
+  if (s <= 40) return 'text-[#ff1744]'
+  return 'text-[#bbb]'
+})
+function formatCompact(n: number | undefined): string {
+  if (typeof n !== 'number' || !Number.isFinite(n)) return '—'
+  const abs = Math.abs(n)
+  if (abs >= 1e9) return (n / 1e9).toFixed(1) + 'B'
+  if (abs >= 1e6) return (n / 1e6).toFixed(1) + 'M'
+  if (abs >= 1e3) return (n / 1e3).toFixed(1) + 'K'
+  return n.toFixed(0)
+}
 
 const editing = ref(false)
 const editLabel = ref('')

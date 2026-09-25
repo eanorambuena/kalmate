@@ -30,6 +30,8 @@ const KEYWORD_MAP: Record<string, string[]> = {
   rsi: ['rsi', 'relativo', 'relative', 'sobrecompra', 'sobreventa', 'overbought', 'oversold'],
   kalman: ['kalman', 'filtro', 'filter', 'suave', 'smooth'],
   forecast: ['forecast', 'prediccion', 'prediction', 'pronostico', 'futuro', 'future'],
+  fundamentals: ['fundamental', 'fundamentals', 'income statement', 'estado de resultado', 'estado de resultados', 'balance', 'earnings', 'utilidad', 'ganancias'],
+  recommendation: ['recommend', 'recom', 'buy', 'sell', 'comprar', 'vender', 'invertir', 'invest', 'conviene'],
 }
 
 function detectIntent(q: string): { ticker: string; flags: Set<string> } {
@@ -61,9 +63,10 @@ function nodePos(cat: string, col: number): { x: number; y: number } {
 }
 
 const CATEGORY: Record<string, string> = {
-  symbolInput: 'input', priceFeed: 'input', currencyInput: 'input', scalarInput: 'input',
+  symbolInput: 'input', priceFeed: 'input', currencyInput: 'input', scalarInput: 'input', incomeStatement: 'input',
   smaIndicator: 'process', emaIndicator: 'process', rsiIndicator: 'process',
   kalmanFilter: 'process', forecastNode: 'process', mathOp: 'process', portfolioInput: 'process',
+  fundamentalAnalysis: 'process', recommendationNode: 'process',
   chartOutput: 'output', candleChart: 'output', display: 'output', priceDisplay: 'output', alertOutput: 'output',
 }
 
@@ -90,11 +93,18 @@ function parseKeywords(query: string): PipelinePlan {
 
   const useCandles = flags.has('candles')
   const useSma = flags.has('sma')
+  const useRecommendation = flags.has('recommendation')
+  // A recommendation needs trend+cycle (Kalman) and timing (RSI) to mean
+  // anything — pull them in even if the query didn't name them explicitly.
+  const useRsi = flags.has('rsi') || useRecommendation
+  const useKalman = flags.has('kalman') || useRecommendation
   const useEma = flags.has('ema')
-  const useRsi = flags.has('rsi')
-  const useKalman = flags.has('kalman')
   const useForecast = flags.has('forecast')
+  const useFundamentals = flags.has('fundamentals') || useRecommendation
   const useChart = flags.has('chart') || (!useCandles && !useForecast)
+  let kalmanIdx = -1
+  let rsiIdx = -1
+  let fundamentalScoreIdx = -1
 
   if (useCandles) {
     const candleIdx = nextIdx++
@@ -124,18 +134,43 @@ function parseKeywords(query: string): PipelinePlan {
   }
 
   if (useRsi) {
-    const rsiIdx = nextIdx++
+    rsiIdx = nextIdx++
     const num = parseInt(query.match(/rsi\s*(\d+)/i)?.[1] || '14')
     nodes.push(mkNode('rsiIndicator', { period: num }, cnt))
     edges.push({ source: 1, target: rsiIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
   }
 
   if (useKalman) {
-    const kalmanIdx = nextIdx++
+    kalmanIdx = nextIdx++
     nodes.push(mkNode('kalmanFilter', {}, cnt))
     edges.push({ source: 1, target: kalmanIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
     if (outputIdx.length > 0) {
       edges.push({ source: kalmanIdx, target: outputIdx[0], sourceHandle: 'smoothed', targetHandle: 'overlayC' })
+    }
+  }
+
+  if (useFundamentals) {
+    const isIdx = nextIdx++
+    const faIdx = nextIdx++
+    nodes.push(mkNode('incomeStatement', {}, cnt))
+    nodes.push(mkNode('fundamentalAnalysis', {}, cnt))
+    edges.push({ source: 0, target: isIdx, sourceHandle: 'symbol', targetHandle: 'symbol' })
+    edges.push({ source: isIdx, target: faIdx, sourceHandle: 'fundamentals', targetHandle: 'fundamentals' })
+    fundamentalScoreIdx = faIdx
+  }
+
+  if (useRecommendation) {
+    const recIdx = nextIdx++
+    nodes.push(mkNode('recommendationNode', {}, cnt))
+    if (kalmanIdx >= 0) {
+      edges.push({ source: kalmanIdx, target: recIdx, sourceHandle: 'trend', targetHandle: 'trend' })
+      edges.push({ source: kalmanIdx, target: recIdx, sourceHandle: 'cycle', targetHandle: 'cycle' })
+    }
+    if (rsiIdx >= 0) {
+      edges.push({ source: rsiIdx, target: recIdx, sourceHandle: 'rsiValue', targetHandle: 'rsiValue' })
+    }
+    if (fundamentalScoreIdx >= 0) {
+      edges.push({ source: fundamentalScoreIdx, target: recIdx, sourceHandle: 'fundamentalScore', targetHandle: 'fundamentalScore' })
     }
   }
 

@@ -579,6 +579,86 @@ describe('executors', () => {
     assert.deepEqual(result.scalar, [5, 5, 6])
   })
 
+  it('incomeStatement returns error when fetch fails', async () => {
+    global.fetch = async () => ({ ok: false, status: 500, json: async () => ({ statusMessage: 'Server error' }) }) as any
+    const result = await executors.incomeStatement(mkCtx({ inputs: { symbol: 'AAPL' } }))
+    assert.ok(result.error)
+    assert.equal(result.fundamentals, null)
+    assert.equal(result.symbol, 'AAPL')
+    global.fetch = origFetch
+  })
+
+  it('incomeStatement propagates fundamentals data on success', async () => {
+    const fundamentals = { symbol: 'AAPL', totalRevenue: 391_000_000_000, netMargin: 0.25 }
+    global.fetch = async () => ({ ok: true, json: async () => fundamentals }) as any
+    const result = await executors.incomeStatement(mkCtx({ inputs: { symbol: 'AAPL' } }))
+    assert.deepEqual(result.fundamentals, fundamentals)
+    global.fetch = origFetch
+  })
+
+  it('fundamentalAnalysis scores a healthy company well above neutral', async () => {
+    const result = await executors.fundamentalAnalysis(mkCtx({
+      inputs: { fundamentals: { netMargin: 0.25, revenueGrowth: 0.12, debtToEquity: 40, currentRatio: 1.8, trailingPE: 18 } },
+    }))
+    assert.equal(result.fundamentalScore, 100)
+    assert.equal(result.checks, 5)
+  })
+
+  it('fundamentalAnalysis scores a struggling company well below neutral', async () => {
+    const result = await executors.fundamentalAnalysis(mkCtx({
+      inputs: { fundamentals: { netMargin: -0.05, revenueGrowth: -0.10, debtToEquity: 260, currentRatio: 0.5, trailingPE: -10 } },
+    }))
+    assert.equal(result.fundamentalScore, 0)
+  })
+
+  it('fundamentalAnalysis defaults to neutral 50 when no fundamentals input is connected', async () => {
+    const result = await executors.fundamentalAnalysis(mkCtx({ inputs: {} }))
+    assert.equal(result.fundamentalScore, 50)
+    assert.equal(result.checks, 0)
+    assert.ok(result.error)
+  })
+
+  it('recommendationNode gives Strong Buy when trend, cycle, RSI and fundamentals all agree bullish', async () => {
+    const trend = [100, 102, 104, 106, 108, 110]
+    const cycle = [-0.01, -0.02, -0.03, -0.04, -0.05, -0.06]
+    const result = await executors.recommendationNode(mkCtx({
+      inputs: { trend, cycle, rsiValue: 25, fundamentalScore: 85 },
+    }))
+    assert.equal(result.verdict, 'Strong Buy')
+    assert.ok(result.score > 60)
+    assert.deepEqual(result.missing, [])
+  })
+
+  it('recommendationNode gives Strong Sell when trend, cycle, RSI and fundamentals all agree bearish', async () => {
+    const trend = [110, 108, 106, 104, 102, 100]
+    const cycle = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06]
+    const result = await executors.recommendationNode(mkCtx({
+      inputs: { trend, cycle, rsiValue: 75, fundamentalScore: 15 },
+    }))
+    assert.equal(result.verdict, 'Strong Sell')
+    assert.ok(result.score < -60)
+  })
+
+  it('recommendationNode treats bad fundamentals as a veto on an otherwise bullish chart', async () => {
+    const trend = [100, 102, 104, 106, 108, 110]
+    const cycle = [-0.01, -0.02, -0.03, -0.04, -0.05, -0.06]
+    const withGoodFundamentals = await executors.recommendationNode(mkCtx({
+      inputs: { trend, cycle, rsiValue: 25, fundamentalScore: 90 },
+    }))
+    const withBadFundamentals = await executors.recommendationNode(mkCtx({
+      inputs: { trend, cycle, rsiValue: 25, fundamentalScore: 5 },
+    }))
+    assert.ok(withBadFundamentals.score < withGoodFundamentals.score)
+    assert.notEqual(withBadFundamentals.verdict, 'Strong Buy')
+  })
+
+  it('recommendationNode defaults missing inputs to neutral and reports them', async () => {
+    const result = await executors.recommendationNode(mkCtx({ inputs: {} }))
+    assert.equal(result.verdict, 'Hold')
+    assert.equal(result.score, 0)
+    assert.deepEqual(result.missing.sort(), ['cycle', 'fundamentalScore', 'rsiValue', 'trend'])
+  })
+
   it('portfolioInput computes weighted average', async () => {
     const result = await executors.portfolioInput(mkCtx({
       inputs: { operandA: 100, operandB: 200 },
@@ -922,6 +1002,34 @@ describe('full pipeline execution', () => {
     assert.equal(results.ch1.forecastSeries.length, results.fc1.forecastSeries.length)
     assert.ok(results.ch1.confidenceSeries)
     assert.equal(results.ch1.confidenceSeries.length, results.fc1.confidenceSeries.length)
+    global.fetch = origFetch
+  })
+
+  it('income statement → fundamental analysis → recommendation wires a fundamentals-only pipeline', async () => {
+    const origFetch = global.fetch
+    global.fetch = async () => ({
+      ok: true,
+      json: async () => ({ netMargin: 0.22, revenueGrowth: 0.08, debtToEquity: 60, currentRatio: 1.5, trailingPE: 20 }),
+    }) as any
+
+    const spec = {
+      nodes: [
+        { id: 's1', type: 'symbolInput', position: { x: 0, y: 0 }, data: { symbol: 'AAPL' } },
+        { id: 'is1', type: 'incomeStatement', position: { x: 200, y: 0 }, data: {} },
+        { id: 'fa1', type: 'fundamentalAnalysis', position: { x: 400, y: 0 }, data: {} },
+        { id: 'rec1', type: 'recommendationNode', position: { x: 600, y: 0 }, data: {} },
+      ],
+      edges: [
+        { id: 'e1', source: 's1', target: 'is1' },
+        { id: 'e2', source: 'is1', target: 'fa1', sourceHandle: 'fundamentals', targetHandle: 'fundamentals' },
+        { id: 'e3', source: 'fa1', target: 'rec1', sourceHandle: 'fundamentalScore', targetHandle: 'fundamentalScore' },
+      ],
+    }
+    const results = await executePipeline(spec)
+    assert.ok(results.is1.fundamentals)
+    assert.equal(results.fa1.fundamentalScore, 100)
+    assert.equal(results.rec1.components.fundamental, 1)
+    assert.ok(results.rec1.score > 0)
     global.fetch = origFetch
   })
 })
