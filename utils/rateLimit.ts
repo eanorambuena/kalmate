@@ -9,7 +9,12 @@ const buckets = new Map<string, number[]>()
 // the same reliability tier utils/cache.ts already accepts for its cache.
 export function isRateLimited(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now()
-  const recent = (buckets.get(key) || []).filter(t => now - t < windowMs)
+  let recent = buckets.get(key) || []
+
+  // Remove expired timestamps from the front (O(n) amortized instead of filter's O(n) per request)
+  while (recent.length > 0 && now - recent[0]! >= windowMs) {
+    recent.shift()
+  }
 
   if (recent.length >= limit) {
     buckets.set(key, recent)

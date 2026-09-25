@@ -173,7 +173,7 @@ export const executors: Record<string, NodeExecutor> = {
   incomeStatement: async (ctx) => {
     const symbol = ctx.inputs.symbol || ctx.data.symbol || 'AAPL'
     try {
-      const res = await fetch(`/api/fundamentals?symbol=${symbol}`)
+      const res = await fetch(`/api/fundamentals?symbol=${encodeURIComponent(symbol)}`)
       const data = await res.json()
       if (!res.ok) return { fundamentals: null, error: data?.statusMessage || `HTTP ${res.status}`, symbol }
       return { fundamentals: data, symbol }
