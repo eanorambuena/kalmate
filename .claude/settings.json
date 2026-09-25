@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": [
+      "Bash(git *)",
+      "Bash(pnpm *)",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__github__create_pull_request",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "A new pull request was just created. Launch the use-reviewers skill to initiate code review with 2 independent reviewers based on the PR's focus area. Use Dr. Alice Chen (Correctness & Type Safety) + Marcus Rodriguez (Security & Performance) as the default reviewer pair for most PRs, unless the PR is primarily frontend-focused (use Evan Brooks) or backend/data-focused (use Sam Okoro). Review the PR diff, extract the changed files, and prepare the reviewer prompts with the exact PR number and file list from the PR details."
+          }
+        ]
+      }
+    ]
+  },
+  "attribution": {
+    "commit": "Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01WLvn9Uasuk1kunbeoSpQtZ",
+    "pr": "🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_01WLvn9Uasuk1kunbeoSpQtZ"
+  }
+}
