@@ -1,158 +1,175 @@
-# Use-Reviewers Skill - Quick Reference
+# Use Reviewers Skill
 
-Launch independent code reviewers for GitHub pull requests.
+Launch independent code reviewers with proper names, focus areas, and approval workflows.
+
+## Overview
+
+This skill defines a systematic code review process using named reviewer agents. Each PR requires approval from at least 2 independent reviewers before merge.
+
+## Files
+
+- **SKILL.md** — Complete skill definition with when to use, reviewer profiles, prompts, and approval criteria
+- **EXAMPLES.md** — Real-world execution examples showing the full workflow
+- **README.md** — This file
 
 ## Quick Start
 
-```bash
-# Default pair (Correctness + Security)
-/use-reviewers 5 eanorambuena/kalmate
+1. **Create PR** with your changes
+2. **Choose reviewers** from the team:
+   - **Dr. Alice Chen** (Correctness & Type Safety)
+   - **Marcus Rodriguez** (Security & Performance)
+   - **Dr. Priya Patel** (Architecture & Design)
+   - **Evan Brooks** (Frontend/UX)
+   - **Sam Okoro** (Backend/Data)
 
-# Frontend-focused
-/use-reviewers 5 eanorambuena/kalmate frontend
+3. **Launch agents** with the review prompt from SKILL.md
+4. **Respond to findings** on the PR thread
+5. **Merge** after both post "Approval Recommended" ✓
 
-# Backend/Data-focused  
-/use-reviewers 5 eanorambuena/kalmate backend
+## When to Use
 
-# Large/Critical (adds 3rd reviewer)
-/use-reviewers 5 eanorambuena/kalmate critical
-```
+- Creating non-trivial PRs (more than config/typo fixes)
+- Needing independent verification
+- Wanting multiple perspectives on security/correctness
+- Establishing code quality baseline
 
-## Reviewer Pairs
+## Key Rules
 
-| Type | Reviewers | Best For |
-|------|-----------|----------|
-| **Default** | Alice + Marcus | Type safety + Security |
-| **Frontend** | Evan + Alice | UI components + Types |
-| **Backend** | Sam + Marcus | APIs + Security |
-| **Critical** | Alice + Priya | Architecture deep dive |
+✓ Each PR reviewed by **at least 2 reviewers**
 
-## Reviewer Profiles (2-3 line summary)
+✓ Each reviewer posts **independent findings** with verdict
 
-| Name | Focus | Looks For |
-|------|-------|-----------|
-| **Dr. Alice Chen** | Type Safety | Missing types, null checks, test gaps |
-| **Marcus Rodriguez** | Security | Injection risks, rate limits, perf bottlenecks |
-| **Evan Brooks** | Frontend | Component API, accessibility, UX |
-| **Sam Okoro** | Backend | Query efficiency, API design, validation |
-| **Dr. Priya Patel** | Architecture | Module coupling, API consistency, patterns |
+✓ Merge only after **both post "Approval Recommended"**
 
-## Three Verdicts
+✓ **Respond to every comment** in PR thread:
+- Pertinent? → Fix and push new commit
+- Not pertinent? → Explain why in thread
 
-| Verdict | Meaning | Next Step |
-|---------|---------|-----------|
-| **✓ Approval Recommended** | Code ready to merge | Monitor for other reviewer |
-| **✗ Changes Requested** | Found real issues | Fix and respond in PR |
-| **? Needs Further Review** | Uncertain/complex | Add 3rd reviewer |
+✓ Reviewer names are **consistent across sessions**
 
-## Response Guide
+✓ Each review includes **attribution footer**
 
-**Fix found (pertinent):**
-```
-✓ Fixed in commit {HASH}. Changed {what} to {why per finding}.
-```
+## Reviewer Profiles
 
-**Suggestion only (not pertinent):**
-```
-✗ Appreciate the suggestion. This is by design for {reason}. Not changing this round.
-```
+| Name | Focus | Best For |
+|------|-------|----------|
+| Dr. Alice Chen | Correctness, Types | All PRs |
+| Marcus Rodriguez | Security, Performance | API, Auth, Data |
+| Dr. Priya Patel | Architecture, Design | Major features, refactors |
+| Evan Brooks | Frontend, UX | UI components, state |
+| Sam Okoro | Backend, Data | DB, API, migrations |
 
-## Merge Criteria (ALL must pass)
-
-- ✓ Both reviewers: "Approval Recommended"
-- ✓ CI passes on latest commit
-- ✓ No merge conflicts
-- ✓ All pertinent comments addressed
-- ✓ Commit attribution footers present
-
-## Pertinent vs Non-Pertinent
-
-**PERTINENT (Fix it):**
-- Type errors
-- Null pointer bugs
-- Security vulnerabilities
-- Performance bottlenecks (N+1, slow algorithms)
-- Missing input validation
-- Test coverage gaps on critical paths
-
-**NOT PERTINENT (Explain it):**
-- Formatting/style preferences
-- Naming suggestions
-- Refactoring without bugs
-- Library suggestions
-- Documentation improvements
-
-## Approval Hierarchy
-
-When reviewers disagree, apply this priority:
-
-1. **Type Safety** (Alice's domain)
-2. **Security** (Marcus's domain)  
-3. **Performance** (Marcus's domain)
-4. **Architecture** (Priya's domain)
-5. **UX/Frontend** (Evan's domain)
-6. **Style** (lowest priority)
-
-**Example:** Alice wants types, Marcus says be flexible → Add the types (safety first).
-
-## Files for Reference
-
-- `SKILL.md` — Full reviewer profiles and verdict rubrics
-- `EXAMPLES.md` — Real workflow examples with code
-- `README.md` — This file (quick reference)
-
-## Common Issues
-
-**Reviewers not launching?**
-- Was PR created via `mcp__github__create_pull_request`? (not manually)
-- Is `.claude/settings.json` hook enabled? Check: `jq '.hooks' .claude/settings.json`
-
-**Too many "Changes Requested"?**
-- Real issues were found — prioritize by severity
-- Fix security > correctness > performance > style
-- Test locally before pushing
-
-**One reviewer approved, one said changes needed?**
-- Fix the issues from "Changes Requested" reviewer
-- Push fix commits
-- Respond in PR thread with brief explanation
-- Re-request review from that reviewer
-- Once approved: MERGE ✓
-
-**Conflicting opinions?**
-- Type safety takes precedence → add the types
-- Security takes precedence → fix the vulnerability
-- Add 3rd reviewer (Priya) if tie-breaking needed
-
-## Workflow Loop
+## Example Workflow
 
 ```
-PR Created
-    ↓
-[Reviewers launch]
-    ↓
-[Review findings posted]
-    ↓
-Assess pertinence
-├─ Real bug? → Fix + Commit + Respond
-└─ Style nit? → Respond (no action)
-    ↓
-[Re-request review]
-    ↓
-Both approved?
-├─ No → Fix more + Re-request
-└─ Yes ✓ → MERGE
+1. Push PR with code changes
+   ↓
+2. Launch Dr. Alice Chen + Marcus Rodriguez
+   ↓
+3. Both review independently, post findings
+   ↓
+4. Respond to each comment on PR
+   - Fix pertinent issues → push new commit
+   - Explain non-pertinent ones → thread reply
+   ↓
+5. Re-request review after fixes
+   ↓
+6. Both post "Approval Recommended" ✓
+   ↓
+7. MERGE
 ```
 
-## Related Files
+## Full Details
 
-- `.claude/REVIEWER_AUTOMATION.md` — Detailed automation workflow
-- `.claude/settings.json` — Hook configuration (PostToolUse)
-- `CLAUDE.md` — Project-wide development guide
+See **SKILL.md** for:
+- Review prompt template (copy-paste for agents)
+- Detailed reviewer focus areas
+- Handling reviewer comments
+- Approval matrix
+- Attribution requirements
+
+See **EXAMPLES.md** for:
+- Real PR examples (simple, complex, non-pertinent)
+- Quick reference on pertinent vs non-pertinent findings
+- Conflict resolution between reviewers
+- When to use 2 vs 3 reviewers
+
+## The Review Prompt
+
+Each reviewer gets this prompt (customize {VARIABLES}):
+
+```
+You are **{REVIEWER_NAME}**, an expert code reviewer focused on **{FOCUS_AREA}**.
+
+Task: Review PR #{NUMBER} comprehensively and independently.
+
+Find real bugs only:
+- Correctness bugs (type errors, logic flaws, null checks)
+- Security vulnerabilities (injection, encoding, validation)
+- Performance issues (severe only, not micro-optimizations)
+- Missing critical test coverage
+
+Skip style nits and preference suggestions.
+
+For each finding:
+- File: path:LINE
+- Summary: one sentence stating the defect
+- Scenario: concrete inputs → wrong output/crash
+- Verdict: CONFIRMED (I read it) or PLAUSIBLE (needs verification)
+
+Final verdict:
+- "Approval Recommended" ✓ if findings are minor/fixed or none
+- "Changes Requested" ✗ if blocking issues remain
+- "Needs Further Review" ? if uncertain
+
+Attribution:
 
 ---
+_Generated by [Claude Code](https://claude.ai/code)_
+```
 
-**Ready to review?** Run:
+## Approval Criteria
+
+| Condition | Action |
+|-----------|--------|
+| Both reviewers: "Approval Recommended" | **MERGE** ✓ |
+| One approved, one changes requested | **FIX & RE-REQUEST** |
+| Both: "Changes Requested" | **FIX & RE-REQUEST** |
+| Either: "Needs Further Review" | **ADD 3RD REVIEWER** |
+| Not yet reviewed | **WAIT** |
+
+## Responding to Comments
+
+**Real bug found?** → Fix it
 ```
-/use-reviewers {PR_NUMBER} eanorambuena/kalmate
+✓ Fixed in commit abc123. Added validation per your comment.
 ```
+
+**Not a bug?** → Explain why
+```
+✗ This is by design. We cache aggressively for performance.
+```
+
+**Design question?** → Discuss in thread, then decide
+```
+Good question. The weighting is per the Schwartz-Smith model. 
+Not changing this round, but logged for v2 customization.
+```
+
+## Examples
+
+See **EXAMPLES.md** for:
+1. Simple 2-reviewer backend fix
+2. Complex 3-reviewer feature with conditional escalation
+3. Handling non-pertinent comments
+4. Approval matrix decision tree
+5. Quick reference on pertinence
+
+## Philosophy
+
+- **Independent reviewers**: Each reviews fresh, not copying others' comments
+- **Real findings only**: No style preferences or speculation
+- **Explicit verdicts**: "Approval Recommended" or "Changes Requested", not maybes
+- **Transparent attributions**: AI-assisted reviews are labeled
+- **Consistent names**: Same reviewers across sessions for familiarity
+- **Defense in depth**: 2+ reviewers catch what 1 might miss

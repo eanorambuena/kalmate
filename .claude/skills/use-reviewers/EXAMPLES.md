@@ -1,408 +1,294 @@
-# Use-Reviewers Examples
+# Use Reviewers — Execution Examples
 
-Practical workflow examples showing how to launch and manage the review process.
-
-## Example 1: Simple Security Fix (Alice + Marcus)
-
-### Scenario
-You're fixing a URL parameter injection vulnerability in the Yahoo API call.
-
-**PR Details:**
-- PR #5: feat(skill): add automatic code review system
-- Branch: fix/url-encoding → main
-- Files changed: 5 files (runner.ts, yahoo.ts, fundamentals.get.ts, rateLimit.ts, security.ts)
-- Commit: 01e124d (latest)
-
-### Step 1: Fetch PR Context
+## Example 1: Simple Backend Fix (2 Reviewers)
 
 ```bash
-gh api repos/eanorambuena/kalmate/pulls/5
+# PR #42: Fix URL encoding in getFundamentals()
+# Files changed: utils/yahoo.ts, server/api/fundamentals.get.ts
+# Type: Security fix
 ```
 
-**Output:**
-```json
-{
-  "number": 5,
-  "title": "feat(skill): add automatic code review system",
-  "body": "Adds use-reviewers skill for automated code review",
-  "files": [
-    "src/utils/runner.ts",
-    "src/utils/yahoo.ts",
-    "src/server/api/fundamentals.get.ts",
-    "src/utils/rateLimit.ts",
-    "src/security.ts"
-  ]
-}
+**Step 1: Launch Reviewers**
+
+Agent 1 (Dr. Alice Chen):
+- Focus: Type safety, validation in fundamentals.get.ts
+- Check: Is symbol validation correct? Are types imported?
+
+Agent 2 (Marcus Rodriguez):
+- Focus: Security, URL encoding
+- Check: encodeURIComponent() applied everywhere? Any injection risks?
+
+**Step 2: Reviewers Post Findings**
+
+Alice:
+```
+File: server/api/fundamentals.get.ts:18
+Summary: getCached<any> should use explicit type FundamentalsData
+Verdict: CONFIRMED
+
+Fix: Add import type { FundamentalsData }, change getCached<any> to getCached<FundamentalsData>
+
+Approval Recommended ✓
 ```
 
-### Step 2: Launch Reviewers
-
-**Invoke skill:**
+Marcus:
 ```
-/use-reviewers 5 eanorambuena/kalmate
+File: utils/yahoo.ts:107
+Summary: Symbol parameter not URL-encoded in getFundamentals()
+Verdict: CONFIRMED — searchTickers() uses encodeURIComponent() but getFundamentals() doesn't
+
+Scenario: symbol="BRK.A&injection" → would pass unsanitized to Yahoo API
+
+Fix: encodeURIComponent(symbol) in URL
+
+Approval Recommended ✓
 ```
 
-**Default pair selected:**
-- ✓ Dr. Alice Chen (Correctness & Type Safety)
-- ✓ Marcus Rodriguez (Security & Performance)
+**Step 3: Respond & Fix**
 
-### Step 3: Reviewers Post Findings
+You respond in PR:
+```
+✓ Alice: Fixed in commit abc123. Added FundamentalsData import and proper typing.
+✓ Marcus: Fixed in commit def456. Applied encodeURIComponent() to symbol param.
+```
 
-**Time: ~2 min later**
+Push commits, CI passes → **MERGE** ✓
 
-**Alice's comment:**
-```markdown
-## Code Review: Alice Chen - Correctness & Type Safety
+---
 
-**PR:** #5 | feat(skill): add automatic code review system
-**Focus:** Type safety, imports, null checks, test coverage
+## Example 2: Complex Feature (3 Reviewers — Conditional)
 
-### Files Reviewed
-- src/utils/runner.ts ✓ Type annotations correct
-- src/utils/yahoo.ts ✓ Symbol parameter properly handled
-- src/server/api/fundamentals.get.ts ✓ Rate limiter integrated
-- src/utils/rateLimit.ts ✓ Optimization looks sound
-- src/security.ts ✓ Error messages sanitized
+```bash
+# PR #47: Add recommendation node pipeline
+# Files changed: utils/pipeline/nodeDefinitions.ts, utils/pipeline/runner.ts, types.ts
+# Type: Feature + refactor
+```
 
-### Verdict
-No type safety issues found. Rate limiter integration looks correct. Error message sanitization prevents information disclosure.
+**Step 1: Launch Reviewers**
 
-**Approval Recommended ✓**
+Agent 1 (Dr. Alice Chen):
+- Type safety across recommendation logic
+- RSI extraction duplicate call bug?
+
+Agent 2 (Marcus Rodriguez):
+- Performance: Is there unnecessary computation?
+- Security: Any data exposure?
+
+Agent 3 (Dr. Priya Patel) [OPTIONAL — conditional on findings]:
+- Architecture: Does recommendation node fit the pipeline model?
+- Is API consistent with other nodes?
+
+**Step 2: Findings Come Back**
+
+Alice:
+```
+File: utils/pipeline/runner.ts:266
+Summary: toSeriesValues(rsiInput) called twice
+Verdict: CONFIRMED
+
+Scenario: Large price series (10k+ points) → unnecessary processing
+
+Approval Recommended (with fix) ✓
+```
+
+Marcus:
+```
+File: utils/pipeline/nodeDefinitions.ts:87-91
+Summary: kalmanFilter outputs missing 'cycle' declaration
+Verdict: CONFIRMED
+
+Impact: validatePipelinePlan() drops cycle edge, recommendation node can't receive cycle input
+
+Approval Recommended (with fix) ✓
+```
+
+Priya:
+```
+File: utils/pipeline/runner.ts (line 246)
+Summary: Recommendation node mixes Kalman + RSI + Fundamentals scoring
+Verdict: PLAUSIBLE
+
+Question: Is the 30/30/40 weighting documented anywhere? Should it be configurable?
+
+Status: Needs Further Review
+→ Escalate to architecture discussion
+```
+
+**Step 3: Respond & Fix**
+
+You respond:
+```
+✓ Alice: Fixed in commit 111aaa. Cached toSeriesValues() result.
+✓ Marcus: Fixed in commit 222bbb. Added cycle output to nodeDefinition.
+→ Priya: Opened issue #99 for weighting documentation. For now, weights are 
+  hardcoded per design. Not blocking this PR.
+```
+
+**Step 4: Re-request from Priya**
+
+Priya reviews again:
+```
+Documentation issue understood. The implementation is correct for v1.
+Current weights (30/30/40) are consistent with Schwartz-Smith model.
+
+Approval Recommended ✓
+```
+
+→ **MERGE** ✓ (all 3 approved)
+
+---
+
+## Example 3: Non-Pertinent Comment Handling
+
+```bash
+# PR #50: Refactor pipeline executor
+# Reviewer: Marcus Rodriguez
+```
+
+Marcus posts:
+```
+File: utils/pipeline/runner.ts:173
+Summary: Why use arrow function for mathOp instead of named function?
+Verdict: PLAUSIBLE
+
+This is just style preference. Named functions are more testable.
+```
+
+You respond:
+```
+Thanks Marcus! This is an architectural choice — executors is a registry 
+object where inline arrows are idiomatic. No changes needed.
+```
+
+Marcus's finding is **not pertinent** → you don't fix it.
+
+Both reviewers still post "Approval Recommended" → **MERGE** ✓
+
+---
+
+## Quick Reference: When Findings Are Pertinent
+
+✓ **PERTINENT** (fix it):
+- Type mismatch or missing import
+- Null pointer or array bounds error
+- Security vulnerability (injection, encoding, auth)
+- Performance bottleneck (N+1, unnecessary computation)
+- Missing validation on untrusted input
+- Breaking change not backward compatible
+- Test coverage missing for critical path
+
+✗ **NOT PERTINENT** (skip it):
+- Style/formatting preference
+- Naming suggestion if names are clear
+- "Could use const instead of let" (if logic depends on it)
+- "Consider refactoring this function" (unless actually broken)
+- "This library would be better" (unless breaking)
+- Comment/documentation improvements (separate task)
+
+? **ASSESS CASE-BY-CASE**:
+- Performance micro-optimization
+- Code clarity vs. conciseness
+- Abstraction level changes
+
+---
+
+## Prompt Template for Quick Launch
+
+Save this as a template to reuse:
+
+```
+You are **{REVIEWER_NAME}**, a code reviewer focused on **{FOCUS}**.
+
+Review PR #{NUMBER} for {FOCUS} issues only.
+
+Find real bugs: type errors, injection risks, null checks, validation gaps, 
+performance bottlenecks, test coverage gaps.
+
+Skip style nits and preference suggestions unless they break code.
+
+Each finding:
+- File: path:LINE
+- Summary: one sentence
+- Scenario: inputs → wrong output
+- Verdict: CONFIRMED or PLAUSIBLE
+
+End with: "Approval Recommended ✓" or "Changes Requested ✗"
+
+Post as GitHub PR comment with attribution:
 
 ---
 _Generated by [Claude Code](https://claude.ai/code)_
 ```
 
-**Marcus's comment (3 min later):**
-```markdown
-## Code Review: Marcus Rodriguez - Security & Performance
-
-**PR:** #5 | feat(skill): add automatic code review system
-**Focus:** Injection risks, rate limiting, performance bottlenecks
-
-### Files Reviewed
-- src/utils/runner.ts
-  - Line 176: `encodeURIComponent(symbol)` ✓ Proper URL encoding
-  
-- src/utils/yahoo.ts
-  - Line 107: `encodeURIComponent(symbol)` ✓ Injection prevented
-  
-- src/server/api/fundamentals.get.ts
-  - Added per-IP rate limiter (30 req/min) ✓ Good limit
-  - Error messages sanitized ✓ No info disclosure
-  
-- src/utils/rateLimit.ts
-  - Refactored cleanup from O(n²) to O(n) amortized ✓ Good optimization
-  
-- src/security.ts
-  - Rate limit configuration secure ✓
-
-### Verdict
-All security vulnerabilities addressed:
-1. ✓ URL parameter injection fixed with encodeURIComponent()
-2. ✓ Rate limiting implemented with appropriate thresholds
-3. ✓ Error messages sanitized
-4. ✓ Performance improved (O(n) cleanup)
-
-**Approval Recommended ✓**
+Customize {REVIEWER_NAME}, {FOCUS}, {NUMBER} for each agent.
 
 ---
-_Generated by [Claude Code](https://claude.ai/code)_
+
+## Approval Matrix Decision Tree
+
 ```
-
-### Step 4: Both Approve → MERGE ✓
-
-```bash
-# CI is green, both reviewers approved
-gh pr merge 5 --squash
+Both reviewers reviewed?
+├─ NO → Wait, then check again
+└─ YES:
+   ├─ Both "Approval Recommended" ✓ 
+   │  └─ MERGE ✓
+   ├─ One "Approval", One "Changes Requested"
+   │  └─ Address comment, re-request review
+   ├─ Both "Changes Requested" ✗
+   │  └─ Fix issues, re-request from both
+   ├─ Either "Needs Further Review" ?
+   │  └─ Add 3rd reviewer or clarify finding
+   └─ Otherwise
+      └─ HOLD until resolved
 ```
 
 ---
 
-## Example 2: Frontend Component (Evan + Alice)
+## Handling Conflicts Between Reviewers
 
-### Scenario
-You've added a new dashboard component with state management.
+**Scenario**: Alice says "Add type", Marcus says "Use any for flexibility"
 
-**Skill invocation:**
+Your call:
 ```
-/use-reviewers 28 eanorambuena/kalmate frontend
-```
+Alice's concern (type safety) ✓ PERTINENT
+Marcus's concern (flexibility) ? ASSESS
 
-**Reviewers selected:**
-- ✓ Evan Brooks (Frontend/UX)
-- ✓ Dr. Alice Chen (Correctness & Type Safety)
+Decision: If adding type doesn't break flexibility → do it (favor safety)
+If it does break it → explain tradeoff in PR, let reviewers re-assess
 
-### Evan's Findings
-
-```markdown
-## Code Review: Evan Brooks - Frontend/UX
-
-**PR:** #28 | feat(dashboard): add analytics component
-**Focus:** Component API, state management, accessibility, performance
-
-### File: src/components/DashboardCard.vue
-
-**Finding 1:** Missing `aria-label` on interactive button
-```
-<button @click="toggle">
+Most likely: Both agree types are worth the tradeoff → FIXED
 ```
 
-Should be:
-```
-<button @click="toggle" aria-label="Toggle dashboard">
-```
-
-**Verdict:** Changes Requested ✗
-```
-
-### Alice's Findings
-
-```markdown
-## Code Review: Alice Chen - Correctness & Type Safety
-
-**PR:** #28 | feat(dashboard): add analytics component
-**Focus:** Type safety, imports, props, slots
-
-### File: src/components/DashboardCard.vue
-
-**Finding 1:** Props type is too loose
-```ts
-interface Props {
-  data: any  // ← Too permissive
-}
-```
-
-Should use explicit type:
-```ts
-interface Props {
-  data: AnalyticsData
-}
-```
-
-**Verdict:** Changes Requested ✗
-```
-
-### Author's Response & Fixes
-
-```bash
-# Fix 1: Add aria-label
-git commit -m "fix(dashboard): add aria-label to toggle button"
-
-# Fix 2: Add explicit AnalyticsData type
-git commit -m "fix(dashboard): use explicit AnalyticsData type for props"
-
-git push origin feat/dashboard-analytics
-```
-
-**PR comment:**
-```
-✓ Fixed aria-label in DashboardCard.vue (commit abc123)
-✓ Added AnalyticsData type import and updated props (commit def456)
-```
-
-### Evan Re-reviews
-
-```markdown
-## Re-Review: Evan Brooks
-
-The accessibility fixes look good. aria-label now properly labels the button.
-
-**Approval Recommended ✓**
-```
-
-### Alice Re-reviews
-
-```markdown
-## Re-Review: Alice Chen
-
-Type safety improved. AnalyticsData is properly imported and used.
-
-**Approval Recommended ✓**
-```
-
-→ **MERGE when CI passes ✓**
+Then: Re-request from Marcus, Alice will approve as-is.
 
 ---
 
-## Example 3: Conflicting Reviewer Opinions
+## When to Use 2 vs 3 Reviewers
 
-### Scenario
-Alice wants strict types, Marcus says "keep flexible for dynamic data."
-
-### Alice's Finding
-```markdown
-File: src/utils/dataTransform.ts:45
-Type parameter should be constrained:
-
-❌ function transform<T>(data: T): T
-✓ function transform<T extends TransformData>(data: T): T
-
-Type safety issue.
-Verdict: Changes Requested ✗
-```
-
-### Marcus's Comment (hypothetical objection)
-```markdown
-The unconstrained generic is fine for flexibility with external API data.
-
-Actually, re-reading: the `encodeURIComponent()` calls look safe.
-
-Verdict: Approval Recommended ✓
-```
-
-### Decision Protocol
-
-**Rule:** Type safety takes precedence over flexibility.
-
-**Author's response:**
-```
-✓ Fixed in commit xyz789. Added TransformData constraint to generic.
-  This maintains flexibility through proper typing while preventing
-  accidental misuse.
-```
-
-**Re-request from Marcus:**
-- If Marcus agrees: Both approve → MERGE ✓
-- If Marcus disagrees: Add Dr. Priya Patel for tie-breaking
+| Change Type | Reviewers | Combo |
+|-------------|-----------|-------|
+| Small fix (bug fix < 50 lines) | 2 | Alice + Marcus |
+| Medium feature (100-300 lines) | 2 | Pair based on domain |
+| Large feature (300+ lines) | 3 | Alice + Marcus + Priya |
+| Security-critical | 2 min | Always include Marcus |
+| Architecture change | 3 min | Always include Priya |
+| Frontend-heavy | 2+ | Evan + (Alice or Priya) |
+| Backend-heavy | 2+ | Sam + Marcus |
 
 ---
 
-## Example 4: Needs Further Review (Escalation)
+## Merging Checklist
 
-### Scenario
-Complex architectural change; reviewers unsure if pattern is correct.
+Before you merge:
 
-### Alice's Finding
-```markdown
-Verdict: Needs Further Review ?
-
-The async state management pattern is unusual. I'm not sure if
-this is a known pattern or a novel approach. Needs architect review.
-```
-
-### Marcus's Finding
-```markdown
-Verdict: Needs Further Review ?
-
-Performance implications of the pubsub pattern aren't clear from diff alone.
-Needs performance analysis.
-```
-
-### Escalation
-
-**Skill adds 3rd reviewer:**
-```
-Dr. Priya Patel (Architecture & Design)
-```
-
-**Priya reviews & settles:**
-```markdown
-## Review: Dr. Priya Patel - Architecture & Design
-
-The pubsub pattern is solid. This is a recognized pattern in reactive
-systems. Performance will be good if used correctly (see guidelines in
-ARCHITECTURE.md).
-
-The state management follows Nuxt composables best practices.
-
-Verdict: Approval Recommended ✓
-```
-
-Now:
-- ✓ Alice: Approval Recommended
-- ✓ Marcus: Approval Recommended  
-- ✓ Priya: Approval Recommended
-
-→ **MERGE ✓**
-
----
-
-## Example 5: Re-requesting Review After Fixes
-
-### Setup
-PR #12: You've made fixes, now need reviewers to re-check.
-
-### Command
-```bash
-# Push your fix commits first
-git push origin fix/my-issue
-
-# Then explicitly re-request review (if not automatic)
-gh pr review --request eanorambuena/kalmate/12 \
-  --reviewer "alice-chen" \
-  --reviewer "marcus-rodriguez"
-```
-
-### Reviewer Re-assessment
-
-**Alice re-reviews:**
-```markdown
-## Re-Review: Alice Chen
-
-Checked the fix. Type safety is now correct. The TransformData
-constraint prevents the reported issue.
-
-Approval Recommended ✓
-```
-
-**Marcus re-reviews:**
-```markdown
-## Re-Review: Marcus Rodriguez
-
-Performance impact analyzed. The rate limiter optimization maintains
-throughput under load.
-
-Approval Recommended ✓
-```
-
----
-
-## Example 6: Not Pertinent Finding
-
-### Reviewer Comment
-```markdown
-File: src/utils/format.ts:12
-
-This function could be more elegant with lodash:
-
-❌ function formatDate(d: Date): string {
-     return d.toISOString().split('T')[0]
-   }
-
-✓ function formatDate(d: Date): string {
-     return formatISO(d, { representation: 'date' })
-   }
-```
-
-### Author's Response
-
-```
-✗ Appreciate the suggestion. We're avoiding extra dependencies
-   to keep bundle size minimal. The current implementation is
-   explicit and doesn't require lodash.
-
-Not changing this round.
-```
-
-**Reviewer accepts** — this is not a correctness or security issue, so no change needed.
-
----
-
-## Quick Reference: Workflow Checklist
-
-- [ ] Create feature branch
-- [ ] Make changes and test locally (`pnpm test`)
-- [ ] Commit with conventional format
-- [ ] Push to branch
-- [ ] Create PR with `mcp__github__create_pull_request`
-- [ ] Hook fires → Reviewers launch automatically
-- [ ] Reviewers post findings (2-5 min typically)
-- [ ] Assess pertinence of each finding
-- [ ] For pertinent: fix code, commit, push
-- [ ] For non-pertinent: respond in PR, no action
-- [ ] Re-request review if fixes made
-- [ ] Both reviewers post "Approval Recommended ✓"
-- [ ] CI is green
+- [ ] PR created with description
+- [ ] At least 2 reviewers assigned (by name)
+- [ ] Both posted reviews with clear verdicts
+- [ ] Both posted "Approval Recommended" ✓
+- [ ] All pertinent comments addressed and responded to
+- [ ] All fixes committed and pushed
+- [ ] CI passes on latest commit
 - [ ] No merge conflicts
-- [ ] **MERGE** ✓
+- [ ] Reviewer attribution footers present
+
+→ **MERGE** ✓
