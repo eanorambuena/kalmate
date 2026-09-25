@@ -34,6 +34,7 @@ export interface NodeDefinition {
   inputs: NodePort[]
   outputs: NodePort[]
   defaultData: Record<string, any>
+  dynamicInputs?: boolean
 }
 
 export interface ExecutionContext {
