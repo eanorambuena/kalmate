@@ -180,6 +180,39 @@ describe('executors', () => {
     global.fetch = origFetch
   })
 
+  it('priceFeed auto-resolves bare Chilean nemotécnico with Santiago suffix', async () => {
+    global.fetch = (async (url: any) => {
+      const u = String(url)
+      if (u.includes('symbol=CFMITNIPSA.SN&')) {
+        return { ok: true, json: async () => [{ close: 100 }, { close: 101 }] } as any
+      }
+      return { ok: false, status: 404, json: async () => ({}) } as any
+    }) as any
+    const ctx = mkCtx({ inputs: { symbol: 'CFMITNIPSA' } })
+    const result = await executors.priceFeed(ctx)
+    assert.equal(result.symbol, 'CFMITNIPSA.SN')
+    assert.equal(result.price, 101)
+    assert.deepEqual(result.candleSeries, [{ close: 100 }, { close: 101 }])
+    global.fetch = origFetch
+  })
+
+  it('priceFeed does not retry qualified Chilean symbol', async () => {
+    let calls = 0
+    global.fetch = (async (url: any) => {
+      calls++
+      const u = String(url)
+      if (u.includes('symbol=CFMITNIPSA.SN&')) {
+        return { ok: true, json: async () => [{ close: 100 }, { close: 101 }] } as any
+      }
+      return { ok: false, status: 404, json: async () => ({}) } as any
+    }) as any
+    const ctx = mkCtx({ inputs: { symbol: 'CFMITNIPSA.SN' } })
+    const result = await executors.priceFeed(ctx)
+    assert.equal(result.symbol, 'CFMITNIPSA.SN')
+    assert.equal(calls, 1)
+    global.fetch = origFetch
+  })
+
   it('chartOutput passes through inputs', async () => {
     const ctx = mkCtx({ inputs: { price: 150, mainSeries: [100, 150], overlayA: [110, 140] } })
     const result = await executors.chartOutput(ctx)
