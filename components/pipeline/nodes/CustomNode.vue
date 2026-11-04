@@ -166,8 +166,8 @@ const displayValue = computed(() => {
   if (!r) return null
   const p = r.value ?? r.price ?? r.scalar ?? r.source
   if (typeof p === 'number') return '$' + p.toFixed(2)
-  if (r.signal === 1) return 'Overpriced'
-  if (r.signal === -1) return 'Underpriced'
+  if (r.signal === 1) return 'Undervalued'
+  if (r.signal === -1) return 'Overvalued'
   const seriesKey = ['smaSeries', 'emaSeries', 'rsiSeries', 'smoothed', 'trend', 'forecastSeries', 'seriesA', 'history']
     .find(k => Array.isArray(r[k]) && r[k].length > 0)
   if (seriesKey) {
@@ -180,8 +180,8 @@ const displayValue = computed(() => {
 const displayClass = computed(() => {
   const r = result.value
   if (!r) return ''
-  if (r.signal === 1) return 'text-[#ff1744]'
-  if (r.signal === -1) return 'text-[#00c853]'
+  if (r.signal === 1) return 'text-[#00c853]'
+  if (r.signal === -1) return 'text-[#ff1744]'
   return ''
 })
 

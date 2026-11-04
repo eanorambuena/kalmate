@@ -434,8 +434,8 @@ function formatResult(val: any): string {
   if (typeof val.price === 'number') return '$' + val.price.toFixed(2)
   if (typeof val.scalar === 'number') return val.scalar.toFixed(2)
   if (typeof val.source === 'number') return '$' + val.source.toFixed(2)
-  if (val.signal === 1) return 'Overpriced'
-  if (val.signal === -1) return 'Underpriced'
+  if (val.signal === 1) return 'Undervalued'
+  if (val.signal === -1) return 'Overvalued'
   return 'OK'
 }
 
