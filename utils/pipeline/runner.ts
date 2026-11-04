@@ -3,7 +3,7 @@ import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman.ts
 import { calcSMA, calcRSI, calcEMA } from '../indicators.ts'
 import { toSeries, toSeriesValues, toSeriesTimestamps, withTimestamps } from '../series.ts'
 import { runForecast } from '../forecast.ts'
-import { estimateFairValue, rollingZScore } from '../valuation.ts'
+import { estimateFairValue, rollingZScore, scoreValue } from '../valuation.ts'
 
 export const executors: Record<string, NodeExecutor> = {
   currencyInput: async (ctx) => {
@@ -199,7 +199,7 @@ export const executors: Record<string, NodeExecutor> = {
 
   fundamentals: async (ctx) => {
     const symbol = ctx.inputs.symbol || ctx.data.symbol
-    const empty = { eps: null, bookValuePerShare: null, freeCashFlow: null, netIncome: null, coverage: 0 }
+    const empty = { eps: null, bookValuePerShare: null, freeCashFlow: null, netIncome: null, shares: null, coverage: 0 }
     if (!symbol) return { ...empty, error: 'Need a symbol' }
     const asOf = ctx.data.asOf || new Date().toISOString().slice(0, 10)
     try {
@@ -211,10 +211,43 @@ export const executors: Record<string, NodeExecutor> = {
         bookValuePerShare: data.bookValuePerShare ?? null,
         freeCashFlow: data.freeCashFlow ?? null,
         netIncome: data.netIncome ?? null,
+        shares: data.shares ?? null,
         coverage: data.coverage ?? 0,
       }
     } catch (e: any) {
       return { ...empty, error: e?.message || 'Fundamentals fetch failed' }
+    }
+  },
+
+  valueScore: async (ctx) => {
+    const series = ctx.inputs.priceSeries || ctx.inputs.history || ctx.inputs.source || ctx.inputs.price
+    const values = toSeriesValues(series)
+    if (!Array.isArray(series) || values.length < 260) {
+      return { score: 0, verdict: 'Fair value', error: 'Need at least 260 price points' }
+    }
+    const price = values[values.length - 1]
+    const bvps = typeof ctx.inputs.bookValuePerShare === 'number' ? ctx.inputs.bookValuePerShare : null
+    const fcf = typeof ctx.inputs.freeCashFlow === 'number' ? ctx.inputs.freeCashFlow : null
+    const shares = typeof ctx.inputs.shares === 'number' && ctx.inputs.shares > 0 ? ctx.inputs.shares : null
+    let gapPct: number | null = null
+    let z: number | null = null
+    try { gapPct = estimateFairValue(values).gap.at(-1) ?? null } catch { gapPct = null }
+    z = rollingZScore(values, 252).z.at(-1) ?? null
+    const res = scoreValue({
+      price,
+      bookValuePerShare: bvps,
+      freeCashFlowPerShare: fcf != null && shares != null ? fcf / shares : null,
+      gapPct,
+      zScore: z,
+    })
+    return {
+      score: res.score,
+      verdict: res.verdict,
+      bookYield: res.components.bookYield,
+      fcfYield: res.components.fcfYield,
+      gapPct,
+      zScore: z,
+      components_used: res.components_used,
     }
   },
 

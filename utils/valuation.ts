@@ -61,3 +61,47 @@ export function rollingZScore(prices: number[], window: number): ZScoreResult {
   }
   return { z }
 }
+
+export interface ValueInputs {
+  price: number
+  bookValuePerShare?: number | null
+  freeCashFlowPerShare?: number | null
+  /** price / fairValue - 1 from estimateFairValue. */
+  gapPct?: number | null
+  /** Rolling z-score of log-price. */
+  zScore?: number | null
+}
+
+export interface ValueScore {
+  /** -1 (expensive) .. +1 (cheap). Average of the components that are available. */
+  score: number
+  verdict: 'Undervalued' | 'Fair value' | 'Overvalued'
+  components: { bookYield: number | null; fcfYield: number | null; gap: number | null; z: number | null }
+  components_used: number
+}
+
+const clamp = (x: number, lo = -1, hi = 1) => Math.max(lo, Math.min(hi, x))
+
+/**
+ * Transparent value tilt. Each component is mapped to [-1, 1] with a fixed,
+ * documented rule (no fitting to returns). Missing inputs are skipped.
+ *  - book yield (BVPS / price): log scale, P/B = 1 is neutral, P/B ≈ 0.4 is +1, P/B ≈ 5 is -1
+ *  - FCF yield: 5% yield = +1
+ *  - Kalman gap: -20% below fair value = +1
+ *  - z-score: -2 = +1
+ * This is a research indicator, not a trading signal. See the backtest notes.
+ */
+export function scoreValue(v: ValueInputs): ValueScore {
+  const bookYield = v.bookValuePerShare != null && v.price > 0 ? v.bookValuePerShare / v.price : null
+  const fcfYield = v.freeCashFlowPerShare != null && v.price > 0 ? v.freeCashFlowPerShare / v.price : null
+  const comp = {
+    bookYield: bookYield != null && bookYield > 0 ? clamp(Math.log(bookYield)) : null,
+    fcfYield: fcfYield != null ? clamp(fcfYield / 0.05) : null,
+    gap: v.gapPct != null ? clamp(-v.gapPct / 0.2) : null,
+    z: v.zScore != null ? clamp(-v.zScore / 2) : null,
+  }
+  const used = Object.values(comp).filter((x): x is number => x !== null)
+  const score = used.length ? used.reduce((a, b) => a + b, 0) / used.length : 0
+  const verdict = score > 0.25 ? 'Undervalued' : score < -0.25 ? 'Overvalued' : 'Fair value'
+  return { score, verdict, components: { bookYield: comp.bookYield, fcfYield: comp.fcfYield, gap: comp.gap, z: comp.z }, components_used: used.length }
+}

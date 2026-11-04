@@ -11,7 +11,7 @@ describe('fundamentals node', () => {
     const def = nodeDefinitions.find(n => n.type === 'fundamentals')
     assert.ok(def)
     assert.equal(def.pro, false)
-    assert.deepEqual(def.outputs.map(o => o.id), ['eps', 'bookValuePerShare', 'freeCashFlow', 'netIncome', 'coverage'])
+    assert.deepEqual(def.outputs.map(o => o.id), ['eps', 'bookValuePerShare', 'freeCashFlow', 'netIncome', 'shares', 'coverage'])
   })
 
   it('asks for the symbol and as-of date and maps the response', async () => {
