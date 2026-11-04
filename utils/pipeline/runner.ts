@@ -3,6 +3,7 @@ import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman.ts
 import { calcSMA, calcRSI, calcEMA } from '../indicators.ts'
 import { toSeries, toSeriesValues, toSeriesTimestamps, withTimestamps } from '../series.ts'
 import { runForecast } from '../forecast.ts'
+import { estimateFairValue, rollingZScore } from '../valuation.ts'
 
 export const executors: Record<string, NodeExecutor> = {
   currencyInput: async (ctx) => {
@@ -174,6 +175,38 @@ export const executors: Record<string, NodeExecutor> = {
     } catch (e: any) {
       return { smoothed: [], trend: [], signal: 0, error: e?.message || 'Kalman error' }
     }
+  },
+
+  fairValue: async (ctx) => {
+    const series = ctx.inputs.priceSeries || ctx.inputs.history || ctx.inputs.source || ctx.inputs.price
+    const values = toSeriesValues(series)
+    if (!Array.isArray(series) || values.length < 30) {
+      return { fairValueSeries: [], gapSeries: [], gapPct: 0, error: 'Need at least 30 price points' }
+    }
+    try {
+      const { fairValue, gap } = estimateFairValue(values)
+      const timestamps = toSeriesTimestamps(series, values.length)
+      const last = values.length - 1
+      return {
+        fairValueSeries: withTimestamps(fairValue, timestamps),
+        gapSeries: withTimestamps(gap, timestamps),
+        gapPct: gap[last] ?? 0,
+      }
+    } catch (e: any) {
+      return { fairValueSeries: [], gapSeries: [], gapPct: 0, error: e?.message || 'Fair value error' }
+    }
+  },
+
+  zScore: async (ctx) => {
+    const series = ctx.inputs.priceSeries || ctx.inputs.history || ctx.inputs.source || ctx.inputs.price
+    const values = toSeriesValues(series)
+    const window = Number(ctx.data.window) || 252
+    if (!Array.isArray(series) || values.length < window) {
+      return { zSeries: [], zScore: 0, error: `Need at least ${window} price points` }
+    }
+    const { z } = rollingZScore(values, window)
+    const timestamps = toSeriesTimestamps(series, values.length)
+    return { zSeries: withTimestamps(z, timestamps), zScore: z[z.length - 1] ?? 0 }
   },
 
   mathOp: async (ctx) => {
