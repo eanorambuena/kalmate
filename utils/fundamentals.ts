@@ -139,3 +139,14 @@ function ttmEps(known: XbrlFact[]): number | null {
 export function snapshotSeries(cf: CompanyFacts, dates: string[]): FundamentalsSnapshot[] {
   return dates.map(d => snapshotAt(cf, d))
 }
+
+// Concepts the snapshot uses. Keeping only these makes a company's facts small
+// enough to cache in a D1 row (the full companyfacts file is several MB).
+const KEPT_CONCEPTS = new Set<string>([...CONCEPTS.netIncome, ...CONCEPTS.eps, ...CONCEPTS.equity, ...CONCEPTS.shares, ...CONCEPTS.operatingCashFlow, ...CONCEPTS.capex])
+
+export function reduceCompanyFacts(cf: CompanyFacts): CompanyFacts {
+  const gaap = cf.facts?.['us-gaap'] ?? {}
+  const kept: Record<string, { units?: Record<string, XbrlFact[]> }> = {}
+  for (const k of Object.keys(gaap)) if (KEPT_CONCEPTS.has(k)) kept[k] = gaap[k]
+  return { facts: { 'us-gaap': kept } }
+}

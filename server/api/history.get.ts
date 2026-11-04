@@ -1,5 +1,7 @@
 import { getHistory } from '../../utils/yahoo'
 import { getCached, setCache } from '../../utils/cache'
+import { tickerDb } from '../../utils/tickerStore'
+import { cachedFetch } from '../../utils/apiCache'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -16,7 +18,10 @@ export default defineEventHandler(async (event) => {
   if (cached) return cached
 
   try {
-    const result = await getHistory(symbol, range, interval)
+    // Daily bars change once a day; intraday bars refresh more often.
+    const ttlMs = interval === '1d' ? 6 * 3_600_000 : 5 * 60_000
+    const result = await cachedFetch(tickerDb(event), `yahoo:${cacheKey}`, { source: 'yahoo', ttlMs, maxBytes: 1_800_000 },
+      () => getHistory(symbol, range, interval))
     setCache(cacheKey, result, 300_000)
     return result
   } catch (error: any) {
