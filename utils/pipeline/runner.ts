@@ -197,6 +197,27 @@ export const executors: Record<string, NodeExecutor> = {
     }
   },
 
+  fundamentals: async (ctx) => {
+    const symbol = ctx.inputs.symbol || ctx.data.symbol
+    const empty = { eps: null, bookValuePerShare: null, freeCashFlow: null, netIncome: null, coverage: 0 }
+    if (!symbol) return { ...empty, error: 'Need a symbol' }
+    const asOf = ctx.data.asOf || new Date().toISOString().slice(0, 10)
+    try {
+      const res = await fetch(`/api/fundamentals?symbol=${encodeURIComponent(String(symbol))}&asOf=${asOf}`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.statusMessage || `HTTP ${res.status}`)
+      return {
+        eps: data.eps ?? null,
+        bookValuePerShare: data.bookValuePerShare ?? null,
+        freeCashFlow: data.freeCashFlow ?? null,
+        netIncome: data.netIncome ?? null,
+        coverage: data.coverage ?? 0,
+      }
+    } catch (e: any) {
+      return { ...empty, error: e?.message || 'Fundamentals fetch failed' }
+    }
+  },
+
   zScore: async (ctx) => {
     const series = ctx.inputs.priceSeries || ctx.inputs.history || ctx.inputs.source || ctx.inputs.price
     const values = toSeriesValues(series)

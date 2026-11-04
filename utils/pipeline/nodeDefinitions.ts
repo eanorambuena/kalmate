@@ -107,6 +107,23 @@ export const nodeDefinitions: NodeDefinition[] = [
     defaultData: {},
   },
   {
+    type: 'fundamentals',
+    label: 'Fundamentals',
+    description: 'Company fundamentals (EPS, book value per share, free cash flow) as they were publicly known on a given date. US-listed tickers only',
+    category: 'process',
+    color: '#00c853',
+    pro: false,
+    inputs: [{ id: 'symbol', label: 'Symbol', type: 'symbol' }],
+    outputs: [
+      { id: 'eps', label: 'EPS (TTM)', type: 'scalar' },
+      { id: 'bookValuePerShare', label: 'Book Value / Share', type: 'scalar' },
+      { id: 'freeCashFlow', label: 'Free Cash Flow', type: 'scalar' },
+      { id: 'netIncome', label: 'Net Income (TTM)', type: 'scalar' },
+      { id: 'coverage', label: 'Coverage', type: 'scalar' },
+    ],
+    defaultData: { asOf: '' },
+  },
+  {
     type: 'zScore',
     label: 'Z-Score',
     description: 'How many standard deviations the price sits from its own rolling average (log scale). Below -2 = cheap versus its history, above +2 = expensive',
