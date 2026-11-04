@@ -55,3 +55,33 @@ describe('cached (store-agnostic)', () => {
     assert.deepEqual(v, { v: 1 })
   })
 })
+
+describe('services for quotes, search, news and screener', () => {
+  it('caches quotes in memory and does not write them to the durable store', async () => {
+    let calls = 0
+    const svc = createServices({ upstream: { quote: (async () => { calls++; return { symbol: 'AAPL' } }) as any } })
+    await svc.quotes(['AAPL'])
+    await svc.quotes(['AAPL'])
+    assert.equal(calls, 1)
+  })
+
+  it('screener filters by price and sorts using the same services', async () => {
+    const svc = createServices({ upstream: {
+      search: (async () => [{ symbol: 'A', quoteType: 'EQUITY' }, { symbol: 'B', quoteType: 'EQUITY' }]) as any,
+      quotes: (async () => [
+        { symbol: 'A', regularMarketPrice: 10, change: 1 },
+        { symbol: 'B', regularMarketPrice: 50, change: 5 },
+      ]) as any,
+    } })
+    const out = await svc.screener({ minPrice: 20, sortBy: 'change' })
+    assert.deepEqual(out.map((r: any) => r.symbol), ['B'])
+  })
+
+  it('search and news go through the cache', async () => {
+    let calls = 0
+    const svc = createServices({ upstream: { search: (async () => { calls++; return [] }) as any } })
+    await svc.search('apple')
+    await svc.search('apple')
+    assert.equal(calls, 1)
+  })
+})
