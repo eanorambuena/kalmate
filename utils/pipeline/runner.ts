@@ -256,8 +256,13 @@ export const executors: Record<string, NodeExecutor> = {
     const values = toSeriesValues(series)
     const price = typeof ctx.inputs.price === 'number' ? ctx.inputs.price : (values.at(-1) ?? null)
     const reference = typeof ctx.inputs.reference === 'number' ? ctx.inputs.reference : null
-    if (price == null) return { diffPct: null, label: 'No reference', error: 'Need a price' }
-    return compareToReference(price, reference)
+    if (price == null) return { diffPct: null, label: 'No reference', undervalued: 0, overvalued: 0, error: 'Need a price' }
+    const cmp = compareToReference(price, reference)
+    return {
+      ...cmp,
+      undervalued: cmp.label === 'Below reference' ? 1 : 0,
+      overvalued: cmp.label === 'Above reference' ? 1 : 0,
+    }
   },
 
   zScore: async (ctx) => {

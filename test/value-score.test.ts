@@ -61,3 +61,22 @@ describe('compareToReference', () => {
     assert.equal(compareToReference(100, 0).label, 'No reference')
   })
 })
+
+import { executors as ex2 } from '../utils/pipeline/runner.ts'
+describe('compareReference outputs', () => {
+  it('flags undervalued when the price is below the reference', async () => {
+    const out = await ex2.compareReference!({ nodeId: 'c', inputs: { price: 80, reference: 100 }, data: {} })
+    assert.equal(out.undervalued, 1)
+    assert.equal(out.overvalued, 0)
+  })
+  it('flags overvalued when the price is above the reference', async () => {
+    const out = await ex2.compareReference!({ nodeId: 'c', inputs: { price: 130, reference: 100 }, data: {} })
+    assert.equal(out.undervalued, 0)
+    assert.equal(out.overvalued, 1)
+  })
+  it('flags neither inside the band', async () => {
+    const out = await ex2.compareReference!({ nodeId: 'c', inputs: { price: 101, reference: 100 }, data: {} })
+    assert.equal(out.undervalued, 0)
+    assert.equal(out.overvalued, 0)
+  })
+})

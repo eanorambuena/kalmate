@@ -150,7 +150,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'compareReference',
     label: 'Compare to Reference',
-    description: 'Shows how far the current price sits above or below a reference value (e.g. fair value or a fundamental target). Descriptive only: not a buy or sell recommendation. Reference values are estimates with limited evidence',
+    description: 'Labels the current price Undervalued or Overvalued against a reference value (e.g. fair value or a fundamental target), with the percentage gap. Descriptive only: not a buy or sell recommendation. Reference values are estimates with limited evidence',
     category: 'process',
     color: '#00c853',
     pro: false,
@@ -159,6 +159,8 @@ export const nodeDefinitions: NodeDefinition[] = [
       { id: 'reference', label: 'Reference Value', type: 'scalar' },
     ],
     outputs: [
+      { id: 'undervalued', label: 'Undervalued', type: 'signal' },
+      { id: 'overvalued', label: 'Overvalued', type: 'signal' },
       { id: 'diffPct', label: 'Difference %', type: 'scalar' },
       { id: 'label', label: 'Position', type: 'any' },
     ],
