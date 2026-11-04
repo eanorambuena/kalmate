@@ -79,7 +79,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'kalmanFilter',
     label: 'Kalman Filter',
-    description: 'Smooths noisy price data using the Schwartz-Smith model to estimate fair value and trend direction',
+    description: 'Smooths noisy price data using the Schwartz-Smith model to estimate fair value and trend direction. Signal: +1 means undervalued (price below equilibrium), -1 means overvalued',
     category: 'process',
     color: '#00c853',
     pro: false,

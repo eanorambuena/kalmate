@@ -446,6 +446,18 @@ describe('executors', () => {
     assert.equal(result.smoothed.length, prices.length)
   })
 
+  it('kalmanFilter signal is +1 (undervalued) when the last point is well below trend, -1 when well above', async () => {
+    const trendSeries = Array.from({ length: 40 }, (_, i) => 100 * Math.exp(0.002 * i))
+    const lastBelow = [...trendSeries.slice(0, -1), trendSeries[trendSeries.length - 1] * 0.6]
+    const lastAbove = [...trendSeries.slice(0, -1), trendSeries[trendSeries.length - 1] * 1.5]
+
+    const below = await executors.kalmanFilter(mkCtx({ inputs: { priceSeries: lastBelow } }))
+    const above = await executors.kalmanFilter(mkCtx({ inputs: { priceSeries: lastAbove } }))
+
+    assert.equal(below.signal, 1, 'price below equilibrium must be buy-leaning (+1)')
+    assert.equal(above.signal, -1, 'price above equilibrium must be overvalued (-1)')
+  })
+
   it('kalmanFilter returns error for short series', async () => {
     const ctx = mkCtx({ inputs: { priceSeries: [100, 101] } })
     const result = await executors.kalmanFilter(ctx)

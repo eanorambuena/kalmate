@@ -170,7 +170,7 @@ export const executors: Record<string, NodeExecutor> = {
         smoothed: withTimestamps(result.smoothed, timestamps),
         trend: withTimestamps(result.trend, timestamps),
         cycle: withTimestamps(result.cycle, timestamps),
-        signal: lastCycle > 0 ? 1 : -1,
+        signal: lastCycle < 0 ? 1 : -1,
       }
     } catch (e: any) {
       return { smoothed: [], trend: [], signal: 0, error: e?.message || 'Kalman error' }
