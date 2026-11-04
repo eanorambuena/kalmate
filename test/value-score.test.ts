@@ -45,3 +45,19 @@ describe('valueScore node', () => {
     assert.equal(out.components_used, 4)
   })
 })
+
+import { compareToReference } from '../utils/valuation.ts'
+describe('compareToReference', () => {
+  it('labels above, below and at-reference positions', () => {
+    assert.equal(compareToReference(120, 100).label, 'Above reference')
+    assert.equal(compareToReference(80, 100).label, 'Below reference')
+    assert.equal(compareToReference(101, 100).label, 'At reference')
+  })
+  it('reports the percentage difference against the reference', () => {
+    assert.ok(Math.abs(compareToReference(120, 100).diffPct! - 0.2) < 1e-9)
+  })
+  it('returns no reference when the reference is missing or invalid', () => {
+    assert.equal(compareToReference(100, null).label, 'No reference')
+    assert.equal(compareToReference(100, 0).label, 'No reference')
+  })
+})

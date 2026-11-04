@@ -3,7 +3,7 @@ import { runKalmanFilter, calibrateMLE, createDefaultParams } from '../kalman.ts
 import { calcSMA, calcRSI, calcEMA } from '../indicators.ts'
 import { toSeries, toSeriesValues, toSeriesTimestamps, withTimestamps } from '../series.ts'
 import { runForecast } from '../forecast.ts'
-import { estimateFairValue, rollingZScore, scoreValue } from '../valuation.ts'
+import { estimateFairValue, rollingZScore, scoreValue, compareToReference } from '../valuation.ts'
 
 export const executors: Record<string, NodeExecutor> = {
   currencyInput: async (ctx) => {
@@ -249,6 +249,15 @@ export const executors: Record<string, NodeExecutor> = {
       zScore: z,
       components_used: res.components_used,
     }
+  },
+
+  compareReference: async (ctx) => {
+    const series = ctx.inputs.priceSeries
+    const values = toSeriesValues(series)
+    const price = typeof ctx.inputs.price === 'number' ? ctx.inputs.price : (values.at(-1) ?? null)
+    const reference = typeof ctx.inputs.reference === 'number' ? ctx.inputs.reference : null
+    if (price == null) return { diffPct: null, label: 'No reference', error: 'Need a price' }
+    return compareToReference(price, reference)
   },
 
   zScore: async (ctx) => {

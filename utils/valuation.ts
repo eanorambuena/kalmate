@@ -105,3 +105,21 @@ export function scoreValue(v: ValueInputs): ValueScore {
   const verdict = score > 0.25 ? 'Undervalued' : score < -0.25 ? 'Overvalued' : 'Fair value'
   return { score, verdict, components: { bookYield: comp.bookYield, fcfYield: comp.fcfYield, gap: comp.gap, z: comp.z }, components_used: used.length }
 }
+
+export interface ReferenceComparison {
+  /** price / reference - 1 */
+  diffPct: number | null
+  label: 'Above reference' | 'At reference' | 'Below reference' | 'No reference'
+}
+
+/**
+ * Descriptive comparison of the current price with a reference value (fair
+ * value, book-based target, etc.). It states where the price sits relative
+ * to the reference and does not say whether to buy or sell.
+ */
+export function compareToReference(price: number, reference: number | null | undefined, band = 0.02): ReferenceComparison {
+  if (!(price > 0) || reference == null || !(reference > 0)) return { diffPct: null, label: 'No reference' }
+  const diffPct = price / reference - 1
+  const label = diffPct > band ? 'Above reference' : diffPct < -band ? 'Below reference' : 'At reference'
+  return { diffPct, label }
+}

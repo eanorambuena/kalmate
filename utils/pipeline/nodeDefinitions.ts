@@ -148,6 +148,23 @@ export const nodeDefinitions: NodeDefinition[] = [
     defaultData: {},
   },
   {
+    type: 'compareReference',
+    label: 'Compare to Reference',
+    description: 'Shows how far the current price sits above or below a reference value (e.g. fair value or a fundamental target). Descriptive only: not a buy or sell recommendation. Reference values are estimates with limited evidence',
+    category: 'process',
+    color: '#00c853',
+    pro: false,
+    inputs: [
+      { id: 'priceSeries', label: 'Price Series', type: 'series' },
+      { id: 'reference', label: 'Reference Value', type: 'scalar' },
+    ],
+    outputs: [
+      { id: 'diffPct', label: 'Difference %', type: 'scalar' },
+      { id: 'label', label: 'Position', type: 'any' },
+    ],
+    defaultData: {},
+  },
+  {
     type: 'zScore',
     label: 'Z-Score',
     description: 'How many standard deviations the price sits from its own rolling average (log scale). Below -2 = cheap versus its history, above +2 = expensive',
