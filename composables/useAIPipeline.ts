@@ -30,6 +30,8 @@ const KEYWORD_MAP: Record<string, string[]> = {
   rsi: ['rsi', 'relativo', 'relative', 'sobrecompra', 'sobreventa', 'overbought', 'oversold'],
   kalman: ['kalman', 'filtro', 'filter', 'suave', 'smooth'],
   forecast: ['forecast', 'prediccion', 'prediction', 'pronostico', 'futuro', 'future'],
+  fairValue: ['value', 'valor', 'infravalorado', 'undervalued', 'overvalued', 'caro', 'barato', 'fair value', 'valor justo'],
+  zscore: ['zscore', 'z-score', 'desviacion'],
 }
 
 function detectIntent(q: string): { ticker: string; flags: Set<string> } {
@@ -64,6 +66,7 @@ const CATEGORY: Record<string, string> = {
   symbolInput: 'input', priceFeed: 'input', currencyInput: 'input', scalarInput: 'input',
   smaIndicator: 'process', emaIndicator: 'process', rsiIndicator: 'process',
   kalmanFilter: 'process', forecastNode: 'process', mathOp: 'process', portfolioInput: 'process',
+  fairValue: 'process', zScore: 'process',
   chartOutput: 'output', candleChart: 'output', display: 'output', priceDisplay: 'output', alertOutput: 'output',
 }
 
@@ -160,6 +163,39 @@ function parseKeywords(query: string): PipelinePlan {
     const chartIdx = nextIdx++
     nodes.push(mkNode('chartOutput', {}, cnt))
     edges.push({ source: 1, target: chartIdx, sourceHandle: 'priceSeries', targetHandle: 'mainSeries' })
+  }
+
+  // Value analysis nodes. Plot overlays go to the chart (or candle chart) when one exists.
+  const plotIdx = nodes.findIndex(n => n.type === 'chartOutput' || n.type === 'candleChart')
+  const freeOverlay = (target: number): string | undefined => {
+    const used = new Set(edges.filter(e => e.target === target).map(e => e.targetHandle))
+    return ['overlayA', 'overlayB', 'overlayC'].find(h => !used.has(h))
+  }
+
+  if (flags.has('fairValue')) {
+    const fvIdx = nodes.length
+    nodes.push(mkNode('fairValue', {}, cnt))
+    edges.push({ source: 1, target: fvIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
+    const gapDisplayIdx = nodes.length
+    nodes.push(mkNode('display', {}, cnt))
+    edges.push({ source: fvIdx, target: gapDisplayIdx, sourceHandle: 'gapPct', targetHandle: 'value' })
+    const overlay = plotIdx !== -1 ? freeOverlay(plotIdx) : undefined
+    if (overlay) {
+      edges.push({ source: fvIdx, target: plotIdx, sourceHandle: 'gapSeries', targetHandle: overlay })
+    }
+  }
+
+  if (flags.has('zscore')) {
+    const zIdx = nodes.length
+    nodes.push(mkNode('zScore', { window: 252 }, cnt))
+    edges.push({ source: 1, target: zIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
+    const zDisplayIdx = nodes.length
+    nodes.push(mkNode('display', {}, cnt))
+    edges.push({ source: zIdx, target: zDisplayIdx, sourceHandle: 'zScore', targetHandle: 'value' })
+    const overlay = plotIdx !== -1 ? freeOverlay(plotIdx) : undefined
+    if (overlay) {
+      edges.push({ source: zIdx, target: plotIdx, sourceHandle: 'zSeries', targetHandle: overlay })
+    }
   }
 
   return { nodes, edges }

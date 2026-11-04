@@ -958,3 +958,69 @@ describe('full pipeline execution', () => {
     global.fetch = origFetch
   })
 })
+
+describe('AI pipeline generation', () => {
+  let useAIPipeline: typeof import('../composables/useAIPipeline.ts').useAIPipeline
+  const g = globalThis as any
+
+  before(async () => {
+    ;({ useAIPipeline } = await import('../composables/useAIPipeline.ts'))
+  })
+
+  // Force the server call to fail so generate() uses the local keyword parser.
+  async function plan(query: string) {
+    g.$fetch = mock.fn(async () => { throw new Error('offline') })
+    return useAIPipeline().generate(query) as Promise<{ nodes: any[]; edges: any[] }>
+  }
+
+  it('value query generates a fairValue node fed by the price feed', async () => {
+    const p = await plan('is AAPL undervalued')
+    const fv = p.nodes.findIndex(n => n.type === 'fairValue')
+    assert.ok(fv > 0)
+    assert.ok(p.edges.some(e => e.source === 1 && e.target === fv && e.sourceHandle === 'priceSeries' && e.targetHandle === 'priceSeries'))
+  })
+
+  it('value query connects gapPct to a display and gapSeries to the chart overlay', async () => {
+    const p = await plan('is AAPL undervalued')
+    const fv = p.nodes.findIndex(n => n.type === 'fairValue')
+    const chart = p.nodes.findIndex(n => n.type === 'chartOutput')
+    const pct = p.edges.find(e => e.source === fv && e.sourceHandle === 'gapPct')
+    assert.ok(pct)
+    assert.equal(p.nodes[pct!.target].type, 'display')
+    assert.equal(pct!.targetHandle, 'value')
+    const gap = p.edges.find(e => e.source === fv && e.sourceHandle === 'gapSeries')
+    assert.ok(gap)
+    assert.equal(gap!.target, chart)
+    assert.equal(gap!.targetHandle, 'overlayA')
+  })
+
+  it('zscore query generates a zScore node with its scalar wired to a display', async () => {
+    const p = await plan('AAPL z-score')
+    const z = p.nodes.findIndex(n => n.type === 'zScore')
+    assert.ok(z > 0)
+    assert.deepEqual(p.nodes[z].data, { window: 252 })
+    const e = p.edges.find(e => e.source === z && e.sourceHandle === 'zScore')
+    assert.ok(e)
+    assert.equal(p.nodes[e!.target].type, 'display')
+  })
+
+  it('existing candle query produces the same plan as before', async () => {
+    const p = await plan('AAPL candle chart')
+    assert.deepEqual(p.nodes.map(n => n.type), ['symbolInput', 'priceFeed', 'candleChart'])
+    assert.deepEqual(p.edges, [
+      { source: 0, target: 1, sourceHandle: 'symbol', targetHandle: 'symbol' },
+      { source: 1, target: 2, sourceHandle: 'candleSeries', targetHandle: 'candleSeries' },
+    ])
+  })
+
+  it('existing SMA query produces the same plan as before', async () => {
+    const p = await plan('grafico AAPL con SMA20')
+    assert.deepEqual(p.nodes.map(n => n.type), ['symbolInput', 'priceFeed', 'smaIndicator', 'chartOutput'])
+    assert.deepEqual(p.nodes[2].data, { period: 20 })
+    assert.deepEqual(p.edges, [
+      { source: 0, target: 1, sourceHandle: 'symbol', targetHandle: 'symbol' },
+      { source: 1, target: 2, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' },
+      { source: 1, target: 3, sourceHandle: 'priceSeries', targetHandle: 'mainSeries' },
+    ])
+  })
+})
