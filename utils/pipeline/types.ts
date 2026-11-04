@@ -34,6 +34,8 @@ export interface NodeDefinition {
   inputs: NodePort[]
   outputs: NodePort[]
   defaultData: Record<string, any>
+  /** When true, the node UI lets the user add/remove inputs (see CustomNode.vue). */
+  dynamicInputs?: boolean
 }
 
 export interface ExecutionContext {

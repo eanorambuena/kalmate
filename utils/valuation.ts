@@ -36,7 +36,10 @@ export function estimateFairValue(prices: number[]): FairValueResult {
   const { trend } = runKalmanFilter(prices, params, 0)
   // `trend` returned by runKalmanFilter is exp(ξ): the equilibrium level.
   const fairValue = trend
-  const gap = prices.map((p, i) => (fairValue[i] > 0 ? p / fairValue[i] - 1 : 0))
+  const gap = prices.map((p, i) => {
+    const fv = fairValue[i] ?? 0
+    return fv > 0 ? p / fv - 1 : 0
+  })
   return { fairValue, gap }
 }
 
@@ -49,13 +52,12 @@ export function rollingZScore(prices: number[], window: number): ZScoreResult {
   const logP = prices.map(p => Math.log(p))
   const z: number[] = new Array(prices.length).fill(0)
   for (let i = w - 1; i < logP.length; i++) {
-    let sum = 0
-    for (let j = i - w + 1; j <= i; j++) sum += logP[j]
-    const mean = sum / w
+    const win = logP.slice(i - w + 1, i + 1)
+    const mean = win.reduce((a, b) => a + b, 0) / w
     let sq = 0
-    for (let j = i - w + 1; j <= i; j++) sq += (logP[j] - mean) ** 2
+    for (const v of win) sq += (v - mean) ** 2
     const std = Math.sqrt(sq / w)
-    z[i] = std > 1e-12 ? (logP[i] - mean) / std : 0
+    z[i] = std > 1e-12 ? ((win[w - 1] ?? 0) - mean) / std : 0
   }
   return { z }
 }

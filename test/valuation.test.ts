@@ -16,7 +16,7 @@ function rng(seed: number) {
 function randomWalk(n: number, seed: number, start = 100): number[] {
   const r = rng(seed)
   const out = [start]
-  for (let i = 1; i < n; i++) out.push(out[i - 1] * Math.exp((r() - 0.5) * 0.04))
+  for (let i = 1; i < n; i++) out.push((out[i - 1] ?? start) * Math.exp((r() - 0.5) * 0.04))
   return out
 }
 
@@ -28,7 +28,8 @@ describe('valuation', () => {
     for (let i = 0; i < 300; i++) prices.push(100 * Math.exp((r() - 0.5) * 0.01))
     for (let i = 0; i < 5; i++) prices.push(75 * Math.exp((r() - 0.5) * 0.01))
     const { gap } = estimateFairValue(prices)
-    assert.ok(gap[gap.length - 1] < -0.1, `expected undervalued gap, got ${gap[gap.length - 1]}`)
+    const last = gap[gap.length - 1] ?? NaN
+    assert.ok(last < -0.1, `expected undervalued gap, got ${last}`)
   })
 
   it('fair value gap is positive after a spike above equilibrium', () => {
@@ -37,7 +38,8 @@ describe('valuation', () => {
     for (let i = 0; i < 300; i++) prices.push(100 * Math.exp((r() - 0.5) * 0.01))
     for (let i = 0; i < 5; i++) prices.push(130 * Math.exp((r() - 0.5) * 0.01))
     const { gap } = estimateFairValue(prices)
-    assert.ok(gap[gap.length - 1] > 0.1, `expected overvalued gap, got ${gap[gap.length - 1]}`)
+    const last = gap[gap.length - 1] ?? NaN
+    assert.ok(last > 0.1, `expected overvalued gap, got ${last}`)
   })
 
   it('fair value rejects too-short series', () => {
@@ -56,7 +58,8 @@ describe('valuation', () => {
     const prices = [...Array(60).fill(100), 80]
     const { z } = rollingZScore(prices, 20)
     assert.equal(z[5], 0)
-    assert.ok(z[z.length - 1] < -2, `expected strong negative z, got ${z[z.length - 1]}`)
+    const last = z[z.length - 1] ?? NaN
+    assert.ok(last < -2, `expected strong negative z, got ${last}`)
   })
 
   it('z-score of a flat window is zero, not NaN', () => {
