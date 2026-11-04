@@ -61,3 +61,11 @@ describe('point-in-time fundamentals', () => {
     assert.ok(at.coverage > 0.5 && at.coverage <= 1)
   })
 })
+
+import { SEC_CIKS } from '../utils/secCiks.ts'
+describe('SEC CIK map', () => {
+  it('maps DUOL to its verified CIK and uses 10-digit zero-padded ids', () => {
+    assert.equal(SEC_CIKS.DUOL, '0001562088')
+    assert.ok(Object.values(SEC_CIKS).every(c => /^\d{10}$/.test(c)))
+  })
+})

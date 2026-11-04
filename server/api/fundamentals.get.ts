@@ -1,11 +1,14 @@
 import { getCached, setCache } from '../../utils/cache'
 import { snapshotAt, type CompanyFacts } from '../../utils/fundamentals'
+import { SEC_CIKS } from '../../utils/secCiks'
 
 // SEC asks for a descriptive User-Agent. Generic client name, no personal contact.
 const SEC_HEADERS = { 'User-Agent': 'Kalmate/1.0 research-client', Accept: 'application/json' }
 const DAY_MS = 86_400_000
 
 async function cikFor(ticker: string): Promise<string | null> {
+  const known = SEC_CIKS[ticker.toUpperCase()]
+  if (known) return known
   const cacheKey = 'sec:tickers'
   let map = getCached<Record<string, string>>(cacheKey)
   if (!map) {
