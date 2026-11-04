@@ -1,6 +1,7 @@
 import { getCached, setCache } from '../../utils/cache'
 import { snapshotAt, type CompanyFacts } from '../../utils/fundamentals'
 import { SEC_CIKS } from '../../utils/secCiks'
+import { tickerDb, getStoredTicker, saveTicker } from '../../utils/tickerStore'
 
 // SEC asks for a descriptive User-Agent. Generic client name, no personal contact.
 const SEC_HEADERS = { 'User-Agent': 'Kalmate/1.0 research-client', Accept: 'application/json' }
@@ -33,8 +34,11 @@ export default defineEventHandler(async (event) => {
     const cacheKey = `fundamentals:${symbol.toUpperCase()}`
     let facts = getCached<CompanyFacts>(cacheKey)
     if (!facts) {
-      const cik = await cikFor(symbol)
+      const db = tickerDb(event)
+      const stored = await getStoredTicker(db, symbol)
+      const cik = stored?.cik ?? await cikFor(symbol)
       if (!cik) throw createError({ statusCode: 404, statusMessage: `No SEC filer for ${symbol} (US-listed companies only)` })
+      if (!stored) await saveTicker(db, { symbol, cik, source: SEC_CIKS[symbol.toUpperCase()] ? 'sec-map' : 'sec-tickers' })
       const res = await fetch(`https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`, { headers: SEC_HEADERS })
       if (!res.ok) throw createError({ statusCode: 502, statusMessage: `SEC facts HTTP ${res.status}` })
       facts = await res.json() as CompanyFacts
