@@ -8,10 +8,10 @@ const canonical = canonicalUrl('/terminal/pipeline')
 useHead({
   title: 'Data Pipeline & Visual Node Editor | Kalmate',
   meta: [
-    { name: 'description', content: 'Build visual financial data pipelines with Kalmate\'s node editor. Connect indicators like SMA, EMA, Kalman filters, and portfolio inputs in a drag-and-drop interface. No coding required.' },
+    { name: 'description', content: 'Build visual financial data pipelines with Kalmate\'s node editor. Connect indicators like SMA, EMA, Kalman filters and Z-Score, rebase assets to compare them, and add fair value or forecasts in a drag-and-drop interface. No coding required.' },
     { name: 'keywords', content: 'kalmate pipeline, financial pipeline, visual node editor, data pipeline finance, drag and drop trading, technical indicators, SMA, EMA, Kalman filter, no-code finance' },
     { property: 'og:title', content: 'Data Pipeline & Visual Node Editor | Kalmate' },
-    { property: 'og:description', content: 'Build visual financial data pipelines with Kalmate\'s node editor. Connect indicators like SMA, EMA, Kalman filters, and portfolio inputs in a drag-and-drop interface.' },
+    { property: 'og:description', content: 'Build visual financial data pipelines with Kalmate\'s node editor. Connect indicators like SMA, EMA, Kalman filters and Z-Score, and compare assets in a drag-and-drop interface.' },
     { property: 'og:url', content: canonical },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
@@ -44,13 +44,13 @@ main#main-content {
     <template #fallback>
       <div class="max-w-3xl mx-auto px-6 py-24 text-center">
         <h1 class="text-3xl font-bold text-white mb-4">Visual Pipeline Editor</h1>
-        <p class="text-[#ccc] mb-6">Drag and drop nodes to build custom data pipelines. Connect Symbol Input → Kalman Filter → Chart Output for live price smoothing, or combine RSI, SMA, and Alert nodes for automated trading signals.</p>
+        <p class="text-[#ccc] mb-6">Drag and drop nodes to build custom data pipelines. Connect Symbol → Price Feed → Kalman Filter → Chart for live price smoothing, or combine RSI, SMA and Alert nodes to watch indicator levels.</p>
         <div class="flex flex-wrap justify-center gap-2 text-sm text-[#888]">
-          <span class="bg-[#111] px-3 py-1 rounded">Symbol Input</span>
+          <span class="bg-[#111] px-3 py-1 rounded">Symbol</span>
           <span class="text-[#555]">→</span>
           <span class="bg-[#111] px-3 py-1 rounded">Kalman Filter</span>
           <span class="text-[#555]">→</span>
-          <span class="bg-[#111] px-3 py-1 rounded">Chart Output</span>
+          <span class="bg-[#111] px-3 py-1 rounded">Chart</span>
         </div>
         <p class="text-[#888] text-xs mt-6">Loading editor...</p>
       </div>

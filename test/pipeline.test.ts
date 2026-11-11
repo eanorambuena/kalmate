@@ -946,17 +946,15 @@ describe('AI pipeline generation', () => {
     assert.ok(p.edges.some(e => e.source === 1 && e.target === fv && e.sourceHandle === 'priceSeries' && e.targetHandle === 'priceSeries'))
   })
 
-  // Blocked: composables/useAIPipeline.ts still wires fairValue.gapPct and gapSeries,
-  // which no longer exist (fairValue now outputs upsidePct and fairValueSeries).
-  it.skip('value query connects gapPct to a display and gapSeries to the chart overlay', async () => {
+  it('value query connects upsidePct to a display and fairValueSeries to the chart overlay', async () => {
     const p = await plan('is AAPL undervalued')
     const fv = p.nodes.findIndex(n => n.type === 'fairValue')
     const chart = p.nodes.findIndex(n => n.type === 'chartOutput')
-    const pct = p.edges.find(e => e.source === fv && e.sourceHandle === 'gapPct')
+    const pct = p.edges.find(e => e.source === fv && e.sourceHandle === 'upsidePct')
     assert.ok(pct)
     assert.equal(p.nodes[pct!.target].type, 'display')
     assert.equal(pct!.targetHandle, 'value')
-    const gap = p.edges.find(e => e.source === fv && e.sourceHandle === 'gapSeries')
+    const gap = p.edges.find(e => e.source === fv && e.sourceHandle === 'fairValueSeries')
     assert.ok(gap)
     assert.equal(gap!.target, chart)
     assert.equal(gap!.targetHandle, 'overlayA')

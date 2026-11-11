@@ -95,9 +95,9 @@ const methods = [
 
 const features = [
   { free: true, pro: true, label: 'Visual node editor' },
-  { free: true, pro: true, label: 'Basic nodes (Symbol, Price, Chart, Kalman)' },
-  { free: false, pro: true, label: 'Pro nodes (RSI, SMA, Forecast, Multi Symbol)' },
-  { free: false, pro: true, label: 'Telegram & Email alerts' },
+  { free: true, pro: true, label: 'Basic nodes (Symbol, Price Feed, Chart, Kalman, Fair Value)' },
+  { free: false, pro: true, label: 'Pro nodes (SMA, EMA, RSI, Forecast)' },
+  { free: false, pro: true, label: 'Forecast with a 95% band and accuracy check' },
   { free: true, pro: true, label: 'Real-time market data' },
   { free: true, pro: true, label: 'Kalman filter analysis' },
   { free: false, pro: true, label: 'Unlimited pipeline runs' },

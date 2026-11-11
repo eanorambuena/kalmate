@@ -287,7 +287,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   },
   {
     type: 'mathOp',
-    label: 'Math Op',
+    label: 'Math',
     description: 'Combines two values with +, -, × or ÷. Works on numbers, arrays and time series (series are matched by date).',
     category: 'process',
     color: PROCESS,

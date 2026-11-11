@@ -1,51 +1,52 @@
-import { nodeDefinitions } from '../../utils/pipeline/nodeDefinitions'
+import { buildNodeCatalog, validatePlan } from '../../utils/pipeline/plan'
 
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions'
 const MODEL = 'llama-3.3-70b-versatile'
 
 function buildPrompt(query: string): string {
-  const nodeList = nodeDefinitions
-    .filter(n => !n.pro)
-    .map(n => {
-      const ins = n.inputs.map(i => `${i.id}(${i.type})`).join(', ') || 'none'
-      const outs = n.outputs.map(o => `${o.id}(${o.type})`).join(', ') || 'none'
-      return `  - ${n.type}: "${n.label}" | inputs: [${ins}] | outputs: [${outs}] | desc: ${n.description}`
-    })
-    .join('\n')
+  return `You are an assistant that generates financial pipelines for a visual node editor. These are the only nodes available, with their exact handle ids and params:
+${buildNodeCatalog()}
 
-  return `You are an assistant that generates financial pipelines. You have these nodes available:
-${nodeList}
-Each node is identified by its "type". "Input" nodes provide data, "process" nodes transform it, "output" nodes display it.
+Each node is identified by its "type". Input nodes provide data, process nodes transform it, output nodes display it.
+Each input handle accepts at most one edge. Port types must match: "any" accepts everything; "series", "price", "scalar", "signal" and "symbol" connect to the same kind, and numeric kinds (price, scalar, signal) connect to each other.
 
 The user query may be in Spanish or English. Generate a pipeline for: "${query}"
 
-Return ONLY valid JSON without markdown, without explanations, with this structure:
+Return ONLY valid JSON without markdown and without explanations, with this structure:
 {
   "nodes": [
     { "type": "symbolInput", "data": { "symbol": "AAPL" } },
     { "type": "priceFeed", "data": {} },
-    { "type": "candleChart", "data": {} }
+    { "type": "chartOutput", "data": {} }
   ],
   "edges": [
     { "source": 0, "target": 1, "sourceHandle": "symbol", "targetHandle": "symbol" },
-    { "source": 1, "target": 2, "sourceHandle": "candleSeries", "targetHandle": "candleSeries" }
+    { "source": 1, "target": 2, "sourceHandle": "priceSeries", "targetHandle": "mainSeries" }
   ]
 }
 
 RULES:
-- source and target in edges are indices of the nodes array (0, 1, 2...)
-- sourceHandle must match an output id of the source node
-- targetHandle must match an input id of the target node
-- Nodes must connect in logical order: inputs -> process -> outputs
-- A symbolInput node must always connect to a priceFeed
-- A priceFeed can connect to multiple nodes`
+- source and target in edges are indices of the nodes array (0, 1, 2...), and source must differ from target
+- sourceHandle must be an output id listed for the source node's type
+- targetHandle must be an input id listed for the target node's type (Weighted Average accepts in0, in1, ...)
+- Every input handle may appear in at most one edge
+- Only use the params listed for each node in its data; use the defaults when unsure
+- A symbolInput node connects to a priceFeed (symbol -> symbol); a priceFeed feeds indicators, forecasts and charts through its priceSeries output
+- Connect the price series to the chart's mainSeries and indicator outputs to overlayA, overlayB or overlayC
+- Do not use nodes that are not listed above`
 }
 
 const VALID_WORDS = [
-  'chart', 'candle', 'sma', 'ema', 'rsi', 'kalman', 'forecast',
+  'chart', 'candle', 'sma', 'ema', 'rsi', 'kalman', 'forecast', 'zscore', 'z-score',
   'price', 'symbol', 'show', 'track', 'filter', 'signal',
-  'linea', 'grafico', 'vela', 'media', 'promedio', 'prediccion',
+  'linea', 'grafico', 'vela', 'media', 'promedio', 'prediccion', 'pronostico',
   'mostrar', 'compar', 'suave', 'filtro', 'relativo',
+  // valuation
+  'value', 'valor', 'valuation', 'valoracion', 'undervalued', 'overvalued', 'infravalorado', 'caro', 'barato', 'fair',
+  // fundamentals
+  'fundamental', 'eps', 'earnings', 'utilidad', 'book',
+  // comparison
+  'versus', 'vs', 'contra',
 ]
 
 function isValidQuery(q: string): boolean {
@@ -111,8 +112,9 @@ export default defineEventHandler(async (event) => {
     const jsonStr = text.substring(jsonStart, jsonEnd + 1)
     const plan = JSON.parse(jsonStr)
 
-    if (!plan.nodes || !Array.isArray(plan.nodes) || !plan.edges || !Array.isArray(plan.edges)) {
-      return { error: 'Invalid pipeline structure from AI' }
+    const check = validatePlan(plan)
+    if (!check.ok) {
+      return { error: `Invalid pipeline from AI: ${check.reason}` }
     }
 
     return plan

@@ -1,3 +1,6 @@
+import { nodeDefinitions } from '../utils/pipeline/nodeDefinitions.ts'
+import { validatePlan } from '../utils/pipeline/plan.ts'
+
 type NodeSpec = {
   type: string
   data: Record<string, any>
@@ -16,12 +19,7 @@ export type PipelinePlan = {
   edges: EdgeSpec[]
 }
 
-function extractTicker(q: string): string {
-  const upper = q.toUpperCase()
-  const m = upper.match(/\b[A-Z]{1,5}(?:-[A-Z]{1,5})?\b/)
-  return m ? m[0] : 'AAPL'
-}
-
+/** Intent keywords, matched at the start of a word on the accent-free lowercase query. */
 const KEYWORD_MAP: Record<string, string[]> = {
   chart: ['chart', 'linea', 'line', 'grafico', 'graph', 'plot', 'mostrar', 'show', 'display', 'track'],
   candles: ['candle', 'vela', 'candlestick', 'japonesa'],
@@ -30,31 +28,92 @@ const KEYWORD_MAP: Record<string, string[]> = {
   rsi: ['rsi', 'relativo', 'relative', 'sobrecompra', 'sobreventa', 'overbought', 'oversold'],
   kalman: ['kalman', 'filtro', 'filter', 'suave', 'smooth'],
   forecast: ['forecast', 'prediccion', 'prediction', 'pronostico', 'futuro', 'future'],
-  fairValue: ['value', 'valor', 'infravalorado', 'undervalued', 'overvalued', 'caro', 'barato', 'fair value', 'valor justo'],
   zscore: ['zscore', 'z-score', 'desviacion'],
+  value: ['undervalued', 'overvalued', 'fair value', 'valor justo', 'infravalorado', 'caro', 'barato', 'valuation', 'valoracion'],
+  fundamentals: ['fundamentals', 'fundamentales', 'eps', 'earnings', 'utilidades', 'book value'],
+  compare: ['compare', 'compar', 'vs', 'versus', 'contra'],
 }
 
-function detectIntent(q: string): { ticker: string; flags: Set<string> } {
-  const lowered = q.toLowerCase()
+/** Words that are never tickers, even in uppercase. Keyword words are added below. */
+const STOP_WORDS = new Set([
+  // English
+  'a', 'i', 'an', 'and', 'or', 'of', 'for', 'with', 'the', 'is', 'it', 'in', 'on', 'to', 'at', 'by', 'be',
+  'me', 'my', 'do', 'what', 'how', 'are', 'can', 'this', 'that', 'from', 'all', 'last', 'days', 'day',
+  'steps', 'step', 'usd', 'ai', 'pe', 'pb', 'eps', 'us', 'o', 'e', 'y',
+  // Spanish
+  'el', 'la', 'los', 'las', 'de', 'del', 'con', 'en', 'por', 'para', 'un', 'una', 'que', 'es', 'mi',
+  'al', 'sin', 'dia', 'dias', 'muestra', 'ver', 'precio', 'precios',
+])
+
+for (const words of Object.values(KEYWORD_MAP)) {
+  for (const w of words) STOP_WORDS.add(w)
+}
+
+const KEYWORD_PATTERNS: Record<string, RegExp[]> = Object.fromEntries(
+  Object.entries(KEYWORD_MAP).map(([key, words]) => [
+    key,
+    words.map(w => new RegExp(`(?<![a-z0-9])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)),
+  ]),
+)
+
+const MAX_TICKERS = 4
+const DEFAULT_TICKER = 'AAPL'
+const DEFAULT_STEPS = 30
+const DEFAULT_WINDOW = 252
+
+/** Accent-free text: "valoración" becomes "valoracion" so keywords and tokens match. */
+function normalizeText(q: string): string {
+  return q.normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
+function tokenize(text: string): string[] {
+  return text
+    .split(/[^A-Za-z0-9.-]+/)
+    .map(t => t.replace(/^[.-]+|[.-]+$/g, ''))
+    .filter(Boolean)
+}
+
+/** 1-5 letters with an optional -XXX or .XX suffix, or up to 12 letters before .SN. */
+function isTickerShape(t: string): boolean {
+  return /^[A-Za-z]{1,5}(?:-[A-Za-z]{1,5}|\.[A-Za-z]{1,2})?$/.test(t) || /^[A-Za-z]{1,12}\.SN$/i.test(t)
+}
+
+function isStop(t: string): boolean {
+  return STOP_WORDS.has(t.toLowerCase())
+}
+
+/**
+ * Tickers in the query, uppercase tokens first. When the query has no uppercase
+ * token, the first lowercase tokens that are not stop words or keywords are used.
+ */
+function findTickers(query: string): { tickers: string[]; explicit: boolean } {
+  const tokens = tokenize(normalizeText(query))
+  const upper = tokens.filter(t => t === t.toUpperCase() && /[A-Z]/.test(t) && isTickerShape(t) && !isStop(t))
+  if (upper.length > 0) {
+    return { tickers: unique(upper.map(t => t.toUpperCase())).slice(0, MAX_TICKERS), explicit: true }
+  }
+  const lower = tokens.filter(t => t === t.toLowerCase() && isTickerShape(t) && !isStop(t))
+  return { tickers: unique(lower.map(t => t.toUpperCase())).slice(0, MAX_TICKERS), explicit: false }
+}
+
+function unique(xs: string[]): string[] {
+  return [...new Set(xs)]
+}
+
+function detectFlags(query: string): Set<string> {
+  const text = normalizeText(query).toLowerCase()
   const flags = new Set<string>()
-  for (const [key, words] of Object.entries(KEYWORD_MAP)) {
-    if (words.some(w => lowered.includes(w))) {
-      flags.add(key)
-    }
+  for (const [key, patterns] of Object.entries(KEYWORD_PATTERNS)) {
+    if (patterns.some(re => re.test(text))) flags.add(key)
   }
-  if (lowered.includes('compar') || lowered.includes('compare') || lowered.includes('varios') || lowered.includes('multi')) {
-    flags.add('compare')
-  }
-  return { ticker: extractTicker(q), flags }
+  return flags
 }
 
 function isValidQuery(q: string): boolean {
   const s = q.trim()
   if (s.length < 2) return false
-  const { flags } = detectIntent(s)
-  if (flags.size > 0) return true
-  if (extractTicker(s) !== 'AAPL' || /[A-Z]{2,5}/.test(s)) return true
-  return false
+  if (detectFlags(s).size > 0) return true
+  return findTickers(s).explicit
 }
 
 function nodePos(cat: string, col: number): { x: number; y: number } {
@@ -62,140 +121,154 @@ function nodePos(cat: string, col: number): { x: number; y: number } {
   return { x: 80 + col * 280, y: yOffsets[cat] ?? 150 }
 }
 
-const CATEGORY: Record<string, string> = {
-  symbolInput: 'input', priceFeed: 'input', currencyInput: 'input', scalarInput: 'input',
-  smaIndicator: 'process', emaIndicator: 'process', rsiIndicator: 'process',
-  kalmanFilter: 'process', forecastNode: 'process', mathOp: 'process', portfolioInput: 'process',
-  fairValue: 'process', zScore: 'process',
-  chartOutput: 'output', candleChart: 'output', display: 'output', priceDisplay: 'output', alertOutput: 'output',
+function categoryOf(type: string): string {
+  return nodeDefinitions.find(d => d.type === type)?.category ?? 'input'
 }
 
-function mkNode(type: string, data: Record<string, any>, counter: Record<string, number>): NodeSpec {
-  const cat = CATEGORY[type] || 'input'
-  const n: NodeSpec = { type, data, position: nodePos(cat, counter[cat]) }
-  counter[cat]++
-  return n
+const CHART_INPUTS = ['overlayA', 'overlayB', 'overlayC'] as const
+
+function stepsFrom(query: string): number {
+  const m = normalizeText(query).toLowerCase().match(/(\d+)\s*(?:dias?|days?|steps?|d)\b/)
+  if (!m) return DEFAULT_STEPS
+  return Math.min(252, Math.max(5, parseInt(m[1], 10)))
 }
 
 function parseKeywords(query: string): PipelinePlan {
-  const { ticker, flags } = detectIntent(query)
+  const flags = detectFlags(query)
+  const text = normalizeText(query)
+  const { tickers } = findTickers(query)
+  const symbols = tickers.length ? tickers : [DEFAULT_TICKER]
+  const compare = flags.has('compare') && symbols.length >= 2
 
   const nodes: NodeSpec[] = []
   const edges: EdgeSpec[] = []
-  const cnt: Record<string, number> = { input: 0, process: 0, output: 0 }
+  const counter: Record<string, number> = { input: 0, process: 0, output: 0 }
 
-  nodes.push(mkNode('symbolInput', { symbol: ticker }, cnt))
-  nodes.push(mkNode('priceFeed', {}, cnt))
-  edges.push({ source: 0, target: 1, sourceHandle: 'symbol', targetHandle: 'symbol' })
-
-  let nextIdx = 2
-  const outputIdx: number[] = []
-
-  const useCandles = flags.has('candles')
-  const useSma = flags.has('sma')
-  const useEma = flags.has('ema')
-  const useRsi = flags.has('rsi')
-  const useKalman = flags.has('kalman')
-  const useForecast = flags.has('forecast')
-  const useChart = flags.has('chart') || (!useCandles && !useForecast)
-
-  if (useCandles) {
-    const candleIdx = nextIdx++
-    nodes.push(mkNode('candleChart', {}, cnt))
-    edges.push({ source: 1, target: candleIdx, sourceHandle: 'candleSeries', targetHandle: 'candleSeries' })
-    outputIdx.push(candleIdx)
+  const add = (type: string, data: Record<string, any> = {}): number => {
+    const cat = categoryOf(type)
+    nodes.push({ type, data, position: nodePos(cat, counter[cat]++) })
+    return nodes.length - 1
   }
 
-  if (useSma) {
-    const smaIdx = nextIdx++
-    const num = parseInt(query.match(/sma\s*(\d+)/i)?.[1] || query.match(/\b(\d+)\b/)?.[1] || '20')
-    nodes.push(mkNode('smaIndicator', { period: num }, cnt))
-    edges.push({ source: 1, target: smaIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
-    if (outputIdx.length > 0) {
-      edges.push({ source: smaIdx, target: outputIdx[0], sourceHandle: 'smaSeries', targetHandle: 'overlayA' })
-    }
+  // Adds an edge unless the target input already has one.
+  const link = (source: number, sourceHandle: string, target: number, targetHandle: string): boolean => {
+    if (edges.some(e => e.target === target && e.targetHandle === targetHandle)) return false
+    edges.push({ source, target, sourceHandle, targetHandle })
+    return true
   }
 
-  if (useEma) {
-    const emaIdx = nextIdx++
-    const num = parseInt(query.match(/ema\s*(\d+)/i)?.[1] || '20')
-    nodes.push(mkNode('emaIndicator', { period: num }, cnt))
-    edges.push({ source: 1, target: emaIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
-    if (outputIdx.length > 0) {
-      edges.push({ source: emaIdx, target: outputIdx[0], sourceHandle: 'emaSeries', targetHandle: 'overlayB' })
-    }
+  // ---- Sources: one Symbol -> Price Feed chain, or one per ticker when comparing ----
+  let symbolIdx: number
+  let feedIdx: number
+  const rebased: number[] = []
+  if (compare) {
+    symbols.forEach((symbol, i) => {
+      const s = add('symbolInput', { symbol })
+      const f = add('priceFeed')
+      link(s, 'symbol', f, 'symbol')
+      const r = add('normalize', { window: '1Y' })
+      link(f, 'priceSeries', r, 'priceSeries')
+      rebased.push(r)
+      if (i === 0) { symbolIdx = s; feedIdx = f }
+    })
+  } else {
+    symbolIdx = add('symbolInput', { symbol: symbols[0] })
+    feedIdx = add('priceFeed')
+    link(symbolIdx, 'symbol', feedIdx, 'symbol')
   }
 
-  if (useRsi) {
-    const rsiIdx = nextIdx++
-    const num = parseInt(query.match(/rsi\s*(\d+)/i)?.[1] || '14')
-    nodes.push(mkNode('rsiIndicator', { period: num }, cnt))
-    edges.push({ source: 1, target: rsiIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
+  // ---- Candle chart and the indicators that feed it ----
+  const useCandles = !compare && flags.has('candles')
+  const candleIdx = useCandles ? add('candleChart') : -1
+  if (useCandles) link(feedIdx, 'candleSeries', candleIdx, 'candleSeries')
+
+  if (flags.has('sma')) {
+    const period = parseInt(text.match(/sma\s*(\d+)/i)?.[1] || text.match(/\b(\d+)\b/)?.[1] || '20', 10)
+    const sma = add('smaIndicator', { period })
+    link(feedIdx, 'priceSeries', sma, 'priceSeries')
+    if (useCandles) link(sma, 'smaSeries', candleIdx, 'overlayA')
   }
 
-  if (useKalman) {
-    const kalmanIdx = nextIdx++
-    nodes.push(mkNode('kalmanFilter', {}, cnt))
-    edges.push({ source: 1, target: kalmanIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
-    if (outputIdx.length > 0) {
-      edges.push({ source: kalmanIdx, target: outputIdx[0], sourceHandle: 'smoothed', targetHandle: 'overlayC' })
-    }
+  if (flags.has('ema')) {
+    const period = parseInt(text.match(/ema\s*(\d+)/i)?.[1] || '20', 10)
+    const ema = add('emaIndicator', { period })
+    link(feedIdx, 'priceSeries', ema, 'priceSeries')
+    if (useCandles) link(ema, 'emaSeries', candleIdx, 'overlayB')
   }
 
-  if (useForecast) {
-    const fcIdx = nextIdx++
-    const steps = parseInt(query.match(/(\d+)\s*(dia|day|step)/i)?.[1] || '15')
-    nodes.push(mkNode('forecastNode', { steps }, cnt))
-    edges.push({ source: 1, target: fcIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
-    if (outputIdx.length > 0) {
-      edges.push({ source: fcIdx, target: outputIdx[0], sourceHandle: 'forecastSeries', targetHandle: 'overlayA' })
-      edges.push({ source: fcIdx, target: outputIdx[0], sourceHandle: 'confidenceSeries', targetHandle: 'overlayB' })
-    }
+  // Indicators whose series may be drawn on the chart, with the handle they plot from.
+  const plotted: Array<{ node: number; handle: string; secondaryPanel: boolean }> = []
+
+  if (flags.has('rsi')) {
+    const period = parseInt(text.match(/rsi\s*(\d+)/i)?.[1] || '14', 10)
+    const rsi = add('rsiIndicator', { period })
+    link(feedIdx, 'priceSeries', rsi, 'priceSeries')
+    plotted.push({ node: rsi, handle: 'rsiSeries', secondaryPanel: true })
   }
 
-  if (useChart && !useCandles && !useForecast) {
-    const chartIdx = nextIdx++
-    nodes.push(mkNode('chartOutput', {}, cnt))
-    edges.push({ source: 1, target: chartIdx, sourceHandle: 'priceSeries', targetHandle: 'mainSeries' })
+  if (flags.has('kalman')) {
+    const k = add('kalmanFilter')
+    link(feedIdx, 'priceSeries', k, 'priceSeries')
+    plotted.push({ node: k, handle: 'smoothed', secondaryPanel: false })
   }
 
-  if (!useCandles && !useChart && !useSma && !useEma && !useRsi && !useKalman && !useForecast) {
-    const chartIdx = nextIdx++
-    nodes.push(mkNode('chartOutput', {}, cnt))
-    edges.push({ source: 1, target: chartIdx, sourceHandle: 'priceSeries', targetHandle: 'mainSeries' })
-  }
-
-  // Value analysis nodes. Plot overlays go to the chart (or candle chart) when one exists.
-  const plotIdx = nodes.findIndex(n => n.type === 'chartOutput' || n.type === 'candleChart')
-  const freeOverlay = (target: number): string | undefined => {
-    const used = new Set(edges.filter(e => e.target === target).map(e => e.targetHandle))
-    return ['overlayA', 'overlayB', 'overlayC'].find(h => !used.has(h))
-  }
-
-  if (flags.has('fairValue')) {
-    const fvIdx = nodes.length
-    nodes.push(mkNode('fairValue', {}, cnt))
-    edges.push({ source: 1, target: fvIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
-    const gapDisplayIdx = nodes.length
-    nodes.push(mkNode('display', {}, cnt))
-    edges.push({ source: fvIdx, target: gapDisplayIdx, sourceHandle: 'gapPct', targetHandle: 'value' })
-    const overlay = plotIdx !== -1 ? freeOverlay(plotIdx) : undefined
-    if (overlay) {
-      edges.push({ source: fvIdx, target: plotIdx, sourceHandle: 'gapSeries', targetHandle: overlay })
-    }
+  if (flags.has('forecast')) {
+    const fc = add('forecastNode', { model: 'auto', steps: stepsFrom(query) })
+    link(feedIdx, 'priceSeries', fc, 'priceSeries')
+    plotted.push({ node: fc, handle: 'forecastSeries', secondaryPanel: false })
   }
 
   if (flags.has('zscore')) {
-    const zIdx = nodes.length
-    nodes.push(mkNode('zScore', { window: 252 }, cnt))
-    edges.push({ source: 1, target: zIdx, sourceHandle: 'priceSeries', targetHandle: 'priceSeries' })
-    const zDisplayIdx = nodes.length
-    nodes.push(mkNode('display', {}, cnt))
-    edges.push({ source: zIdx, target: zDisplayIdx, sourceHandle: 'zScore', targetHandle: 'value' })
-    const overlay = plotIdx !== -1 ? freeOverlay(plotIdx) : undefined
-    if (overlay) {
-      edges.push({ source: zIdx, target: plotIdx, sourceHandle: 'zSeries', targetHandle: overlay })
+    const z = add('zScore', { window: DEFAULT_WINDOW })
+    link(feedIdx, 'priceSeries', z, 'priceSeries')
+    plotted.push({ node: z, handle: 'zSeries', secondaryPanel: true })
+  }
+
+  if (flags.has('value')) {
+    const fv = add('fairValue')
+    link(symbolIdx, 'symbol', fv, 'symbol')
+    link(feedIdx, 'priceSeries', fv, 'priceSeries')
+    plotted.push({ node: fv, handle: 'fairValueSeries', secondaryPanel: false })
+    const d = add('display')
+    link(fv, 'upsidePct', d, 'value')
+  }
+
+  if (flags.has('fundamentals')) {
+    const f = add('fundamentals')
+    link(symbolIdx, 'symbol', f, 'symbol')
+    const d = add('display')
+    link(f, 'eps', d, 'value')
+  }
+
+  // ---- The plot: the candle chart, or a line chart (comparison and everything else) ----
+  let plot = candleIdx
+  if (!useCandles) {
+    plot = add('chartOutput')
+    if (compare) {
+      rebased.forEach((r, i) => link(r, 'normalized', plot, ['mainSeries', ...CHART_INPUTS][i]))
+    } else {
+      link(feedIdx, 'priceSeries', plot, 'mainSeries')
     }
+  }
+
+  // Overlays go to the first free chart input; secondary-panel series only go to a line chart.
+  const plotOverlay = (node: number, handle: string, secondaryPanel: boolean) => {
+    if (secondaryPanel && useCandles) return
+    const free = CHART_INPUTS.find(h => !edges.some(e => e.target === plot && e.targetHandle === h))
+    if (free) link(node, handle, plot, free)
+  }
+  for (const p of plotted) plotOverlay(p.node, p.handle, p.secondaryPanel)
+
+  // ---- Readouts: scalars shown on a Display node ----
+  if (flags.has('forecast')) {
+    const fc = nodes.findIndex(n => n.type === 'forecastNode')
+    const d = add('display')
+    link(fc, 'expectedReturn', d, 'value')
+  }
+  if (flags.has('zscore')) {
+    const z = nodes.findIndex(n => n.type === 'zScore')
+    const d = add('display')
+    link(z, 'zScore', d, 'value')
   }
 
   return { nodes, edges }
@@ -207,12 +280,12 @@ export function useAIPipeline() {
       return { error: 'Describe qué pipeline quieres construir. Ej: "grafico AAPL con SMA20" o "velas BTC"' }
     }
     try {
-      const res = await $fetch('/api/generate-pipeline', {
+      const res: any = await $fetch('/api/generate-pipeline', {
         method: 'POST',
         body: { query },
       })
-      if (res.error) return { error: res.error }
-      if (res.nodes && res.edges) return res as PipelinePlan
+      // Any server failure, or a plan that does not match the node definitions, falls back to the local generator.
+      if (res && !res.error && validatePlan(res).ok) return res as PipelinePlan
     } catch {}
     return parseKeywords(query)
   }
