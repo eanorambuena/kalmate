@@ -31,12 +31,14 @@ jobs:
       - run: pnpm test
 
       - name: Provision infrastructure (Pages, KV, D1) and render wrangler.toml
+        id: provision
         run: node scripts/provision.mjs
 
       - name: Apply D1 migrations
-        run: npx wrangler d1 migrations apply kalmate-tickers --remote
+        if: steps.provision.outputs.d1 == 'true'
+        run: ./node_modules/.bin/wrangler d1 migrations apply kalmate-tickers --remote
 
       - run: pnpm build
 
       - name: Deploy
-        run: npx wrangler pages deploy dist --project-name=kalmate --branch=main
+        run: ./node_modules/.bin/wrangler pages deploy dist --project-name=kalmate --branch=main

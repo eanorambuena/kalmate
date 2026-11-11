@@ -45,3 +45,27 @@ describe('provisioning helpers', () => {
     assert.doesNotMatch(src, /'create', [A-Z0-9_]+, '--json'/)
   })
 })
+
+// @ts-ignore plain ESM helper
+import { isPermissionError } from '../scripts/provision-lib.mjs'
+
+describe('provisioning degrades when the token lacks a permission', () => {
+  it('recognises Cloudflare authentication errors', () => {
+    assert.equal(isPermissionError('A request to the Cloudflare API failed.\n  Authentication error [code: 10000]'), true)
+    assert.equal(isPermissionError('Unknown argument: json'), false)
+  })
+
+  it('omits a binding whose resource could not be provisioned', () => {
+    const out = renderWranglerToml('name = "kalmate"\n', { kvId: null, d1Name: 'kalmate-tickers', d1Id: 'd' })
+    assert.doesNotMatch(out, /kv_namespaces/)
+    assert.match(out, /d1_databases/)
+    const none = renderWranglerToml('name = "kalmate"\n', { kvId: null, d1Name: 'kalmate-tickers', d1Id: null })
+    assert.doesNotMatch(none, /kv_namespaces|d1_databases/)
+  })
+
+  it('the workflow only applies migrations when D1 was provisioned', () => {
+    const wf = readFileSync('.github/workflows/deploy.yml', 'utf8')
+    assert.match(wf, /id: provision/)
+    assert.match(wf, /if: steps\.provision\.outputs\.d1 == 'true'/)
+  })
+})

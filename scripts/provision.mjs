@@ -4,7 +4,8 @@
 // Requires CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the environment.
 import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
-import { extractJson, findKvNamespace, findD1Database, hasPagesProject, renderWranglerToml } from './provision-lib.mjs'
+import { appendFileSync } from 'node:fs'
+import { extractJson, findKvNamespace, findD1Database, hasPagesProject, isPermissionError, renderWranglerToml } from './provision-lib.mjs'
 
 const PROJECT = 'kalmate'
 const KV_TITLE = 'KALMATE_KV'
@@ -59,8 +60,21 @@ function ensurePagesProject() {
   console.log(`pages project created: ${PROJECT}`)
 }
 
+// A token without access to a product must not block the deploy: the app runs
+// without that binding (in-memory fallbacks), and the gap is reported loudly.
+function optional(label, permission, fn) {
+  try {
+    return fn()
+  } catch (err) {
+    if (!isPermissionError(String(err.message))) throw err
+    console.log(`::warning title=${label} not provisioned::The Cloudflare API token has no ${permission} permission. Deploying without the ${label} binding.`)
+    return null
+  }
+}
+
 ensurePagesProject()
-const kvId = ensureKv()
-const d1Id = ensureD1()
+const kvId = optional('KV', 'Workers KV Storage: Edit', ensureKv)
+const d1Id = optional('D1', 'D1: Edit', ensureD1)
 writeFileSync('wrangler.toml', renderWranglerToml(readFileSync('wrangler.toml', 'utf8'), { kvId, d1Name: D1_NAME, d1Id }))
-console.log('wrangler.toml rendered with provisioned ids')
+console.log(`wrangler.toml rendered (kv: ${kvId ? 'bound' : 'missing'}, d1: ${d1Id ? 'bound' : 'missing'})`)
+if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `kv=${Boolean(kvId)}\nd1=${Boolean(d1Id)}\n`)

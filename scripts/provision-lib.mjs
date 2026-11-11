@@ -36,21 +36,17 @@ export function hasPagesProject(list, name) {
   return list.some(p => (p['Project Name'] ?? p.name) === name)
 }
 
+/** True when wrangler failed because the API token lacks access to that product. */
+export function isPermissionError(message) {
+  return /Authentication error|code: 10000|not authorized|permission/i.test(message)
+}
+
 /** Appends resolved bindings to the committed wrangler.toml, replacing any previous rendered block. */
 export function renderWranglerToml(base, { kvId, d1Name, d1Id }) {
   const marker = '# --- provisioned bindings (generated in CI, do not commit) ---'
   const clean = base.split(marker)[0].trimEnd()
-  return `${clean}
-
-${marker}
-[[kv_namespaces]]
-binding = "KALMATE_KV"
-id = "${kvId}"
-
-[[d1_databases]]
-binding = "TICKERS_DB"
-database_name = "${d1Name}"
-database_id = "${d1Id}"
-migrations_dir = "migrations"
-`
+  const blocks = []
+  if (kvId) blocks.push(`[[kv_namespaces]]\nbinding = "KALMATE_KV"\nid = "${kvId}"`)
+  if (d1Id) blocks.push(`[[d1_databases]]\nbinding = "TICKERS_DB"\ndatabase_name = "${d1Name}"\ndatabase_id = "${d1Id}"\nmigrations_dir = "migrations"`)
+  return `${clean}\n\n${marker}\n${blocks.join('\n\n')}${blocks.length ? '\n' : ''}`
 }
