@@ -18,6 +18,12 @@ export interface CompanyFacts {
   facts?: { 'us-gaap'?: Record<string, { units?: Record<string, XbrlFact[]> }> }
 }
 
+/** A stock split: `ratio` new shares per old share, effective on `date` (YYYY-MM-DD). */
+export interface StockSplit {
+  date: string
+  ratio: number
+}
+
 export interface FundamentalsSnapshot {
   asOf: string
   eps: number | null
@@ -28,6 +34,7 @@ export interface FundamentalsSnapshot {
   operatingCashFlow: number | null
   capex: number | null
   freeCashFlow: number | null
+  freeCashFlowPerShare: number | null
   /** Fraction of the values above that were available (0..1). */
   coverage: number
 }
@@ -63,54 +70,96 @@ function knownBy(facts: XbrlFact[], asOf: string): XbrlFact[] {
   return facts.filter(f => f.filed <= asOf && Number.isFinite(f.val))
 }
 
+/** Latest end first; on equal ends, the latest filing first. */
+function newestFirst(a: XbrlFact, b: XbrlFact): number {
+  return (a.end < b.end ? 1 : a.end > b.end ? -1 : 0) || (a.filed < b.filed ? 1 : a.filed > b.filed ? -1 : 0)
+}
+
+/** Product of the ratios of every split effective after the filing date. */
+function splitFactor(filed: string, splits: StockSplit[]): number {
+  let f = 1
+  for (const s of splits) if (s.date > filed) f *= s.ratio
+  return f
+}
+
 /**
- * Trailing-twelve-month sum for a flow item (income, cash flow). Uses the most
- * recent four quarters when they are available, otherwise the latest annual
- * 10-K value. Balance-sheet items are point values and use `latestPoint`.
+ * Restates per-share and share-count facts in today's share basis. Yahoo
+ * prices are adjusted for splits, SEC facts are not. Other facts are returned
+ * unchanged.
+ */
+function adjustForSplits(facts: XbrlFact[], kind: 'perShare' | 'count', splits: StockSplit[]): XbrlFact[] {
+  if (!splits.length) return facts
+  return facts.map(f => {
+    const factor = splitFactor(f.filed, splits)
+    if (factor === 1) return f
+    return { ...f, val: kind === 'perShare' ? f.val / factor : f.val * factor }
+  })
+}
+
+/**
+ * Trailing-twelve-month value for a flow item (income, cash flow, EPS):
+ *   TTM = latest annual + current year-to-date - same year-to-date one year earlier.
+ * Without any annual fact it sums four quarters when they are available.
+ * Balance-sheet items are point values and use `latestPoint`.
  */
 function ttmFlow(known: XbrlFact[]): number | null {
-  const quarters = known
-    .filter(f => f.start && f.form.startsWith('10-Q') && days(f.start, f.end) >= 80 && days(f.start, f.end) <= 100)
-    .sort((a, b) => (a.end < b.end ? 1 : -1))
+  const annuals = known
+    .filter(f => f.start && days(f.start, f.end) >= 340 && days(f.start, f.end) <= 380)
+    .sort(newestFirst)
+  const annual = annuals[0]
+  if (!annual) return quarterSum(known)
+
+  const ytds = known
+    .filter(f => f.start && days(f.start, f.end) < 340 && f.end > annual.end
+      && days(annual.end, f.start) >= 0 && days(annual.end, f.start) <= 10)
+    .sort(newestFirst)
+  const current = ytds[0]
+  if (!current) return annual.val
+
+  const duration = days(current.start!, current.end)
+  const priorEnd = Date.parse(current.end) - 365 * DAY
+  const prior = known
+    .filter(f => f.start && Math.abs(days(f.start, f.end) - duration) <= 10
+      && Math.abs(Date.parse(f.end) - priorEnd) <= 15 * DAY)
+    .sort(newestFirst)[0]
+  if (!prior) return annual.val
+  return annual.val + current.val - prior.val
+}
+
+/** Sum of the four latest quarters (duration 80-100 days), if they span at most 300 days. */
+function quarterSum(known: XbrlFact[]): number | null {
+  const quarters = known.filter(f => f.start && days(f.start, f.end) >= 80 && days(f.start, f.end) <= 100)
   // Keep one value per quarter end (latest filing wins, i.e. the restated one known at asOf).
   const byEnd = new Map<string, XbrlFact>()
   for (const q of quarters) {
     const prev = byEnd.get(q.end)
     if (!prev || q.filed > prev.filed) byEnd.set(q.end, q)
   }
-  const last4 = [...byEnd.values()].sort((a, b) => (a.end < b.end ? 1 : -1)).slice(0, 4)
+  const last4 = [...byEnd.values()].sort(newestFirst).slice(0, 4)
   if (last4.length === 4 && days(last4[3].end, last4[0].end) <= 300) {
     return last4.reduce((s, q) => s + q.val, 0)
   }
-  const annual = known
-    .filter(f => f.form.startsWith('10-K') && f.start && days(f.start, f.end) >= 340)
-    .sort((a, b) => (a.end < b.end ? 1 : -1) || (a.filed < b.filed ? 1 : -1))
-  return annual[0]?.val ?? null
+  return null
 }
 
 function latestPoint(known: XbrlFact[]): number | null {
-  const sorted = [...known].sort((a, b) => (a.end < b.end ? 1 : -1) || (a.filed < b.filed ? 1 : -1))
-  return sorted[0]?.val ?? null
-}
-
-function latestPerShare(known: XbrlFact[]): number | null {
-  // Per-share values: prefer the latest 10-K/10-Q annual or quarterly point.
-  const sorted = [...known].sort((a, b) => (a.end < b.end ? 1 : -1) || (a.filed < b.filed ? 1 : -1))
+  const sorted = [...known].sort(newestFirst)
   return sorted[0]?.val ?? null
 }
 
 /** Builds what was publicly known about a company at `asOf` (YYYY-MM-DD). */
-export function snapshotAt(cf: CompanyFacts, asOf: string): FundamentalsSnapshot {
+export function snapshotAt(cf: CompanyFacts, asOf: string, splits: StockSplit[] = []): FundamentalsSnapshot {
   const netIncome = ttmFlow(knownBy(factsFor(cf, CONCEPTS.netIncome), asOf))
-  const eps = ttmEps(knownBy(factsFor(cf, CONCEPTS.eps), asOf))
+  const eps = ttmFlow(adjustForSplits(knownBy(factsFor(cf, CONCEPTS.eps), asOf), 'perShare', splits))
   const equity = latestPoint(knownBy(factsFor(cf, CONCEPTS.equity), asOf))
-  const shares = latestPoint(knownBy(factsFor(cf, CONCEPTS.shares), asOf))
+  const shares = latestPoint(adjustForSplits(knownBy(factsFor(cf, CONCEPTS.shares), asOf), 'count', splits))
   const ocf = ttmFlow(knownBy(factsFor(cf, CONCEPTS.operatingCashFlow), asOf))
   const capexRaw = ttmFlow(knownBy(factsFor(cf, CONCEPTS.capex), asOf))
   // Capex is reported as a positive payment in XBRL; subtract its magnitude.
   const capex = capexRaw === null ? null : Math.abs(capexRaw)
   const fcf = ocf !== null && capex !== null ? ocf - capex : null
   const bvps = equity !== null && shares && shares > 0 ? equity / shares : null
+  const fcfps = fcf !== null && shares && shares > 0 ? fcf / shares : null
   const values = [eps, netIncome, equity, shares, ocf, capex, fcf]
   return {
     asOf,
@@ -122,22 +171,30 @@ export function snapshotAt(cf: CompanyFacts, asOf: string): FundamentalsSnapshot
     operatingCashFlow: ocf,
     capex,
     freeCashFlow: fcf,
+    freeCashFlowPerShare: fcfps,
     coverage: values.filter(v => v !== null).length / values.length,
   }
 }
 
-/** EPS does not add across quarters reliably, so it uses the latest TTM-style annual value. */
-function ttmEps(known: XbrlFact[]): number | null {
-  const annual = known
-    .filter(f => f.form.startsWith('10-K') && f.start && days(f.start, f.end) >= 340)
-    .sort((a, b) => (a.end < b.end ? 1 : -1) || (a.filed < b.filed ? 1 : -1))
-  if (annual[0]) return annual[0].val
-  return latestPerShare(known)
+/** Snapshot at each date in `dates`, for a backtest over filing history. */
+export function snapshotSeries(cf: CompanyFacts, dates: string[], splits: StockSplit[] = []): FundamentalsSnapshot[] {
+  return dates.map(d => snapshotAt(cf, d, splits))
 }
 
-/** Snapshot at each date in `dates`, for a backtest over filing history. */
-export function snapshotSeries(cf: CompanyFacts, dates: string[]): FundamentalsSnapshot[] {
-  return dates.map(d => snapshotAt(cf, d))
+const QUARTER_END_MD = ['12-31', '09-30', '06-30', '03-31'] as const
+
+/** The last `count` calendar quarter-ends strictly before `today` (YYYY-MM-DD), oldest first. */
+export function quarterEnds(count: number, today: string): string[] {
+  const out: string[] = []
+  let year = Number(today.slice(0, 4))
+  while (out.length < count && year > 1900) {
+    for (const md of QUARTER_END_MD) {
+      const d = `${year}-${md}`
+      if (d < today && out.length < count) out.push(d)
+    }
+    year--
+  }
+  return out.reverse()
 }
 
 // Concepts the snapshot uses. Keeping only these makes a company's facts small

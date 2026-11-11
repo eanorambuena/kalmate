@@ -1,7 +1,7 @@
 // Data services. Routes ask for market data and get the same shape whether it
 // came from a cache or from the upstream API.
 import * as yahoo from '../yahoo.ts'
-import { snapshotAt, reduceCompanyFacts, type CompanyFacts, type FundamentalsSnapshot } from '../fundamentals.ts'
+import { snapshotAt, reduceCompanyFacts, quarterEnds, type CompanyFacts, type FundamentalsSnapshot, type StockSplit } from '../fundamentals.ts'
 import { SEC_CIKS } from '../secCiks.ts'
 import { getStoredTicker, saveTicker, type D1Like } from '../tickerStore.ts'
 import { d1Store, memoryStore, type Store } from './store.ts'
@@ -30,6 +30,7 @@ export interface Upstream {
   quotes: typeof yahoo.getQuotes
   search: typeof yahoo.searchTickers
   news: typeof yahoo.getNews
+  splits: typeof yahoo.getSplits
   fetch: typeof fetch
 }
 
@@ -40,6 +41,11 @@ export interface Services {
   news(symbol?: string): Promise<any>
   screener(params: { q?: string, minPrice?: number, maxPrice?: number, sortBy?: string, sortDir?: string }): Promise<any[]>
   fundamentals(symbol: string, asOf: string): Promise<FundamentalsSnapshot & { symbol: string }>
+  fundamentalsHistory(symbol: string): Promise<{
+    symbol: string
+    current: FundamentalsSnapshot
+    points: { asOf: string; eps: number | null; bookValuePerShare: number | null; freeCashFlowPerShare: number | null }[]
+  }>
 }
 
 const defaultUpstream: Upstream = {
@@ -48,6 +54,7 @@ const defaultUpstream: Upstream = {
   quotes: yahoo.getQuotes,
   search: yahoo.searchTickers,
   news: yahoo.getNews,
+  splits: yahoo.getSplits,
   fetch: (...args) => globalThis.fetch(...args),
 }
 
@@ -56,6 +63,15 @@ export function createServices(opts: { db?: D1Like | null, upstream?: Partial<Up
   const durable: Store = db ? d1Store(db) : sharedMemory
   const up: Upstream = { ...defaultUpstream, ...opts.upstream }
   const storeFor = (ttlMs: number): Store => (ttlMs < SHORT_TTL_MS ? sharedMemory : durable)
+
+  /** Splits are optional: when they cannot be loaded, values are left unadjusted. */
+  async function splitsFor(ticker: string): Promise<StockSplit[]> {
+    try {
+      return await cached(durable, `yahoo:splits:${ticker}`, { source: 'yahoo', ttlMs: WEEK_MS }, () => up.splits(ticker))
+    } catch {
+      return []
+    }
+  }
 
   async function cikFor(ticker: string): Promise<string | null> {
     const known = SEC_CIKS[ticker]
@@ -69,6 +85,21 @@ export function createServices(opts: { db?: D1Like | null, upstream?: Partial<Up
       return out
     })
     return map[ticker] ?? null
+  }
+
+  /** Resolves the ticker to its SEC CIK and loads its reduced company facts (cached for a week). */
+  async function loadFacts(symbol: string): Promise<{ ticker: string, facts: CompanyFacts }> {
+    const ticker = symbol.toUpperCase()
+    const stored = await getStoredTicker(db, ticker)
+    const cik = stored?.cik ?? await cikFor(ticker)
+    if (!cik) throw new DataError(404, `No SEC filer for ${ticker} (US-listed companies only)`)
+    if (!stored) await saveTicker(db, { symbol: ticker, cik, source: SEC_CIKS[ticker] ? 'sec-map' : 'sec-tickers' })
+    const facts = await cached(durable, `sec:facts:${cik}`, { source: 'sec', ttlMs: WEEK_MS }, async () => {
+      const res = await up.fetch(`https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`, { headers: SEC_HEADERS })
+      if (!res.ok) throw new DataError(502, `SEC facts HTTP ${res.status}`)
+      return reduceCompanyFacts(await res.json() as CompanyFacts)
+    })
+    return { ticker, facts }
   }
 
   const self: Services = {
@@ -116,17 +147,20 @@ export function createServices(opts: { db?: D1Like | null, upstream?: Partial<Up
     },
 
     async fundamentals(symbol, asOf) {
-      const ticker = symbol.toUpperCase()
-      const stored = await getStoredTicker(db, ticker)
-      const cik = stored?.cik ?? await cikFor(ticker)
-      if (!cik) throw new DataError(404, `No SEC filer for ${ticker} (US-listed companies only)`)
-      if (!stored) await saveTicker(db, { symbol: ticker, cik, source: SEC_CIKS[ticker] ? 'sec-map' : 'sec-tickers' })
-      const facts = await cached(durable, `sec:facts:${cik}`, { source: 'sec', ttlMs: WEEK_MS }, async () => {
-        const res = await up.fetch(`https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`, { headers: SEC_HEADERS })
-        if (!res.ok) throw new DataError(502, `SEC facts HTTP ${res.status}`)
-        return reduceCompanyFacts(await res.json() as CompanyFacts)
+      const { ticker, facts } = await loadFacts(symbol)
+      const splits = await splitsFor(ticker)
+      return { symbol: ticker, ...snapshotAt(facts, asOf, splits) }
+    },
+
+    async fundamentalsHistory(symbol) {
+      const { ticker, facts } = await loadFacts(symbol)
+      const splits = await splitsFor(ticker)
+      const today = new Date().toISOString().slice(0, 10)
+      const points = quarterEnds(24, today).map(asOf => {
+        const s = snapshotAt(facts, asOf, splits)
+        return { asOf, eps: s.eps, bookValuePerShare: s.bookValuePerShare, freeCashFlowPerShare: s.freeCashFlowPerShare }
       })
-      return { symbol: ticker, ...snapshotAt(facts, asOf) }
+      return { symbol: ticker, current: snapshotAt(facts, today, splits), points }
     },
   }
   return self

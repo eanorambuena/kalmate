@@ -12,23 +12,36 @@ export function calcSMA(data: number[], period: number): number[] {
   return result
 }
 
+/** Wilder's RSI. Indices before `period` are 50 (not enough data). */
 export function calcRSI(data: number[], period: number): number[] {
-  const result: number[] = []
-  const gains: number[] = []
-  const losses: number[] = []
-  for (let i = 1; i < data.length; i++) {
-    const diff = data[i] - data[i - 1]
-    gains.push(diff > 0 ? diff : 0)
-    losses.push(diff < 0 ? -diff : 0)
+  const n = data.length
+  const result: number[] = new Array(n).fill(50)
+  if (period < 1 || n <= period) return result
+
+  const rsiOf = (avgGain: number, avgLoss: number): number => {
+    if (avgGain === 0 && avgLoss === 0) return 50
+    if (avgLoss === 0) return 100
+    return 100 - 100 / (1 + avgGain / avgLoss)
   }
-  for (let i = 0; i < data.length; i++) {
-    if (i < period) { result.push(50); continue }
-    const avgGain = gains.slice(i - period, i).reduce((a, b) => a + b, 0) / period
-    const avgLoss = losses.slice(i - period, i).reduce((a, b) => a + b, 0) / period
-    if (avgGain === 0 && avgLoss === 0) { result.push(50); continue }
-    if (avgLoss === 0) { result.push(100); continue }
-    const rs = avgGain / avgLoss
-    result.push(100 - 100 / (1 + rs))
+
+  let sumGain = 0
+  let sumLoss = 0
+  for (let k = 1; k <= period; k++) {
+    const diff = data[k] - data[k - 1]
+    if (diff > 0) sumGain += diff
+    else sumLoss -= diff
+  }
+  let avgGain = sumGain / period
+  let avgLoss = sumLoss / period
+  result[period] = rsiOf(avgGain, avgLoss)
+
+  for (let i = period + 1; i < n; i++) {
+    const diff = data[i] - data[i - 1]
+    const gain = diff > 0 ? diff : 0
+    const loss = diff < 0 ? -diff : 0
+    avgGain = (avgGain * (period - 1) + gain) / period
+    avgLoss = (avgLoss * (period - 1) + loss) / period
+    result[i] = rsiOf(avgGain, avgLoss)
   }
   return result
 }

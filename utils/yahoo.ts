@@ -98,3 +98,17 @@ export async function getNews(symbol?: string) {
   const data = await apiFetch(`${BASE}/v1/finance/search?q=${encodeURIComponent(query)}`)
   return data.news?.slice(0, 10) ?? []
 }
+
+/** Stock splits for a symbol, oldest first. `ratio` is new shares per old share. */
+export async function getSplits(symbol: string): Promise<{ date: string; ratio: number }[]> {
+  const now = Math.floor(Date.now() / 1000)
+  const data = await apiFetch(`${BASE}/v8/finance/chart/${encodeURIComponent(symbol)}?period1=0&period2=${now}&interval=3mo&events=split`)
+  const splits: Record<string, { date: number; numerator: number; denominator: number }> = data.chart?.result?.[0]?.events?.splits ?? {}
+  const out: { date: string; ratio: number }[] = []
+  for (const s of Object.values(splits)) {
+    const ratio = s.numerator / s.denominator
+    if (!(ratio > 0) || !Number.isFinite(ratio) || !Number.isFinite(s.date)) continue
+    out.push({ date: new Date(s.date * 1000).toISOString().slice(0, 10), ratio })
+  }
+  return out.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+}

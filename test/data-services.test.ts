@@ -8,6 +8,8 @@ const facts = { facts: { 'us-gaap': { NetIncomeLoss: { units: { USD: [
   { start: '2024-01-01', end: '2024-12-31', val: 40, form: '10-K', filed: '2025-02-01' },
 ] } } } } }
 
+const noSplits = async () => []
+
 function fakeFetch(log: string[], body: unknown = facts, ok = true) {
   return (async (url: string) => {
     log.push(url)
@@ -18,7 +20,7 @@ function fakeFetch(log: string[], body: unknown = facts, ok = true) {
 describe('data services', () => {
   it('returns fundamentals for a mapped ticker without needing the tickers file', async () => {
     const log: string[] = []
-    const svc = createServices({ upstream: { fetch: fakeFetch(log) } })
+    const svc = createServices({ upstream: { fetch: fakeFetch(log), splits: noSplits } })
     const out = await svc.fundamentals('duol', '2025-03-01')
     assert.equal(out.symbol, 'DUOL')
     assert.equal(out.netIncome, 40)
@@ -27,7 +29,7 @@ describe('data services', () => {
 
   it('answers the second request from cache without calling upstream', async () => {
     const log: string[] = []
-    const svc = createServices({ upstream: { fetch: fakeFetch(log) } })
+    const svc = createServices({ upstream: { fetch: fakeFetch(log), splits: noSplits } })
     await svc.fundamentals('AAPL', '2025-03-01')
     await svc.fundamentals('AAPL', '2025-06-01')
     assert.equal(log.filter(u => u.includes('companyfacts')).length, 1)
@@ -83,5 +85,50 @@ describe('services for quotes, search, news and screener', () => {
     await svc.search('apple')
     await svc.search('apple')
     assert.equal(calls, 1)
+  })
+})
+
+// EPS annual facts for a split test; body is shaped like SEC companyfacts.
+const epsFacts = (val: number, filed = '2020-02-01') => ({ facts: { 'us-gaap': { EarningsPerShareDiluted: { units: { 'USD/shares': [
+  { start: '2019-01-01', end: '2019-12-31', val, form: '10-K', filed },
+] } } } } })
+
+describe('fundamentals history', () => {
+  it('returns the current snapshot and 24 quarter-end points from one facts download', async () => {
+    const log: string[] = []
+    const svc = createServices({ upstream: { fetch: fakeFetch(log, epsFacts(10, '2024-02-01')), splits: noSplits } })
+    const out = await svc.fundamentalsHistory('MSFT')
+    assert.equal(out.current.eps, 10)
+    assert.equal(out.points.length, 24)
+    assert.equal(out.points[0].eps, null)
+    assert.equal(out.points[23].eps, 10)
+    assert.ok('bookValuePerShare' in out.points[0] && 'freeCashFlowPerShare' in out.points[0])
+    assert.equal(log.filter(u => u.includes('companyfacts')).length, 1)
+  })
+
+  it('a failing splits upstream does not break fundamentals', async () => {
+    const svc = createServices({ upstream: { fetch: fakeFetch([], epsFacts(10)), splits: (async () => { throw new Error('down') }) as any } })
+    const out = await svc.fundamentals('NVDA', '2025-03-01')
+    assert.equal(out.eps, 10)
+  })
+
+  it('passes loaded splits to the snapshot and caches them for a week', async () => {
+    let splitCalls = 0
+    const svc = createServices({ upstream: {
+      fetch: fakeFetch([], epsFacts(8)),
+      splits: (async () => { splitCalls++; return [{ date: '2020-08-31', ratio: 4 }] }) as any,
+    } })
+    const out = await svc.fundamentals('AMZN', '2021-01-01')
+    assert.equal(out.eps, 2)
+    await svc.fundamentals('AMZN', '2021-01-01')
+    assert.equal(splitCalls, 1)
+  })
+
+  it('does not refetch facts when history is requested after a snapshot', async () => {
+    const log: string[] = []
+    const svc = createServices({ upstream: { fetch: fakeFetch(log, epsFacts(10)), splits: noSplits } })
+    await svc.fundamentals('META', '2025-03-01')
+    await svc.fundamentalsHistory('META')
+    assert.equal(log.filter(u => u.includes('companyfacts')).length, 1)
   })
 })
