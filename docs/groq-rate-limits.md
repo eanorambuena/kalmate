@@ -54,7 +54,15 @@ prompt is the cheapest way to raise that.
 - A single request larger than the token limit is still allowed when the window
   is empty, so a misconfigured limit cannot lock the feature out.
 
-## Limitation
+## Limitations
+
+There is no per-client quota. The budget is shared, so one client can use up the
+budget for everyone, and on the free tier the daily token limit allows only a
+few dozen generations in total. That is Groq's limit, not one this code adds:
+without the budget the same traffic would reach Groq's 429s sooner. When the
+budget is spent the app falls back to the local keyword parser. A per-client
+limiter in front of this one would stop a single caller from using all of it.
+
 
 The budget lives in memory in each Cloudflare isolate. Several isolates each
 keep their own count, so under heavy traffic they can together exceed Groq's

@@ -2,7 +2,7 @@
 // globals so it can be tested with a fake fetch.
 
 import { buildNodeCatalog, validatePlan, type Plan } from './plan.ts'
-import { estimateTokens, parseResetSeconds, type Budget } from './groqBudget.ts'
+import { estimateTokens, parseResetSeconds, MAX_BLOCK_SEC, type Budget } from './groqBudget.ts'
 
 export const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions'
 
@@ -127,7 +127,7 @@ export async function generateWithLLM(query: string, opts: LLMOptions): Promise<
       const body = await res.text().catch(() => '')
       if (isModelGone(res.status, body)) continue
       if (res.status === 429) {
-        const retryAfterSec = Math.ceil(parseResetSeconds(res.headers?.get('retry-after')) ?? DEFAULT_RETRY_AFTER_SEC)
+        const retryAfterSec = Math.min(MAX_BLOCK_SEC, Math.max(1, Math.ceil(parseResetSeconds(res.headers?.get('retry-after')) ?? DEFAULT_RETRY_AFTER_SEC)))
         opts.budget?.penalize(model, retryAfterSec)
         return { error: 'Rate limited. Try again in a moment.', retryAfterSec }
       }

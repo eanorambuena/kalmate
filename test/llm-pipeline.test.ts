@@ -160,6 +160,15 @@ describe('local budget in front of Groq', () => {
     assert.deepEqual(await generateWithLLM('AAPL chart', { apiKey: 'k', fetch: f.fn, models: [M], budget }), PLAN)
   })
 
+  it('keeps a hostile or absurd Retry-After finite and bounded', async () => {
+    for (const [value, expected] of [['86400', 900], ['9'.repeat(400), 10], ['-5', 10]] as const) {
+      const f = fakeFetch([{ status: 429, body: {}, headers: { 'retry-after': value } }])
+      const out: any = await generateWithLLM('AAPL chart', { apiKey: 'k', fetch: f.fn, models: [M], budget: createBudget({ now: clock().now }) })
+      assert.equal(out.retryAfterSec, expected, value.slice(0, 12))
+      assert.ok(Number.isFinite(out.retryAfterSec))
+    }
+  })
+
   it('uses the remaining-tokens headers to avoid the next 429', async () => {
     const budget = createBudget({ override: { rpm: 100, tpm: 1_000_000, rpd: 1000, tpd: 10_000_000 }, margin: 1, now: clock().now })
     const f = fakeFetch([okWithUsage(500, { 'x-ratelimit-remaining-tokens': '10', 'x-ratelimit-reset-tokens': '30s' })])

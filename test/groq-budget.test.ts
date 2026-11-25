@@ -34,6 +34,7 @@ describe('estimateTokens and parseResetSeconds', () => {
     assert.equal(parseResetSeconds('12'), 12)
     assert.equal(parseResetSeconds(null), undefined)
     assert.equal(parseResetSeconds('soon'), undefined)
+    assert.equal(parseResetSeconds('9'.repeat(400)), undefined, 'not a finite number of seconds')
   })
 })
 
@@ -136,6 +137,36 @@ describe('createBudget', () => {
     assert.equal(denied.retryAfterSec, 8)
     c.advance(8_000)
     assert.equal(b.reserve(MODEL, 3000).ok, true)
+  })
+
+  it('counts what it sends against the remaining tokens Groq reported', () => {
+    const c = clock()
+    const b = createBudget({ override: { rpm: 100, tpm: 1_000_000, rpd: 1000, tpd: 10_000_000 }, margin: 1, now: c.now })
+    b.observe(MODEL, new Headers({ 'x-ratelimit-remaining-tokens': '5000', 'x-ratelimit-reset-tokens': '30s' }))
+    assert.equal(b.reserve(MODEL, 2000).ok, true)
+    assert.equal(b.reserve(MODEL, 2000).ok, true)
+    const third: any = b.reserve(MODEL, 2000)
+    assert.equal(third.ok, false, '6000 tokens must not go out against 5000 remaining')
+    assert.equal(third.retryAfterSec, 30)
+  })
+
+  it('gives the tokens back when a request is rejected or uses less than estimated', () => {
+    const b = createBudget({ override: { rpm: 100, tpm: 1_000_000, rpd: 1000, tpd: 10_000_000 }, margin: 1, now: clock().now })
+    b.observe(MODEL, new Headers({ 'x-ratelimit-remaining-tokens': '5000', 'x-ratelimit-reset-tokens': '30s' }))
+    const a: any = b.reserve(MODEL, 4000)
+    b.settle(a, 0)
+    assert.equal(b.reserve(MODEL, 4000).ok, true)
+  })
+
+  it('ignores or clamps header values that make no sense', () => {
+    const b = createBudget({ now: clock().now })
+    b.observe(MODEL, new Headers({ 'x-ratelimit-remaining-tokens': '-50', 'x-ratelimit-reset-tokens': '99999999s' }))
+    const denied: any = b.reserve(MODEL, 10)
+    assert.equal(denied.ok, false, 'negative remaining counts as none')
+    assert.ok(denied.retryAfterSec <= 120, 'the token window is a minute, so a huge reset is clamped')
+    const c = createBudget({ now: clock().now })
+    c.observe(MODEL, new Headers({ 'x-ratelimit-remaining-tokens': 'lots', 'x-ratelimit-reset-tokens': '8s' }))
+    assert.equal(c.reserve(MODEL, 3000).ok, true)
   })
 
   it('honours overrides, for accounts on a higher tier', () => {

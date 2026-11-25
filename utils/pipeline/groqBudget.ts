@@ -36,7 +36,10 @@ export const FALLBACK_LIMITS: ModelLimits = { rpm: 30, tpm: 6000, rpd: 1000, tpd
 export const SAFETY_MARGIN = 0.85
 
 /** Longest we will block a model on the strength of a single Retry-After value. */
-const MAX_BLOCK_SEC = 900
+export const MAX_BLOCK_SEC = 900
+
+/** Groq's token window is one minute, so a longer reset from a header is not credible. */
+const MAX_RESET_SEC = 120
 
 const MINUTE_MS = 60_000
 const DAY_MS = 86_400_000
@@ -51,11 +54,12 @@ export function parseResetSeconds(value: string | null | undefined): number | un
   if (value == null) return undefined
   const v = value.trim()
   const ms = v.match(/^(\d+(?:\.\d+)?)ms$/)
-  if (ms) return Number(ms[1]) / 1000
-  if (/^\d+(?:\.\d+)?$/.test(v)) return Number(v)
+  const finite = (n: number) => (Number.isFinite(n) ? n : undefined)
+  if (ms) return finite(Number(ms[1]) / 1000)
+  if (/^\d+(?:\.\d+)?$/.test(v)) return finite(Number(v))
   const parts = v.match(/^(?:(\d+(?:\.\d+)?)m)?(?:(\d+(?:\.\d+)?)s)?$/)
   if (!parts || (parts[1] === undefined && parts[2] === undefined)) return undefined
-  return Number(parts[1] ?? 0) * 60 + Number(parts[2] ?? 0)
+  return finite(Number(parts[1] ?? 0) * 60 + Number(parts[2] ?? 0))
 }
 
 /** GROQ_RPM, GROQ_TPM, GROQ_RPD and GROQ_TPD override the limits, for accounts on a higher tier. */
@@ -151,12 +155,17 @@ export function createBudget(options: BudgetOptions = {}) {
 
       const ticket: Ticket = { ok: true, model, t, tokens }
       s.events.push(ticket)
+      // What we send now is no longer available to the next request in Groq's window.
+      if (s.known && t < s.known.until) s.known.remaining -= tokens
       return ticket
     },
 
     /** Replaces the estimate with the tokens Groq actually reported. */
     settle(ticket: Reservation, actualTokens: number) {
-      if (ticket.ok && Number.isFinite(actualTokens) && actualTokens >= 0) ticket.tokens = actualTokens
+      if (!ticket.ok || !Number.isFinite(actualTokens) || actualTokens < 0) return
+      const known = states.get(ticket.model)?.known
+      if (known && now() < known.until) known.remaining += ticket.tokens - actualTokens
+      ticket.tokens = actualTokens
     },
 
     /** Stops using a model for a while, after Groq answered 429 for it. */
@@ -170,7 +179,7 @@ export function createBudget(options: BudgetOptions = {}) {
       const remaining = Number(headers.get('x-ratelimit-remaining-tokens'))
       const resetSec = parseResetSeconds(headers.get('x-ratelimit-reset-tokens'))
       if (headers.get('x-ratelimit-remaining-tokens') === null || !Number.isFinite(remaining) || resetSec === undefined) return
-      stateOf(model).known = { remaining, until: now() + resetSec * 1000 }
+      stateOf(model).known = { remaining: Math.max(0, remaining), until: now() + Math.min(resetSec, MAX_RESET_SEC) * 1000 }
     },
   }
 }
