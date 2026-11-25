@@ -1,5 +1,7 @@
 # Kalmate — Claude Code Development Guide
 
+The project rules in `AGENTS.md` (Conventional Commits, pnpm only, English UI text, descriptive labels instead of buy/sell advice) apply to everything below.
+
 This guide explains how to work with Claude Code in this project, with emphasis on the automatic code review system.
 
 ## Quick Start
@@ -107,14 +109,13 @@ type(scope): description
 
 Optional longer explanation
 
-Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01WLvn9Uasuk1kunbeoSpQtZ
+Claude-Session: <the current session URL>
 ```
 
-**Types**: `feat`, `fix`, `refactor`, `ci`, `chore`, `docs`, `test`, `perf`
+**Types**: `feat`, `fix`, `refactor`, `ci`, `chore`, `docs`, `test`, `perf`, `a11y`, `seo`, `i18n`
 
 **Examples**:
-- `feat(pipeline): add recommendation node with scoring`
+- `feat(pipeline): add z-score node`
 - `fix(security): encode symbol parameter in Yahoo API call`
 - `refactor(market): replace N+1 quote polls with shared poller`
 

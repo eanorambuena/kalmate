@@ -52,7 +52,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import Modal from '../Modal.vue'
-import { TrendingUp, BarChart3, Sparkles, Link2, Mail, Zap } from '@lucide/vue'
+import { TrendingUp, BarChart3, Sparkles, Activity, Zap } from '@lucide/vue'
 
 const props = defineProps<{ modelValue?: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
@@ -64,9 +64,8 @@ watch(open, (v) => { emit('update:modelValue', v) })
 const proFeatures = [
   { icon: TrendingUp, label: 'RSI — Relative market strength' },
   { icon: BarChart3, label: 'SMA — Customizable moving averages' },
-  { icon: Sparkles, label: 'Forecast — Kalman prediction' },
-  { icon: Link2, label: 'Multi Symbol — Batch analysis' },
-  { icon: Mail, label: 'Telegram & Email alerts' },
+  { icon: Activity, label: 'EMA — Exponential moving averages' },
+  { icon: Sparkles, label: 'Forecast — Price projection with a 95% band and an accuracy check' },
   { icon: Zap, label: 'Unlimited pipeline runs' },
 ]
 
