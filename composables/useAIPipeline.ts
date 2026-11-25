@@ -277,7 +277,7 @@ function parseKeywords(query: string): PipelinePlan {
 export function useAIPipeline() {
   async function generate(query: string): Promise<PipelinePlan | { error: string }> {
     if (!isValidQuery(query)) {
-      return { error: 'Describe qué pipeline quieres construir. Ej: "grafico AAPL con SMA20" o "velas BTC"' }
+      return { error: 'Describe the pipeline you want to build, e.g. "AAPL chart with SMA 20" or "BTC-USD candles"' }
     }
     try {
       const res: any = await $fetch('/api/generate-pipeline', {
