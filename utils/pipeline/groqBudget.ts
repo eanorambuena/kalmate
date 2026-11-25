@@ -76,13 +76,17 @@ export function limitsFromEnv(env: Record<string, string | undefined>): Partial<
   return out
 }
 
-interface Ticket { ok: true; model: string; t: number; tokens: number }
+/** `epoch` identifies which Groq-reported count (if any) was in force when this was reserved. */
+interface Ticket { ok: true; model: string; t: number; tokens: number; epoch: number }
 export type Reservation = Ticket | { ok: false; reason: 'rpm' | 'tpm' | 'rpd' | 'tpd' | 'blocked'; retryAfterSec: number }
 
 interface ModelState {
   events: Array<{ t: number; tokens: number }>
   blockedUntil: number
-  known?: { remaining: number; until: number }
+  known?: { remaining: number; until: number; epoch: number }
+  knownEpochs: number
+  /** Reserved, not yet settled: Groq's headers may not include these tokens yet. */
+  inflight: Set<Ticket>
 }
 
 export interface BudgetOptions {
@@ -102,7 +106,7 @@ export function createBudget(options: BudgetOptions = {}) {
 
   const stateOf = (model: string): ModelState => {
     let s = states.get(model)
-    if (!s) states.set(model, (s = { events: [], blockedUntil: 0 }))
+    if (!s) states.set(model, (s = { events: [], blockedUntil: 0, knownEpochs: 0, inflight: new Set() }))
     return s
   }
 
@@ -153,18 +157,27 @@ export function createBudget(options: BudgetOptions = {}) {
         return { ok: false, reason: 'tpm', retryAfterSec: Math.max(1, Math.ceil((s.known.until - t) / 1000)) }
       }
 
-      const ticket: Ticket = { ok: true, model, t, tokens }
+      const live = s.known && t < s.known.until ? s.known : undefined
+      const ticket: Ticket = { ok: true, model, t, tokens, epoch: live?.epoch ?? 0 }
       s.events.push(ticket)
+      s.inflight.add(ticket)
       // What we send now is no longer available to the next request in Groq's window.
-      if (s.known && t < s.known.until) s.known.remaining -= tokens
+      if (live) live.remaining -= tokens
       return ticket
     },
 
     /** Replaces the estimate with the tokens Groq actually reported. */
     settle(ticket: Reservation, actualTokens: number) {
-      if (!ticket.ok || !Number.isFinite(actualTokens) || actualTokens < 0) return
-      const known = states.get(ticket.model)?.known
-      if (known && now() < known.until) known.remaining += ticket.tokens - actualTokens
+      if (!ticket.ok) return
+      const s = states.get(ticket.model)
+      s?.inflight.delete(ticket)
+      if (!Number.isFinite(actualTokens) || actualTokens < 0) return
+      // Only give tokens back to the count they were taken from. A newer count from
+      // Groq's headers already reflects what this request really used.
+      const known = s?.known
+      if (known && ticket.epoch !== 0 && known.epoch === ticket.epoch && now() < known.until) {
+        known.remaining += ticket.tokens - actualTokens
+      }
       ticket.tokens = actualTokens
     },
 
@@ -174,12 +187,27 @@ export function createBudget(options: BudgetOptions = {}) {
       stateOf(model).blockedUntil = now() + sec * 1000
     },
 
-    /** Learns how many tokens Groq says are left in the current minute. */
-    observe(model: string, headers: { get(name: string): string | null }) {
+    /**
+     * Learns how many tokens Groq says are left in the current minute. Pass the
+     * ticket of the response the headers came with: other requests still in
+     * flight are subtracted, since Groq may not have counted them yet.
+     */
+    observe(model: string, headers: { get(name: string): string | null }, ticket?: Reservation) {
       const remaining = Number(headers.get('x-ratelimit-remaining-tokens'))
       const resetSec = parseResetSeconds(headers.get('x-ratelimit-reset-tokens'))
       if (headers.get('x-ratelimit-remaining-tokens') === null || !Number.isFinite(remaining) || resetSec === undefined) return
-      stateOf(model).known = { remaining: Math.max(0, remaining), until: now() + Math.min(resetSec, MAX_RESET_SEC) * 1000 }
+      const s = stateOf(model)
+      const t = now()
+      let pending = 0
+      for (const other of s.inflight) {
+        if (t - other.t > MAX_RESET_SEC * 1000) s.inflight.delete(other) // its response never came back
+        else if (other !== ticket) pending += other.tokens
+      }
+      s.known = {
+        remaining: Math.max(0, remaining - pending),
+        until: t + Math.min(resetSec, MAX_RESET_SEC) * 1000,
+        epoch: ++s.knownEpochs,
+      }
     },
   }
 }

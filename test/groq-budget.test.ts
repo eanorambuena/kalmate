@@ -169,6 +169,60 @@ describe('createBudget', () => {
     assert.equal(c.reserve(MODEL, 3000).ok, true)
   })
 
+  describe('reservations and Groq\'s own count', () => {
+    const big = { rpm: 100, tpm: 1_000_000, rpd: 1000, tpd: 10_000_000 }
+    const H = (n: number) => new Headers({ 'x-ratelimit-remaining-tokens': String(n), 'x-ratelimit-reset-tokens': '30s' })
+    const mk = (c = clock()) => ({ c, b: createBudget({ override: big, margin: 1, now: c.now }) })
+
+    it('does not credit the estimate back twice once Groq has reported its own count', () => {
+      const { b } = mk()
+      b.observe(MODEL, H(5000))
+      const t: any = b.reserve(MODEL, 2000)
+      b.observe(MODEL, H(4000), t) // Groq's figure already excludes the 1000 tokens actually used
+      b.settle(t, 1000)
+      assert.equal(b.reserve(MODEL, 4500).ok, false, 'Groq has 4000 left')
+      assert.equal(b.reserve(MODEL, 4000).ok, true)
+    })
+
+    it('does not credit a rejected request on top of the count Groq sent with the 429', () => {
+      const { b } = mk()
+      b.observe(MODEL, H(5000))
+      const t: any = b.reserve(MODEL, 2000)
+      b.observe(MODEL, H(5000), t)
+      b.settle(t, 0)
+      assert.equal(b.reserve(MODEL, 6000).ok, false)
+    })
+
+    it('keeps requests that are still in flight subtracted when another response arrives', () => {
+      const { b } = mk()
+      b.observe(MODEL, H(5000))
+      const a: any = b.reserve(MODEL, 2000)
+      b.reserve(MODEL, 2000) // still in flight
+      b.observe(MODEL, H(3500), a)
+      b.settle(a, 1500)
+      assert.equal(b.reserve(MODEL, 3000).ok, false, '3500 reported minus 2000 still on its way')
+      assert.equal(b.reserve(MODEL, 1500).ok, true)
+    })
+
+    it('does not let a request that never finished weigh on the budget forever', () => {
+      const { b, c } = mk()
+      b.reserve(MODEL, 2000) // the connection dropped, settle() never ran
+      c.advance(180_000)
+      const t: any = b.reserve(MODEL, 100)
+      b.observe(MODEL, H(4000), t)
+      assert.equal(b.reserve(MODEL, 3800).ok, true)
+    })
+
+    it('releases an in-flight request even when the reported usage is unusable', () => {
+      const { b } = mk()
+      const a: any = b.reserve(MODEL, 2000)
+      b.settle(a, NaN)
+      const t: any = b.reserve(MODEL, 100)
+      b.observe(MODEL, H(4000), t)
+      assert.equal(b.reserve(MODEL, 3800).ok, true)
+    })
+  })
+
   it('honours overrides, for accounts on a higher tier', () => {
     const b = createBudget({ override: { rpm: 1000, tpm: 250_000, rpd: 14_400, tpd: 5_000_000 }, margin: 1, now: clock().now })
     for (let i = 0; i < 100; i++) assert.equal(b.reserve(MODEL, 2000).ok, true)
