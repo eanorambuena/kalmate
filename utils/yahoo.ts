@@ -1,4 +1,4 @@
-import type { QuoteData, HistoryData, FundamentalsData } from './types'
+import type { QuoteData, HistoryData } from './types'
 
 const BASE = 'https://query2.finance.yahoo.com'
 
@@ -93,57 +93,22 @@ export async function searchTickers(query: string) {
   return data.quotes?.slice(0, 10) ?? []
 }
 
-function num(v: any): number | undefined {
-  if (typeof v === 'number') return v
-  if (v && typeof v.raw === 'number') return v.raw
-  return undefined
-}
-
-// Basic income-statement-level fundamentals (Yahoo's unofficial quoteSummary
-// endpoint) — the "estado de resultado" numbers, plus a handful of ratios
-// needed for a rough gut-check, not a full analyst-grade fundamentals dataset.
-export async function getFundamentals(symbol: string): Promise<FundamentalsData> {
-  const modules = 'incomeStatementHistory,financialData,defaultKeyStatistics,summaryDetail'
-  const data = await apiFetch(`${BASE}/v10/finance/quoteSummary/${symbol}?modules=${modules}`)
-  const result = data.quoteSummary?.result?.[0]
-  if (!result) throw new Error(`No fundamentals data for ${symbol}`)
-
-  const incomeHistory = result.incomeStatementHistory?.incomeStatementHistory ?? []
-  const latest = incomeHistory[0]
-  const financialData = result.financialData ?? {}
-  const keyStats = result.defaultKeyStatistics ?? {}
-  const summary = result.summaryDetail ?? {}
-
-  return {
-    symbol,
-    totalRevenue: num(latest?.totalRevenue) ?? num(financialData.totalRevenue),
-    netIncome: num(latest?.netIncome),
-    grossProfit: num(latest?.grossProfit),
-    operatingIncome: num(latest?.operatingIncome),
-    netMargin: num(financialData.profitMargins),
-    grossMargin: num(financialData.grossMargins),
-    operatingMargin: num(financialData.operatingMargins),
-    revenueGrowth: num(financialData.revenueGrowth),
-    earningsGrowth: num(financialData.earningsGrowth),
-    returnOnEquity: num(financialData.returnOnEquity),
-    debtToEquity: num(financialData.debtToEquity),
-    currentRatio: num(financialData.currentRatio),
-    trailingPE: num(summary.trailingPE),
-    forwardPE: num(summary.forwardPE),
-    priceToBook: num(keyStats.priceToBook),
-    marketCap: num(summary.marketCap),
-    incomeStatementHistory: incomeHistory.map((y: any) => ({
-      endDate: y.endDate?.fmt,
-      totalRevenue: num(y.totalRevenue),
-      netIncome: num(y.netIncome),
-      grossProfit: num(y.grossProfit),
-      operatingIncome: num(y.operatingIncome),
-    })),
-  }
-}
-
 export async function getNews(symbol?: string) {
   const query = symbol || 'stock market'
   const data = await apiFetch(`${BASE}/v1/finance/search?q=${encodeURIComponent(query)}`)
   return data.news?.slice(0, 10) ?? []
+}
+
+/** Stock splits for a symbol, oldest first. `ratio` is new shares per old share. */
+export async function getSplits(symbol: string): Promise<{ date: string; ratio: number }[]> {
+  const now = Math.floor(Date.now() / 1000)
+  const data = await apiFetch(`${BASE}/v8/finance/chart/${encodeURIComponent(symbol)}?period1=0&period2=${now}&interval=3mo&events=split`)
+  const splits: Record<string, { date: number; numerator: number; denominator: number }> = data.chart?.result?.[0]?.events?.splits ?? {}
+  const out: { date: string; ratio: number }[] = []
+  for (const s of Object.values(splits)) {
+    const ratio = s.numerator / s.denominator
+    if (!(ratio > 0) || !Number.isFinite(ratio) || !Number.isFinite(s.date)) continue
+    out.push({ date: new Date(s.date * 1000).toISOString().slice(0, 10), ratio })
+  }
+  return out.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
 }

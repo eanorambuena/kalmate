@@ -91,15 +91,15 @@
           <li><strong class="text-white">Stock Screener</strong> — Search and filter thousands of instruments with 5 presets: Top Gainers, Top Losers, Tech Stocks, Dividend, Growth</li>
           <li><strong class="text-white">Portfolio Tracker</strong> — Add positions, track real-time P&amp;L, stored locally in your browser</li>
           <li><strong class="text-white">Price Alerts</strong> — Set above/below thresholds with 30-second polling and browser notifications</li>
-          <li><strong class="text-white">Data Pipeline</strong> — Visual node editor with 18 node types across 3 categories: input, process, output</li>
+          <li><strong class="text-white">Data Pipeline</strong> — Visual node editor with 21 node types across 3 categories: input, process, output</li>
         </ul>
 
         <h2 class="text-2xl font-bold text-white mt-8 mb-4">The Pipeline: Kalmate's Superpower</h2>
         <p>
-          Unlike traditional terminals, Kalmate includes a <NuxtLink to="/terminal/pipeline" class="text-[#00c853] hover:underline">visual data pipeline</NuxtLink> where you connect nodes to build custom analysis. Drag a <strong class="text-white">Symbol Input</strong>, connect it to a <strong class="text-white">Kalman Filter</strong>, then to a <strong class="text-white">Chart Output</strong> — no coding required.
+          Unlike traditional terminals, Kalmate includes a <NuxtLink to="/terminal/pipeline" class="text-[#00c853] hover:underline">visual data pipeline</NuxtLink> where you connect nodes to build custom analysis. Drag a <strong class="text-white">Symbol</strong>, connect it to a <strong class="text-white">Price Feed</strong>, then to a <strong class="text-white">Kalman Filter</strong> and a <strong class="text-white">Chart</strong>, no coding required.
         </p>
         <p>
-          11 node types are free, and 7 pro nodes (SMA, EMA, RSI, Multi-Symbol Input, Forecast, Telegram, Email) add advanced capabilities.
+          17 node types are free, and 4 pro nodes (SMA, EMA, RSI, Forecast) add advanced indicators and forecasting.
         </p>
 
         <div class="bg-[#111] border border-[#222] rounded-xl p-6 my-6">
@@ -107,15 +107,15 @@
           <div class="grid grid-cols-3 gap-3 text-xs">
             <div class="bg-[#0a0a0a] rounded-lg p-3 border border-[#2979ff]/30">
               <div class="text-[#2979ff] font-bold">Input</div>
-              <div class="text-[#ccc] mt-1">Symbol, Price Feed, Scalar, Currency, Multi-Symbol</div>
+              <div class="text-[#ccc] mt-1">Symbol, Price Feed, Number, Currency</div>
             </div>
             <div class="bg-[#0a0a0a] rounded-lg p-3 border border-[#00c853]/30">
               <div class="text-[#00c853] font-bold">Process</div>
-              <div class="text-[#ccc] mt-1">Kalman Filter, SMA, EMA, RSI, Math, Forecast, Portfolio</div>
+              <div class="text-[#ccc] mt-1">Kalman Filter, Z-Score, Rebase to 100, Fundamentals, Fair Value, Compare to Reference, SMA, EMA, RSI, Forecast, Math, Weighted Average, News</div>
             </div>
             <div class="bg-[#0a0a0a] rounded-lg p-3 border border-[#ff69b4]/30">
               <div class="text-[#ff69b4] font-bold">Output</div>
-              <div class="text-[#ccc] mt-1">Chart, Candle Chart, Price Display, Alert, Telegram, Email</div>
+              <div class="text-[#ccc] mt-1">Chart, Candle Chart, Display, Alert</div>
             </div>
           </div>
         </div>

@@ -1,165 +1,67 @@
-export interface KalmanParams {
-  phi: number
-  mu: number
-  sigmaChi: number
-  sigmaXi: number
-  sigmaObs: number
-  rho: number
+// Causal local-trend Kalman filter shared by the pipeline node and the stock page.
+
+const LTF_PRESET_Q: Record<'responsive' | 'balanced' | 'smooth', number> = {
+  responsive: 0.05,
+  balanced: 0.005,
+  smooth: 0.0005,
 }
 
-export interface KalmanResult {
-  smoothed: number[]
-  trend: number[]
-  cycle: number[]
-  predicted: number[]
-  confidence: number[]
-  logLikelihood: number
-}
-
-function matMul2x2(A: number[][], B: number[][]): number[][] {
-  return [
-    [A[0][0] * B[0][0] + A[0][1] * B[1][0], A[0][0] * B[0][1] + A[0][1] * B[1][1]],
-    [A[1][0] * B[0][0] + A[1][1] * B[1][0], A[1][0] * B[0][1] + A[1][1] * B[1][1]],
-  ]
-}
-
-function matMulVec2x2(A: number[][], v: number[]): number[] {
-  return [
-    A[0][0] * v[0] + A[0][1] * v[1],
-    A[1][0] * v[0] + A[1][1] * v[1],
-  ]
-}
-
-function matTranspose2x2(A: number[][]): number[][] {
-  return [[A[0][0], A[1][0]], [A[0][1], A[1][1]]]
-}
-
-function matAdd2x2(A: number[][], B: number[][]): number[][] {
-  return [
-    [A[0][0] + B[0][0], A[0][1] + B[0][1]],
-    [A[1][0] + B[1][0], A[1][1] + B[1][1]],
-  ]
-}
-
-export function createDefaultParams(): KalmanParams {
-  return {
-    phi: 0.9,
-    mu: 0.0001,
-    sigmaChi: 0.02,
-    sigmaXi: 0.005,
-    sigmaObs: 0.01,
-    rho: -0.3,
-  }
-}
-
-export function runKalmanFilter(
+/**
+ * Causal Kalman filter for a local linear trend on ln(price).
+ * State [level, slope]; observation y = level + noise (R = 1);
+ * process noise Q = diag(q, q * 0.01).
+ */
+export function localTrendFilter(
   prices: number[],
-  params: KalmanParams,
-  predictSteps: number = 10,
-): KalmanResult {
+  smoothing: 'responsive' | 'balanced' | 'smooth' = 'balanced',
+): { smoothed: number[]; deviation: number[] } {
   const n = prices.length
-  const logPrices = prices.map(p => Math.log(p))
-  const dt = 1
-
-  const phi = params.phi
-  const mu = params.mu * dt
-  const sChi = params.sigmaChi * Math.sqrt(dt)
-  const sXi = params.sigmaXi * Math.sqrt(dt)
-  const sObs = params.sigmaObs
-  const rho = params.rho
-
-  const A: number[][] = [[phi, 0], [0, 1]]
-  const c: number[] = [0, mu]
-  const Q: number[][] = [
-    [sChi * sChi, rho * sChi * sXi],
-    [rho * sChi * sXi, sXi * sXi],
-  ]
-  const H: number[] = [1, 1]
-  const R = sObs * sObs
-
-  let x: number[] = [0, logPrices[0]]
-  let P: number[][] = [[1, 0], [0, 1]]
-
   const smoothed: number[] = []
-  const trend: number[] = []
-  const cycle: number[] = []
-  let logLik = 0
+  const deviation: number[] = []
+  if (n === 0) return { smoothed, deviation }
 
-  for (let i = 0; i < n; i++) {
-    const xPred = matMulVec2x2(A, x)
-    xPred[0] += c[0]
-    xPred[1] += c[1]
+  const q = LTF_PRESET_Q[smoothing] ?? LTF_PRESET_Q.balanced
+  const qLevel = q
+  const qSlope = q * 0.01
+  const R = 1
 
-    const AT = matTranspose2x2(A)
-    const APA = matMul2x2(matMul2x2(A, P), AT)
-    const PPred = matAdd2x2(APA, Q)
+  const y0 = Math.log(prices[0])
+  let level = y0
+  let slope = 0
+  // Covariance P = [[p00, p01], [p01, p11]]
+  let p00 = 1
+  let p01 = 0
+  let p11 = 0.01
 
-    const zPred = H[0] * xPred[0] + H[1] * xPred[1]
-    const innovation = logPrices[i] - zPred
-    const F = H[0] * (PPred[0][0] * H[0] + PPred[0][1] * H[1]) +
-              H[1] * (PPred[1][0] * H[0] + PPred[1][1] * H[1]) + R
+  smoothed.push(Math.exp(level))
+  deviation.push(prices[0] / smoothed[0] - 1)
 
-    const K0 = (PPred[0][0] * H[0] + PPred[0][1] * H[1]) / F
-    const K1 = (PPred[1][0] * H[0] + PPred[1][1] * H[1]) / F
+  for (let i = 1; i < n; i++) {
+    // Predict: x' = F x with F = [[1, 1], [0, 1]]; P' = F P F^T + Q
+    const predLevel = level + slope
+    const predSlope = slope
+    const q00 = p00 + 2 * p01 + p11 + qLevel
+    const q01 = p01 + p11
+    const q11 = p11 + qSlope
 
-    x[0] = xPred[0] + K0 * innovation
-    x[1] = xPred[1] + K1 * innovation
+    // Update with scalar observation y = level + v, H = [1, 0]
+    const y = Math.log(prices[i])
+    const S = q00 + R
+    const k0 = q00 / S
+    const k1 = q01 / S
+    const innovation = y - predLevel
 
-    P[0][0] = PPred[0][0] - K0 * (PPred[0][0] * H[0] + PPred[0][1] * H[1])
-    P[0][1] = PPred[0][1] - K0 * (PPred[1][0] * H[0] + PPred[1][1] * H[1])
-    P[1][0] = PPred[1][0] - K1 * (PPred[0][0] * H[0] + PPred[0][1] * H[1])
-    P[1][1] = PPred[1][1] - K1 * (PPred[1][0] * H[0] + PPred[1][1] * H[1])
+    level = predLevel + k0 * innovation
+    slope = predSlope + k1 * innovation
 
-    smoothed.push(Math.exp(x[0] + x[1]))
-    trend.push(Math.exp(x[1]))
-    cycle.push(x[0])
+    p00 = (1 - k0) * q00
+    p01 = q01 - k0 * q01
+    p11 = q11 - k1 * q01
 
-    logLik += -0.5 * (Math.log(2 * Math.PI) + Math.log(F) + (innovation * innovation) / F)
+    const s = Math.exp(level)
+    smoothed.push(s)
+    deviation.push(prices[i] / s - 1)
   }
 
-  const predicted: number[] = []
-  const confidence: number[] = []
-  let px = [...x]
-  let pP = [[P[0][0], P[0][1]], [P[1][0], P[1][1]]]
-
-  for (let i = 0; i < predictSteps; i++) {
-    const xp = matMulVec2x2(A, px)
-    xp[0] += c[0]
-    xp[1] += c[1]
-    px = xp
-
-    const AT = matTranspose2x2(A)
-    pP = matAdd2x2(matMul2x2(matMul2x2(A, pP), AT), Q)
-
-    const predPrice = Math.exp(px[0] + px[1])
-    const predVar = pP[0][0] + pP[1][1] + 2 * pP[0][1] + R
-    const ci = 1.96 * Math.sqrt(predVar)
-
-    predicted.push(predPrice)
-    confidence.push(predPrice * (Math.exp(ci) - 1))
-  }
-
-  return { smoothed, trend, cycle, predicted, confidence, logLikelihood: logLik }
-}
-
-export function calibrateMLE(prices: number[]): KalmanParams {
-  const n = prices.length
-  const logPrices = prices.map(p => Math.log(p))
-  const returns = logPrices.slice(1).map((v, i) => v - logPrices[i])
-  const meanRet = returns.reduce((a, b) => a + b, 0) / returns.length
-  const variance = returns.reduce((a, b) => a + (b - meanRet) ** 2, 0) / returns.length
-  const sigma = Math.sqrt(variance)
-  const autoCorrNum = returns.slice(0, -1).reduce((a, r, i) => a + r * returns[i + 1], 0)
-  const autoCorrDen = returns.slice(0, -1).reduce((a, r) => a + r * r, 0)
-  const autoCorr = autoCorrDen > 1e-12 ? autoCorrNum / autoCorrDen : 0.5
-  const baseSigma = Math.max(sigma, 1e-8)
-
-  return {
-    phi: Math.min(0.99, Math.max(0.01, autoCorr)),
-    mu: meanRet,
-    sigmaChi: baseSigma * 0.8,
-    sigmaXi: baseSigma * 0.3,
-    sigmaObs: baseSigma * 0.15,
-    rho: -0.3,
-  }
+  return { smoothed, deviation }
 }

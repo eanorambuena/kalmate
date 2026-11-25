@@ -12,8 +12,8 @@
 
       <div class="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0" ref="messagesRef">
         <div v-if="!conversation.length" class="text-[#666] text-xs text-center mt-12 leading-relaxed">
-          Describe el pipeline que quieres construir.<br>
-          Ej: <span class="text-[#888] font-mono">chart AAPL con SMA20</span>
+          Describe the pipeline you want to build.<br>
+          E.g. <span class="text-[#888] font-mono">chart AAPL with SMA20</span> or <span class="text-[#888] font-mono">is NVDA undervalued</span>
         </div>
         <div v-for="(msg, i) in conversation" :key="i" class="flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
           <div class="text-xs max-w-[85%] rounded-2xl px-3.5 py-2 leading-relaxed break-words" :class="msg.role === 'user' ? 'bg-[#00c853]/20 text-white' : 'bg-[#222] text-[#ccc]'">
@@ -38,7 +38,7 @@
           <input
             v-model="query"
             type="text"
-            placeholder="Describe tu pipeline..."
+            placeholder="e.g. compare AAPL vs MSFT, forecast BTC-USD 60 days"
             class="flex-1 bg-[#222] border border-[#444] rounded-xl px-3 py-2 text-white text-xs font-mono outline-none focus:border-[#00c853] transition-colors"
             @keydown.enter="doGenerate"
             :disabled="generating"

@@ -1,71 +1,87 @@
 <template>
-  <div class="bg-[#111] border border-[#333] rounded-xl p-3 min-w-[280px] cursor-grab active:cursor-grabbing relative">
-    <div class="flex items-center gap-2 mb-2">
-      <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: '#ff69b4' }" />
-      <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">OUTPUT</span>
+  <div class="group relative w-[360px] bg-[#111] border border-[#333] rounded-xl p-3 cursor-grab active:cursor-grabbing">
+    <button
+      type="button"
+      class="nodrag absolute top-1.5 right-1.5 z-10 w-4 h-4 flex items-center justify-center rounded text-[#888] hover:text-white hover:bg-[#333] text-xs leading-none opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+      title="Remove node"
+      aria-label="Remove node"
+      @click.stop="removeSelf"
+    >×</button>
+
+    <div class="flex items-center gap-2 mb-1.5 pr-5">
+      <div class="w-2 h-2 rounded-full flex-shrink-0" :style="{ backgroundColor: '#ff69b4' }" />
+      <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">Output</span>
     </div>
-    <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
-    <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
-    <div v-if="candles.length > 0" class="w-full h-[120px] relative">
-      <svg viewBox="0 0 260 118" class="w-full h-full" preserveAspectRatio="none">
-        <g v-for="(c, i) in visibleCandles.items" :key="i">
-          <line :x1="c.x" :y1="c.highY" :x2="c.x" :y2="c.lowY" :stroke="c.color" stroke-width="1" />
-          <rect :x="c.x - c.w / 2" :y="c.bodyTop" :width="c.w" :height="c.bodyH" :fill="c.color" />
-        </g>
-        <polyline v-for="(ov, idx) in overlays" :key="'ov-'+idx" :points="ov.points" fill="none" :stroke="ov.color" stroke-width="1.5" vector-effect="non-scaling-stroke" />
-        <line x1="5" y1="109" x2="255" y2="109" stroke="#333" stroke-width="1" />
-        <g v-for="(t, idx) in axisLabels" :key="'ax'+idx">
-          <line :x1="t.x" y1="109" :x2="t.x" y2="112" stroke="#444" stroke-width="1" />
-          <text :x="t.x" y="116" fill="#888" font-size="6.5" text-anchor="middle" font-family="monospace">{{ t.label }}</text>
-        </g>
-      </svg>
-      <div class="absolute top-2 right-2 flex flex-col gap-1 text-[9px]">
-        <span class="text-[#aaa] font-mono">{{ candles.length }} candles</span>
-        <span v-for="(ov, idx) in overlays" :key="idx" class="flex items-center gap-1" :style="{ color: ov.color }">
-          <span class="w-2 h-0.5 rounded" :style="{ backgroundColor: ov.color }" />
-          {{ ov.label }}
-        </span>
-      </div>
+    <p v-if="!editing" class="nodrag text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853] truncate" :title="displayLabel" @click="startEdit">{{ displayLabel }}</p>
+    <input
+      v-else
+      ref="inputEl"
+      v-model="editLabel"
+      class="nodrag bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none"
+      @blur="saveLabel"
+      @keydown.enter="saveLabel"
+      @keydown.escape="cancelLabel"
+    />
+
+    <PipelineChart
+      v-if="candles.length"
+      :lines="overlays"
+      :candles="candles"
+      height="230px"
+      initial-horizon="6M"
+      :aria-label="`${displayLabel}: candlestick chart`"
+    >
+      <template #actions>
+        <button
+          type="button"
+          class="nodrag px-1.5 py-0.5 rounded text-[10px] font-medium text-[#888] hover:text-white"
+          title="Open full screen"
+          aria-label="Expand chart"
+          @click="expanded = true"
+        >⤢</button>
+      </template>
+    </PipelineChart>
+    <div v-else class="h-[120px] flex items-center justify-center text-center text-[#aaa] text-[10px] px-2">
+      {{ result?.error || 'Connect a Price Feed and run the pipeline to see candles' }}
     </div>
-    <div v-else class="h-[120px] flex items-center justify-center text-[#aaa] text-[10px]">
-      {{ result?.error || 'Run pipeline to see candles' }}
-    </div>
-    <div v-if="lastPrice" class="mt-1 text-center">
-      <span class="text-white font-mono text-sm font-bold" :class="lastPrice >= openPrice ? 'text-[#00c853]' : 'text-[#ff1744]'">${{ lastPrice }}</span>
-    </div>
+
+    <ChartExpand :open="expanded" :title="displayLabel" :lines="overlays" :candles="candles" initial-horizon="6M" @close="expanded = false" />
 
     <div class="flex flex-col gap-1 mt-2">
       <div v-for="inp in inputs" :key="inp.id" class="flex items-center gap-1 relative pl-3">
-        <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ position:'absolute', left:'0px', top:'50%' }" />
-        <Handle type="source" :position="Position.Left" :id="'left:' + inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0 !opacity-0" :style="{ position:'absolute', left:'0px', top:'50%' }" />
-        <span class="text-[9px] text-[#aaa]">{{ inp.label }}</span>
+        <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ position: 'absolute', left: '0px', top: '50%' }" />
+        <Handle type="source" :position="Position.Left" :id="'left:' + inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0 !opacity-0" :style="{ position: 'absolute', left: '0px', top: '50%' }" />
+        <span v-if="OVERLAY_COLORS[inp.id]" class="w-2 h-2 rounded-sm" :style="{ backgroundColor: OVERLAY_COLORS[inp.id] }" />
+        <span class="text-[9px] text-[#aaa]">{{ overlays.find(o => o.key === inp.id)?.label ?? inp.label }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Handle, Position } from '@vue-flow/core'
+import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import { computed, ref, nextTick } from 'vue'
-import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
-import { toSeriesValues } from '~/utils/series'
+import { nodeDefinitions } from '../../../utils/pipeline/nodeDefinitions'
+import PipelineChart, { type ChartLine } from '../PipelineChart.vue'
+import ChartExpand from '../ChartExpand.vue'
 
 const props = defineProps({
   id: { type: String, required: true },
   data: { type: Object, default: () => ({}) },
 })
 
-const emit = defineEmits<{ 'update:data': [data: any] }>()
+const { removeNodes } = useVueFlow()
 
 const def = nodeDefinitions.find(n => n.type === 'candleChart')
 const inputs = def?.inputs ?? []
 
-const result = computed(() => props.data?.result)
+const result = computed<any>(() => props.data?.result)
 const displayLabel = computed(() => props.data?.label || 'Candle Chart')
 
 const editing = ref(false)
 const editLabel = ref('')
 const inputEl = ref<HTMLInputElement>()
+const expanded = ref(false)
 
 function startEdit() {
   editLabel.value = displayLabel.value
@@ -74,9 +90,7 @@ function startEdit() {
 }
 
 function saveLabel() {
-  if (editLabel.value.trim()) {
-    emit('update:data', { ...props.data, label: editLabel.value.trim() })
-  }
+  if (editLabel.value.trim()) props.data.label = editLabel.value.trim()
   editing.value = false
 }
 
@@ -84,105 +98,24 @@ function cancelLabel() {
   editing.value = false
 }
 
-const candles = computed(() => {
-  const candleSeries = result.value?.candleSeries ?? result.value?.ohlc
-  if (!Array.isArray(candleSeries) || candleSeries.length < 2) return []
-  return candleSeries.filter((h: any) => h.open > 0 && h.high > 0 && h.low > 0 && h.close > 0)
-})
-
-const svgW = 260, svgH = 110, pad = 5, maxCandles = 40
-
-const visibleCandles = computed(() => {
-  const all = candles.value
-  if (all.length === 0) return []
-  const slice = all.slice(-maxCandles)
-  let min = Infinity, max = -Infinity
-  for (const c of slice) {
-    if (c.low < min) min = c.low
-    if (c.high > max) max = c.high
-  }
-  const range = max - min || 1
-  const candleW = (svgW - pad * 2) / slice.length
-  const yScale = (v: number) => svgH - pad - ((v - min) / range) * (svgH - pad * 2)
-  return {
-    items: slice.map((c: any, i: number) => {
-      const x = pad + i * candleW + candleW / 2
-      const highY = yScale(c.high)
-      const lowY = yScale(c.low)
-      const openY = yScale(c.open)
-      const closeY = yScale(c.close)
-      const bodyTop = Math.min(openY, closeY)
-      const bodyH = Math.max(closeY - openY, 1) || 1
-      return { x, highY, lowY, bodyTop, bodyH, w: Math.max(candleW * 0.6, 1), color: c.close >= c.open ? '#00c853' : '#ff1744' }
-    }),
-    min, range,
-  }
-})
-
-const overlays = computed(() => {
-  const r = result.value
-  if (!r) return []
-  const slice = candles.value.slice(-maxCandles)
-  if (slice.length === 0) return []
-  const { min, range } = visibleCandles.value
-  const candleW = (svgW - pad * 2) / slice.length
-  const yScale = (v: number) => svgH - pad - ((v - min) / range) * (svgH - pad * 2)
-  const xAt = (i: number) => pad + i * candleW + candleW / 2
-
-  type Overlay = { label: string; color: string; points: string }
-  const out: Overlay[] = []
-  const overlaysRaw: [string, string, string][] = [
-    [r.overlayA ?? r.seriesB, 'Overlay A', '#2979ff'],
-    [r.overlayB ?? r.seriesC, 'Overlay B', '#aa00ff'],
-    [r.overlayC ?? r.seriesD, 'Overlay C', '#ff6d00'],
-  ]
-  for (const [data, label, color] of overlaysRaw) {
-    if (!Array.isArray(data) || data.length < 2) continue
-    const values = toSeriesValues(data)
-    const pts = values.slice(-maxCandles).map((v: number, i: number) => `${xAt(i)},${yScale(v)}`).join(' ')
-    out.push({ label, color, points: pts })
-  }
-  return out
-})
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-function fmtTick(ts?: number, useMonthLabels?: boolean): string {
-  if (!ts) return ''
-  const d = new Date(ts)
-  const month = MONTHS[d.getMonth()]
-  if (useMonthLabels) return `${month} '${String(d.getFullYear()).slice(2)}`
-  return `${month} ${d.getDate()}`
+function removeSelf() {
+  removeNodes([props.id], true)
 }
 
-const axisLabels = computed(() => {
-  const slice = candles.value.slice(-maxCandles)
-  if (slice.length === 0) return []
-  const candleW = (svgW - pad * 2) / slice.length
-  const first = slice[0]
-  const last = slice[slice.length - 1]
-  const spanMs = last.timestamp - first.timestamp
-  const useMonthLabels = spanMs > 250 * 86_400_000
-  const q = Math.floor(slice.length / 2)
-  const labels = [
-    { x: pad + candleW / 2, label: fmtTick(first.timestamp, useMonthLabels) },
-  ]
-  if (q > 0 && q < slice.length - 1) {
-    labels.push({ x: pad + q * candleW + candleW / 2, label: fmtTick(slice[q].timestamp, useMonthLabels) })
-  }
-  labels.push({ x: pad + (slice.length - 1) * candleW + candleW / 2, label: fmtTick(last.timestamp, useMonthLabels) })
-  return labels
-})
+const OVERLAY_COLORS: Record<string, string> = { overlayA: '#2979ff', overlayB: '#aa00ff', overlayC: '#ff6d00' }
 
-const lastPrice = computed(() => {
-  const candleSeries = result.value?.candleSeries ?? result.value?.ohlc
-  if (!Array.isArray(candleSeries) || candleSeries.length === 0) return null
-  return candleSeries[candleSeries.length - 1].close?.toFixed(2) ?? null
-})
+const candles = computed(() => (Array.isArray(result.value?.candleSeries) ? result.value.candleSeries : []))
 
-const openPrice = computed(() => {
-  const candleSeries = result.value?.candleSeries ?? result.value?.ohlc
-  if (!Array.isArray(candleSeries) || candleSeries.length === 0) return 0
-  return candleSeries[candleSeries.length - 1].open ?? 0
+const overlays = computed<ChartLine[]>(() => {
+  const raw = Array.isArray(result.value?.overlays) ? result.value.overlays : []
+  return raw
+    .filter((o: any) => Array.isArray(o?.points) && o.points.length)
+    .map((o: any, k: number) => ({
+      key: String(o.handle ?? k),
+      label: String(o.label ?? o.handle ?? `Overlay ${k + 1}`),
+      unit: o.unit ?? 'price',
+      color: OVERLAY_COLORS[o.handle] ?? '#ffd600',
+      points: o.points,
+    }))
 })
 </script>
