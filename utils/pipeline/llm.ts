@@ -2,6 +2,7 @@
 // globals so it can be tested with a fake fetch.
 
 import { buildNodeCatalog, validatePlan, type Plan } from './plan.ts'
+import { estimateTokens, parseResetSeconds, MAX_BLOCK_SEC, type Budget } from './groqBudget.ts'
 
 export const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions'
 
@@ -13,16 +14,21 @@ export const DEFAULT_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.6-27b']
 
 const MAX_QUERY = 500
 const TIMEOUT_MS = 30_000
+/** Tokens we expect the model to produce (the plan plus reasoning), for the pre-flight budget check. */
+const COMPLETION_ESTIMATE = 1200
+const DEFAULT_RETRY_AFTER_SEC = 10
 
-type FetchLike = (url: string, init: any) => Promise<{ ok: boolean; status: number; text(): Promise<string>; json(): Promise<any> }>
+type FetchLike = (url: string, init: any) => Promise<{ ok: boolean; status: number; headers?: { get(name: string): string | null }; text(): Promise<string>; json(): Promise<any> }>
 
 export interface LLMOptions {
   apiKey: string | undefined
   fetch?: FetchLike
   models?: string[]
+  /** Local rate-limit budget, checked before every call so Groq's own limits are not reached. */
+  budget?: Budget
 }
 
-export type LLMResult = Plan | { error: string }
+export type LLMResult = Plan | { error: string; retryAfterSec?: number }
 
 export function buildPrompt(query: string): string {
   return `You are an assistant that generates financial pipelines for a visual node editor. These are the only nodes available, with their exact handle ids and params:
@@ -82,9 +88,15 @@ export async function generateWithLLM(query: string, opts: LLMOptions): Promise<
   const doFetch: FetchLike = opts.fetch ?? (globalThis.fetch as any)
   const models = opts.models?.length ? opts.models : DEFAULT_MODELS
   const prompt = buildPrompt(q)
-  let rateLimited = false
+  const estimate = estimateTokens(prompt) + COMPLETION_ESTIMATE
+  let waitSec: number | undefined
 
   for (const model of models) {
+    const ticket = opts.budget?.reserve(model, estimate)
+    if (ticket && !ticket.ok) {
+      waitSec = Math.min(waitSec ?? Infinity, ticket.retryAfterSec)
+      continue
+    }
     let res
     try {
       res = await doFetch(GROQ_API, {
@@ -104,21 +116,30 @@ export async function generateWithLLM(query: string, opts: LLMOptions): Promise<
         signal: typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal ? AbortSignal.timeout(TIMEOUT_MS) : undefined,
       })
     } catch (e: any) {
+      // The request may have reached Groq before it failed, so keep its estimate counted.
+      if (ticket) opts.budget?.settle(ticket, ticket.tokens)
       return { error: e?.name === 'TimeoutError' ? 'The AI service timed out' : 'Could not reach the AI service' }
     }
 
+    if (res.headers) opts.budget?.observe(model, res.headers, ticket)
+
     if (!res.ok) {
+      // A rejected request still counts as a request, but it processed no tokens.
+      if (ticket) opts.budget?.settle(ticket, 0)
       const body = await res.text().catch(() => '')
       if (isModelGone(res.status, body)) continue
       // Groq limits requests and tokens per model, so another model may still have room.
       if (res.status === 429) {
-        rateLimited = true
+        const retryAfterSec = Math.min(MAX_BLOCK_SEC, Math.max(1, Math.ceil(parseResetSeconds(res.headers?.get('retry-after')) ?? DEFAULT_RETRY_AFTER_SEC)))
+        opts.budget?.penalize(model, retryAfterSec)
+        waitSec = Math.min(waitSec ?? Infinity, retryAfterSec)
         continue
       }
       return { error: `AI service error ${res.status}` }
     }
 
     const data = await res.json().catch(() => null)
+    if (ticket) opts.budget?.settle(ticket, Number(data?.usage?.total_tokens))
     const text: string = data?.choices?.[0]?.message?.content ?? ''
     const plan = extractJson(text)
     if (plan === undefined) return { error: 'AI response contained no JSON' }
@@ -128,5 +149,8 @@ export async function generateWithLLM(query: string, opts: LLMOptions): Promise<
     return plan as Plan
   }
 
-  return { error: rateLimited ? 'Rate limited. Try again in a moment.' : 'No configured AI model is available' }
+  if (waitSec !== undefined) {
+    return { error: `Rate limited. Try again in about ${waitSec} seconds.`, retryAfterSec: waitSec }
+  }
+  return { error: 'No configured AI model is available' }
 }
