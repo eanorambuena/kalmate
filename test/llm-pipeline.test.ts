@@ -1,7 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { generateWithLLM, DEFAULT_MODELS, PROMPT_EXAMPLES, buildPrompt } from '../utils/pipeline/llm.ts'
-import { validatePlan } from '../utils/pipeline/plan.ts'
+import { generateWithLLM, DEFAULT_MODELS } from '../utils/pipeline/llm.ts'
 
 const PLAN = {
   nodes: [
@@ -114,29 +113,35 @@ describe('generateWithLLM', () => {
   })
 })
 
-describe('prompt examples', () => {
-  it('ship at least a chart, an overlay and a forecast example', () => {
-    assert.ok(PROMPT_EXAMPLES.length >= 3)
-    const types = PROMPT_EXAMPLES.flatMap(e => e.plan.nodes.map(n => n.type))
-    for (const t of ['chartOutput', 'smaIndicator', 'forecastNode']) assert.ok(types.includes(t), t)
+describe('rate limits', () => {
+  const limited = { status: 429, body: { error: { message: 'Rate limit reached' } } }
+
+  it('tries the next model when one is rate limited, since limits are per model', async () => {
+    const f = fakeFetch([limited, reply(JSON.stringify(PLAN))])
+    const out = await generateWithLLM('AAPL chart', { apiKey: 'k', fetch: f.fn })
+    assert.deepEqual(out, PLAN)
+    assert.equal(f.calls.length, 2)
+    assert.equal(f.calls[0]!.body.model, DEFAULT_MODELS[0])
+    assert.equal(f.calls[1]!.body.model, DEFAULT_MODELS[1])
   })
 
-  it('every example is a plan the validator accepts, so the model never learns a broken pattern', () => {
-    for (const e of PROMPT_EXAMPLES) {
-      const check = validatePlan(e.plan)
-      assert.ok(check.ok, `${e.query}: ${(check as any).reason}`)
-    }
+  it('reports rate limiting when every model is limited', async () => {
+    const f = fakeFetch([limited, limited])
+    const out: any = await generateWithLLM('AAPL chart', { apiKey: 'k', fetch: f.fn })
+    assert.match(out.error, /Rate limited/)
+    assert.equal(f.calls.length, DEFAULT_MODELS.length)
   })
 
-  it('are embedded in the prompt with their query', () => {
-    const prompt = buildPrompt('AAPL chart')
-    for (const e of PROMPT_EXAMPLES) {
-      assert.ok(prompt.includes(JSON.stringify(e.query)))
-      assert.ok(prompt.includes(JSON.stringify(e.plan)))
-    }
+  it('reports rate limiting rather than "no model" when a retired model is followed by a limited one', async () => {
+    const f = fakeFetch([modelGone, limited])
+    const out: any = await generateWithLLM('AAPL chart', { apiKey: 'k', fetch: f.fn })
+    assert.match(out.error, /Rate limited/)
   })
 
-  it('give no buy/sell advice', () => {
-    assert.doesNotMatch(JSON.stringify(PROMPT_EXAMPLES), /\b(buy|sell|recommend)/i)
+  it('does not try another model for errors that would repeat (bad key)', async () => {
+    const f = fakeFetch([{ status: 401, body: {} }, reply(JSON.stringify(PLAN))])
+    const out: any = await generateWithLLM('AAPL chart', { apiKey: 'k', fetch: f.fn })
+    assert.match(out.error, /401/)
+    assert.equal(f.calls.length, 1)
   })
 })

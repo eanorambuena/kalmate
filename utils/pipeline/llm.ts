@@ -24,46 +24,6 @@ export interface LLMOptions {
 
 export type LLMResult = Plan | { error: string }
 
-const node = (type: string, data: Record<string, any> = {}) => ({ type, data })
-const edge = (source: number, target: number, sourceHandle: string, targetHandle: string) => ({ source, target, sourceHandle, targetHandle })
-
-/** Worked examples shown to the model; each one is checked against validatePlan in the tests. */
-export const PROMPT_EXAMPLES: Array<{ query: string; plan: Plan }> = [
-  {
-    query: 'AAPL chart',
-    plan: {
-      nodes: [node('symbolInput', { symbol: 'AAPL' }), node('priceFeed'), node('chartOutput')],
-      edges: [edge(0, 1, 'symbol', 'symbol'), edge(1, 2, 'priceSeries', 'mainSeries')],
-    },
-  },
-  {
-    query: 'MSFT with SMA 20 and RSI',
-    plan: {
-      nodes: [node('symbolInput', { symbol: 'MSFT' }), node('priceFeed'), node('smaIndicator', { period: 20 }), node('rsiIndicator'), node('chartOutput')],
-      edges: [
-        edge(0, 1, 'symbol', 'symbol'),
-        edge(1, 2, 'priceSeries', 'priceSeries'),
-        edge(1, 3, 'priceSeries', 'priceSeries'),
-        edge(1, 4, 'priceSeries', 'mainSeries'),
-        edge(2, 4, 'smaSeries', 'overlayA'),
-        edge(3, 4, 'rsiSeries', 'overlayB'),
-      ],
-    },
-  },
-  {
-    query: 'forecast TSLA 30 days',
-    plan: {
-      nodes: [node('symbolInput', { symbol: 'TSLA' }), node('priceFeed'), node('forecastNode', { steps: 30 }), node('chartOutput')],
-      edges: [
-        edge(0, 1, 'symbol', 'symbol'),
-        edge(1, 2, 'priceSeries', 'priceSeries'),
-        edge(1, 3, 'priceSeries', 'mainSeries'),
-        edge(2, 3, 'forecastSeries', 'overlayA'),
-      ],
-    },
-  },
-]
-
 export function buildPrompt(query: string): string {
   return `You are an assistant that generates financial pipelines for a visual node editor. These are the only nodes available, with their exact handle ids and params:
 ${buildNodeCatalog()}
@@ -72,9 +32,6 @@ Each node is identified by its "type". Input nodes provide data, process nodes t
 Each input handle accepts at most one edge. Port types must match: "any" accepts everything; "series", "price", "scalar", "signal" and "symbol" connect to the same kind, and numeric kinds (price, scalar, signal) connect to each other.
 
 The user query may be in Spanish or English. Generate a pipeline for: ${JSON.stringify(query)}
-
-EXAMPLES (study the exact node and handle names):
-${PROMPT_EXAMPLES.map(e => `Query: ${JSON.stringify(e.query)}\n${JSON.stringify(e.plan)}`).join('\n\n')}
 
 Return ONLY valid JSON without markdown and without explanations, with this structure:
 {
@@ -125,6 +82,7 @@ export async function generateWithLLM(query: string, opts: LLMOptions): Promise<
   const doFetch: FetchLike = opts.fetch ?? (globalThis.fetch as any)
   const models = opts.models?.length ? opts.models : DEFAULT_MODELS
   const prompt = buildPrompt(q)
+  let rateLimited = false
 
   for (const model of models) {
     let res
@@ -152,7 +110,11 @@ export async function generateWithLLM(query: string, opts: LLMOptions): Promise<
     if (!res.ok) {
       const body = await res.text().catch(() => '')
       if (isModelGone(res.status, body)) continue
-      if (res.status === 429) return { error: 'Rate limited. Try again in a moment.' }
+      // Groq limits requests and tokens per model, so another model may still have room.
+      if (res.status === 429) {
+        rateLimited = true
+        continue
+      }
       return { error: `AI service error ${res.status}` }
     }
 
@@ -166,5 +128,5 @@ export async function generateWithLLM(query: string, opts: LLMOptions): Promise<
     return plan as Plan
   }
 
-  return { error: 'No configured AI model is available' }
+  return { error: rateLimited ? 'Rate limited. Try again in a moment.' : 'No configured AI model is available' }
 }
