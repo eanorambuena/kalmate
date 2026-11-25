@@ -1,43 +1,80 @@
 <template>
-  <div class="bg-[#111] border border-[#333] rounded-xl p-3 min-w-[280px] cursor-grab active:cursor-grabbing relative">
-    <div class="flex items-center gap-2 mb-2">
-      <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: '#ff69b4' }" />
-      <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">OUTPUT</span>
+  <div class="group relative w-[280px] bg-[#111] border border-[#333] rounded-xl p-3 cursor-grab active:cursor-grabbing">
+    <button
+      type="button"
+      class="nodrag absolute top-1.5 right-1.5 z-10 w-4 h-4 flex items-center justify-center rounded text-[#888] hover:text-white hover:bg-[#333] text-xs leading-none opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+      title="Remove node"
+      aria-label="Remove node"
+      @click.stop="removeSelf"
+    >×</button>
+
+    <div class="flex items-center gap-2 mb-1.5 pr-5">
+      <div class="w-2 h-2 rounded-full flex-shrink-0" :style="{ backgroundColor: '#ff69b4' }" />
+      <span class="text-[10px] font-bold text-[#aaa] uppercase tracking-wider">Output</span>
     </div>
-    <p class="text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853]" @click="startEdit" v-if="!editing">{{ displayLabel }}</p>
-    <input v-else ref="inputEl" v-model="editLabel" class="bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none" @blur="saveLabel" @keydown.enter="saveLabel" @keydown.escape="cancelLabel" />
-    <div v-if="candles.length > 0" class="w-full h-[120px] relative">
-      <svg viewBox="0 0 260 118" class="w-full h-full" preserveAspectRatio="none">
-        <g v-for="(c, i) in visibleCandles.items" :key="i">
-          <line :x1="c.x" :y1="c.highY" :x2="c.x" :y2="c.lowY" :stroke="c.color" stroke-width="1" />
-          <rect :x="c.x - c.w / 2" :y="c.bodyTop" :width="c.w" :height="c.bodyH" :fill="c.color" />
-        </g>
-        <polyline v-for="(ov, idx) in overlays" :key="'ov-'+idx" :points="ov.points" fill="none" :stroke="ov.color" stroke-width="1.5" vector-effect="non-scaling-stroke" />
-        <line x1="5" y1="109" x2="255" y2="109" stroke="#333" stroke-width="1" />
-        <g v-for="(t, idx) in axisLabels" :key="'ax'+idx">
-          <line :x1="t.x" y1="109" :x2="t.x" y2="112" stroke="#444" stroke-width="1" />
-          <text :x="t.x" y="116" fill="#888" font-size="6.5" text-anchor="middle" font-family="monospace">{{ t.label }}</text>
-        </g>
-      </svg>
-      <div class="absolute top-2 right-2 flex flex-col gap-1 text-[9px]">
-        <span class="text-[#aaa] font-mono">{{ candles.length }} candles</span>
-        <span v-for="(ov, idx) in overlays" :key="idx" class="flex items-center gap-1" :style="{ color: ov.color }">
-          <span class="w-2 h-0.5 rounded" :style="{ backgroundColor: ov.color }" />
-          {{ ov.label }}
-        </span>
-      </div>
+    <p v-if="!editing" class="nodrag text-white text-xs font-medium mb-2 cursor-pointer hover:text-[#00c853] truncate" :title="displayLabel" @click="startEdit">{{ displayLabel }}</p>
+    <input
+      v-else
+      ref="inputEl"
+      v-model="editLabel"
+      class="nodrag bg-[#1a1a1a] border border-[#444] rounded px-1 py-0.5 text-xs text-white w-full mb-2 outline-none"
+      @blur="saveLabel"
+      @keydown.enter="saveLabel"
+      @keydown.escape="cancelLabel"
+    />
+
+    <div v-if="candles.length > 0" class="flex flex-wrap gap-x-2.5 gap-y-1 mb-2 text-[9px] min-w-0" aria-label="Legend">
+      <span class="flex items-center gap-1">
+        <span class="font-mono" :style="{ color: lastUp ? UP : DOWN }">Close {{ lastClose }}</span>
+        <span class="text-[#666]">· {{ candles.length }} candles</span>
+      </span>
+      <span v-for="o in overlays" :key="o.key" class="flex items-center gap-1 min-w-0">
+        <span class="w-2 h-0.5 rounded flex-shrink-0" :style="{ backgroundColor: o.color }" />
+        <span class="text-[#bbb] truncate max-w-[110px]" :title="o.label">{{ o.label }}</span>
+        <span class="font-mono text-white">{{ o.last == null ? '—' : formatValue(o.last, o.unit) }}</span>
+      </span>
     </div>
-    <div v-else class="h-[120px] flex items-center justify-center text-[#aaa] text-[10px]">
+
+    <svg
+      v-if="candles.length > 0 && range"
+      :viewBox="`0 0 ${W} ${H}`"
+      class="w-full h-auto block"
+      role="img"
+      :aria-label="`${displayLabel}: ${candles.length} candles`"
+    >
+      <line :x1="PADL" :y1="BOTTOM" :x2="W - PADR" :y2="BOTTOM" stroke="#333" stroke-width="1" />
+      <text :x="PADL - 3" :y="TOP + 4" fill="#888" font-size="6.5" text-anchor="end" font-family="monospace">{{ formatValue(range.max, 'price') }}</text>
+      <text :x="PADL - 3" :y="BOTTOM" fill="#888" font-size="6.5" text-anchor="end" font-family="monospace">{{ formatValue(range.min, 'price') }}</text>
+
+      <g v-for="(c, i) in items" :key="i">
+        <line :x1="c.x" :y1="c.yH" :x2="c.x" :y2="c.yL" :stroke="c.color" stroke-width="1" />
+        <rect :x="c.x - c.w / 2" :y="c.bodyTop" :width="c.w" :height="c.bodyH" :fill="c.color" />
+      </g>
+
+      <polyline
+        v-for="o in overlayPaths"
+        :key="'ov-' + o.key"
+        :points="o.points"
+        fill="none"
+        :stroke="o.color"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+        vector-effect="non-scaling-stroke"
+      />
+
+      <g v-for="(t, idx) in axisLabels" :key="'ax' + idx">
+        <line :x1="t.x" :y1="BOTTOM" :x2="t.x" :y2="BOTTOM + 3" stroke="#444" stroke-width="1" />
+        <text :x="t.x" :y="BOTTOM + 12" fill="#888" font-size="6.5" :text-anchor="t.anchor" font-family="monospace">{{ t.label }}</text>
+      </g>
+    </svg>
+    <div v-else class="h-[120px] flex items-center justify-center text-center text-[#aaa] text-[10px] px-2">
       {{ result?.error || 'Run pipeline to see candles' }}
-    </div>
-    <div v-if="lastPrice" class="mt-1 text-center">
-      <span class="text-white font-mono text-sm font-bold" :class="lastPrice >= openPrice ? 'text-[#00c853]' : 'text-[#ff1744]'">${{ lastPrice }}</span>
     </div>
 
     <div class="flex flex-col gap-1 mt-2">
       <div v-for="inp in inputs" :key="inp.id" class="flex items-center gap-1 relative pl-3">
-        <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ position:'absolute', left:'0px', top:'50%' }" />
-        <Handle type="source" :position="Position.Left" :id="'left:' + inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0 !opacity-0" :style="{ position:'absolute', left:'0px', top:'50%' }" />
+        <Handle type="target" :position="Position.Left" :id="inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0" :style="{ position: 'absolute', left: '0px', top: '50%' }" />
+        <Handle type="source" :position="Position.Left" :id="'left:' + inp.id" class="w-2 h-2 !bg-[#2979ff] !border-0 !opacity-0" :style="{ position: 'absolute', left: '0px', top: '50%' }" />
         <span class="text-[9px] text-[#aaa]">{{ inp.label }}</span>
       </div>
     </div>
@@ -45,22 +82,23 @@
 </template>
 
 <script setup lang="ts">
-import { Handle, Position } from '@vue-flow/core'
+import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import { computed, ref, nextTick } from 'vue'
-import { nodeDefinitions } from '~/utils/pipeline/nodeDefinitions'
-import { toSeriesValues } from '~/utils/series'
+import { nodeDefinitions } from '../../../utils/pipeline/nodeDefinitions'
+import { formatValue } from '../../../utils/pipeline/values'
+import { yRange, valueToY, nearestIndex, medianGap, type ValueRange } from '../../../utils/chart-scale'
 
 const props = defineProps({
   id: { type: String, required: true },
   data: { type: Object, default: () => ({}) },
 })
 
-const emit = defineEmits<{ 'update:data': [data: any] }>()
+const { removeNodes } = useVueFlow()
 
 const def = nodeDefinitions.find(n => n.type === 'candleChart')
 const inputs = def?.inputs ?? []
 
-const result = computed(() => props.data?.result)
+const result = computed<any>(() => props.data?.result)
 const displayLabel = computed(() => props.data?.label || 'Candle Chart')
 
 const editing = ref(false)
@@ -75,7 +113,7 @@ function startEdit() {
 
 function saveLabel() {
   if (editLabel.value.trim()) {
-    emit('update:data', { ...props.data, label: editLabel.value.trim() })
+    props.data.label = editLabel.value.trim()
   }
   editing.value = false
 }
@@ -84,105 +122,139 @@ function cancelLabel() {
   editing.value = false
 }
 
-const candles = computed(() => {
-  const candleSeries = result.value?.candleSeries ?? result.value?.ohlc
-  if (!Array.isArray(candleSeries) || candleSeries.length < 2) return []
-  return candleSeries.filter((h: any) => h.open > 0 && h.high > 0 && h.low > 0 && h.close > 0)
-})
+function removeSelf() {
+  removeNodes([props.id], true)
+}
 
-const svgW = 260, svgH = 110, pad = 5, maxCandles = 40
-
-const visibleCandles = computed(() => {
-  const all = candles.value
-  if (all.length === 0) return []
-  const slice = all.slice(-maxCandles)
-  let min = Infinity, max = -Infinity
-  for (const c of slice) {
-    if (c.low < min) min = c.low
-    if (c.high > max) max = c.high
-  }
-  const range = max - min || 1
-  const candleW = (svgW - pad * 2) / slice.length
-  const yScale = (v: number) => svgH - pad - ((v - min) / range) * (svgH - pad * 2)
-  return {
-    items: slice.map((c: any, i: number) => {
-      const x = pad + i * candleW + candleW / 2
-      const highY = yScale(c.high)
-      const lowY = yScale(c.low)
-      const openY = yScale(c.open)
-      const closeY = yScale(c.close)
-      const bodyTop = Math.min(openY, closeY)
-      const bodyH = Math.max(closeY - openY, 1) || 1
-      return { x, highY, lowY, bodyTop, bodyH, w: Math.max(candleW * 0.6, 1), color: c.close >= c.open ? '#00c853' : '#ff1744' }
-    }),
-    min, range,
-  }
-})
-
-const overlays = computed(() => {
-  const r = result.value
-  if (!r) return []
-  const slice = candles.value.slice(-maxCandles)
-  if (slice.length === 0) return []
-  const { min, range } = visibleCandles.value
-  const candleW = (svgW - pad * 2) / slice.length
-  const yScale = (v: number) => svgH - pad - ((v - min) / range) * (svgH - pad * 2)
-  const xAt = (i: number) => pad + i * candleW + candleW / 2
-
-  type Overlay = { label: string; color: string; points: string }
-  const out: Overlay[] = []
-  const overlaysRaw: [string, string, string][] = [
-    [r.overlayA ?? r.seriesB, 'Overlay A', '#2979ff'],
-    [r.overlayB ?? r.seriesC, 'Overlay B', '#aa00ff'],
-    [r.overlayC ?? r.seriesD, 'Overlay C', '#ff6d00'],
-  ]
-  for (const [data, label, color] of overlaysRaw) {
-    if (!Array.isArray(data) || data.length < 2) continue
-    const values = toSeriesValues(data)
-    const pts = values.slice(-maxCandles).map((v: number, i: number) => `${xAt(i)},${yScale(v)}`).join(' ')
-    out.push({ label, color, points: pts })
-  }
-  return out
-})
+// ---- Layout (SVG user units; the svg scales to the node width) ----
+const W = 256
+const PADL = 34
+const PADR = 4
+const TOP = 6
+const BOTTOM = 110
+const H = BOTTOM + 16
+const MAX_CANDLES = 60
+const DAY = 86_400_000
+const UP = '#00c853'
+const DOWN = '#ff1744'
+const OVERLAY_COLORS = ['#2979ff', '#aa00ff', '#ff6d00']
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-function fmtTick(ts?: number, useMonthLabels?: boolean): string {
-  if (!ts) return ''
-  const d = new Date(ts)
-  const month = MONTHS[d.getMonth()]
-  if (useMonthLabels) return `${month} '${String(d.getFullYear()).slice(2)}`
-  return `${month} ${d.getDate()}`
-}
+type Candle = { timestamp: number; open: number; high: number; low: number; close: number }
+
+/** The most recent candles, ordered by time, with all four prices present. */
+const candles = computed<Candle[]>(() => {
+  const raw = result.value?.candleSeries
+  if (!Array.isArray(raw)) return []
+  return raw
+    .filter((c: any) => [c?.open, c?.high, c?.low, c?.close].every(v => Number.isFinite(v) && v > 0))
+    .slice(-MAX_CANDLES)
+})
+
+const timestamps = computed(() => candles.value.map(c => c.timestamp))
+const gap = computed(() => medianGap(timestamps.value) || DAY)
+const candleW = computed(() => (candles.value.length ? (W - PADL - PADR) / candles.value.length : 0))
+const candleX = (i: number) => PADL + (i + 0.5) * candleW.value
+
+const lastCandle = computed(() => candles.value[candles.value.length - 1])
+const lastClose = computed(() => (lastCandle.value ? formatValue(lastCandle.value.close, 'price') : '—'))
+const lastUp = computed(() => !!lastCandle.value && lastCandle.value.close >= lastCandle.value.open)
+
+type Overlay = { key: string; label: string; unit: string; color: string; last: number | null; values: { idx: number; value: number }[] }
+
+/**
+ * Overlays placed by timestamp: each point goes to the candle closest in
+ * time, and is dropped when no candle is within one bar of it (for example
+ * forecast points after the last candle).
+ */
+const overlays = computed<Overlay[]>(() => {
+  const raw = Array.isArray(result.value?.overlays) ? result.value.overlays : []
+  const ts = timestamps.value
+  if (ts.length === 0) return []
+  const out: Overlay[] = []
+  raw.forEach((o: any, k: number) => {
+    const byIdx = new Map<number, number>()
+    for (const p of Array.isArray(o?.points) ? o.points : []) {
+      if (!Number.isFinite(p?.value)) continue
+      const idx = nearestIndex(ts, p.timestamp)
+      if (idx < 0 || Math.abs(ts[idx]! - p.timestamp) > gap.value) continue
+      byIdx.set(idx, p.value)
+    }
+    const values = [...byIdx.entries()].sort((a, b) => a[0] - b[0]).map(([idx, value]) => ({ idx, value }))
+    if (values.length === 0) return
+    out.push({
+      key: String(o.handle ?? k),
+      label: String(o.label ?? o.handle ?? `Overlay ${k + 1}`),
+      unit: o.unit ?? 'price',
+      color: OVERLAY_COLORS[k % OVERLAY_COLORS.length]!,
+      last: values[values.length - 1]!.value,
+      values,
+    })
+  })
+  return out
+})
+
+const range = computed<ValueRange | null>(() => {
+  if (candles.value.length === 0) return null
+  const pts = candles.value.flatMap(c => [
+    { timestamp: c.timestamp, value: c.low },
+    { timestamp: c.timestamp, value: c.high },
+  ])
+  for (const o of overlays.value) for (const v of o.values) pts.push({ timestamp: 0, value: v.value })
+  return yRange([{ points: pts }])
+})
+
+/** Polyline points for each overlay, on the same scale as the candles. */
+const overlayPaths = computed(() => {
+  const r = range.value
+  if (!r) return []
+  return overlays.value.map(o => ({
+    key: o.key,
+    color: o.color,
+    points: o.values
+      .map(v => `${candleX(v.idx).toFixed(1)},${valueToY(v.value, r, TOP, BOTTOM).toFixed(1)}`)
+      .join(' '),
+  }))
+})
+
+const items = computed(() => {
+  const r = range.value
+  if (!r) return []
+  const cw = candleW.value
+  return candles.value.map((c, i) => {
+    const yH = valueToY(c.high, r, TOP, BOTTOM)
+    const yL = valueToY(c.low, r, TOP, BOTTOM)
+    const yO = valueToY(c.open, r, TOP, BOTTOM)
+    const yC = valueToY(c.close, r, TOP, BOTTOM)
+    return {
+      x: candleX(i),
+      yH,
+      yL,
+      bodyTop: Math.min(yO, yC),
+      bodyH: Math.max(Math.abs(yC - yO), 1),
+      w: Math.max(cw * 0.6, 1),
+      color: c.close >= c.open ? UP : DOWN,
+    }
+  })
+})
 
 const axisLabels = computed(() => {
-  const slice = candles.value.slice(-maxCandles)
-  if (slice.length === 0) return []
-  const candleW = (svgW - pad * 2) / slice.length
-  const first = slice[0]
-  const last = slice[slice.length - 1]
-  const spanMs = last.timestamp - first.timestamp
-  const useMonthLabels = spanMs > 250 * 86_400_000
-  const q = Math.floor(slice.length / 2)
-  const labels = [
-    { x: pad + candleW / 2, label: fmtTick(first.timestamp, useMonthLabels) },
-  ]
-  if (q > 0 && q < slice.length - 1) {
-    labels.push({ x: pad + q * candleW + candleW / 2, label: fmtTick(slice[q].timestamp, useMonthLabels) })
+  const all = candles.value
+  if (all.length === 0) return []
+  const first = all[0]!
+  const last = all[all.length - 1]!
+  const useMonthLabels = last.timestamp - first.timestamp > 250 * DAY
+  const fmt = (ts: number) => {
+    const d = new Date(ts)
+    return useMonthLabels ? `${MONTHS[d.getMonth()]} '${String(d.getFullYear()).slice(2)}` : `${MONTHS[d.getMonth()]} ${d.getDate()}`
   }
-  labels.push({ x: pad + (slice.length - 1) * candleW + candleW / 2, label: fmtTick(last.timestamp, useMonthLabels) })
-  return labels
-})
-
-const lastPrice = computed(() => {
-  const candleSeries = result.value?.candleSeries ?? result.value?.ohlc
-  if (!Array.isArray(candleSeries) || candleSeries.length === 0) return null
-  return candleSeries[candleSeries.length - 1].close?.toFixed(2) ?? null
-})
-
-const openPrice = computed(() => {
-  const candleSeries = result.value?.candleSeries ?? result.value?.ohlc
-  if (!Array.isArray(candleSeries) || candleSeries.length === 0) return 0
-  return candleSeries[candleSeries.length - 1].open ?? 0
+  const mid = Math.floor((all.length - 1) / 2)
+  const picks = [
+    { i: 0, anchor: 'start' },
+    { i: mid, anchor: 'middle' },
+    { i: all.length - 1, anchor: 'end' },
+  ].filter((p, k, arr) => arr.findIndex(q => q.i === p.i) === k)
+  return picks.map(p => ({ x: candleX(p.i), label: fmt(all[p.i]!.timestamp), anchor: p.anchor }))
 })
 </script>

@@ -1,93 +1,69 @@
 <template>
   <div class="h-[calc(100vh-120px)] w-full relative flex">
+    <!-- Sidebar -->
     <div class="w-52 flex-shrink-0 bg-[#0d0d0d] border-r border-[#222] overflow-y-auto z-10 flex flex-col">
-      <div class="p-2 space-y-2">
-        <div>
-          <div class="text-[10px]">Input</div>
+      <div class="p-2 space-y-3">
+        <div class="relative">
+          <Search class="w-3 h-3 text-[#666] absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            v-model="query"
+            type="search"
+            placeholder="Search nodes"
+            aria-label="Search nodes"
+            class="w-full bg-[#161616] border border-[#2a2a2a] rounded pl-6 pr-2 py-1.5 text-[10px] text-white placeholder:text-[#666] outline-none focus:border-[#00c853]"
+          />
+        </div>
+
+        <div v-for="g in groups" :key="g.key">
+          <div class="flex items-center gap-1 px-1 mb-1 text-[10px] font-mono uppercase tracking-wider text-[#888]">
+            <Lock v-if="g.pro && !isPro" class="w-2.5 h-2.5" />
+            <span>{{ g.title }}</span>
+          </div>
           <div class="space-y-0.5">
             <button
-              v-for="n in inputNodes" :key="n.type"
+              v-for="n in g.items" :key="n.type"
+              type="button"
               class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
-              :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
-              @click="addNode(n.type)"
+              :style="buttonStyle(n)"
+              :aria-disabled="isLocked(n) ? 'true' : undefined"
+              @click="isLocked(n) ? (showProModal = true) : addNode(n.type)"
               @mouseenter="showTip(n, $event)"
               @mouseleave="hideTip"
               @focus="showTip(n, $event)"
               @blur="hideTip"
             >
-              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
+              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: isLocked(n) ? '#444' : n.color }" />
               {{ n.label }}
             </button>
           </div>
         </div>
-        <div>
-          <div class="text-[10px]">Process</div>
-          <div class="space-y-0.5">
-            <button
-              v-for="n in processNodes" :key="n.type"
-              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
-              :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
-              @click="addNode(n.type)"
-              @mouseenter="showTip(n, $event)"
-              @mouseleave="hideTip"
-              @focus="showTip(n, $event)"
-              @blur="hideTip"
-            >
-              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
-              {{ n.label }}
-            </button>
-          </div>
-        </div>
-        <div>
-          <div class="text-[10px]">Output</div>
-          <div class="space-y-0.5">
-            <button
-              v-for="n in outputNodes" :key="n.type"
-              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
-              :style="{ background: n.color + '15', color: n.color, border: '1px solid ' + n.color + '25' }"
-              @click="addNode(n.type)"
-              @mouseenter="showTip(n, $event)"
-              @mouseleave="hideTip"
-              @focus="showTip(n, $event)"
-              @blur="hideTip"
-            >
-              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: n.color }" />
-              {{ n.label }}
-            </button>
-          </div>
-        </div>
-        <div>
-          <div class="text-[10px] font-mono text-[#ff69b4] tracking-wider px-2 mb-1 uppercase flex items-center gap-1">
-            Pro
-            <svg v-if="!isPro" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
-          </div>
-          <div class="space-y-0.5">
-            <button
-              v-for="n in proNodes" :key="n.type"
-              class="w-full px-2.5 py-1.5 rounded text-[10px] font-bold text-left transition-colors flex items-center gap-2"
-              :style="{ background: isPro ? n.color + '15' : '#111', color: isPro ? n.color : '#555', border: '1px solid ' + (isPro ? n.color + '25' : '#222') }"
-              :disabled="!isPro"
-              @click="isPro ? addNode(n.type) : showProModal = true"
-              @mouseenter="showTip(n, $event)"
-              @mouseleave="hideTip"
-              @focus="showTip(n, $event)"
-              @blur="hideTip"
-            >
-              <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="{ background: isPro ? n.color : '#444' }" />
-              {{ n.label }}
-            </button>
-          </div>
-        </div>
+
+        <p v-if="groups.length === 0" class="px-1 text-[10px] text-[#666]">No nodes match "{{ query }}".</p>
       </div>
     </div>
 
     <div class="flex-1 relative">
+      <!-- Toolbar -->
       <div class="absolute top-2 right-2 z-10 flex items-center gap-1.5 bg-[#0d0d0d]/80 backdrop-blur-sm border border-[#222] rounded-lg px-2 py-1.5">
+        <span
+          v-if="nodes.length > 0"
+          class="px-1.5 text-[10px] font-mono whitespace-nowrap"
+          role="status"
+          aria-live="polite"
+        >
+          <span v-if="running" class="text-[#2979ff]">Running…</span>
+          <span v-else-if="lastRunAt" class="text-[#888]">Updated {{ lastRunLabel }}</span>
+          <span v-if="errorCount > 0" class="ml-1.5 text-[#ff1744]">{{ errorCount }} error{{ errorCount === 1 ? '' : 's' }}</span>
+        </span>
+
+        <div v-if="nodes.length > 0" class="w-px h-4 bg-[#333] mx-0.5" />
+
         <button
           class="px-2 py-1 rounded text-[10px] font-bold transition-all"
           :class="eraserMode ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-[#1a1a1a] text-[#bbb] hover:text-white border border-transparent'"
+          :aria-pressed="eraserMode"
+          title="Eraser mode: click nodes or edges to delete them"
           @click="eraserMode = !eraserMode"
-          title="Eraser mode: click edges to delete"
         >
           <Trash2 class="w-3.5 h-3.5" />
         </button>
@@ -99,20 +75,21 @@
         </button>
         <button
           class="px-2 py-1 bg-[#1a1a1a] text-[#bbb] text-[10px] font-bold rounded hover:text-white transition-colors border border-transparent"
-          @click="$emit('help')"
           title="Show tutorial"
+          @click="$emit('help')"
         >
           ?
         </button>
 
-        <div class="w-px h-4 bg-[#333] mx-1" />
+        <div class="w-px h-4 bg-[#333] mx-0.5" />
 
         <button
           class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="autorun ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
+          :aria-pressed="autorun"
           @click="autorun = !autorun"
         >
-          <component :is="autorun ? Pause : Play" class="w-3 h-3" />
+          <component :is="autorun ? Pause : Play" class="w-3 h-3 inline -mt-px" />
           Auto
         </button>
         <button
@@ -121,32 +98,24 @@
           :disabled="nodes.length === 0 || running || autorun"
           @click="runPipeline"
         >
-          <Play class="w-3 h-3" /> Run
+          <Play class="w-3 h-3 inline -mt-px" /> Run
         </button>
 
-        <div class="w-px h-4 bg-[#333] mx-1" />
+        <div class="w-px h-4 bg-[#333] mx-0.5" />
 
-        <button
-          class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
-          :class="showResults ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
-          @click="showResults = !showResults"
-          title="Toggle results panel"
-        >
-          <BarChart3 class="w-3.5 h-3.5" />
-        </button>
         <button
           class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="showAI ? 'bg-[#00c853]/20 text-[#00c853] border border-[#00c853]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
-          @click="showAI = !showAI"
           title="Generate pipeline with AI"
+          @click="showAI = !showAI"
         >
           <Sparkles class="w-3.5 h-3.5" />
         </button>
         <button
           class="px-2 py-1 rounded text-[10px] font-bold transition-colors"
           :class="showSaver ? 'bg-[#2979ff]/20 text-[#2979ff] border border-[#2979ff]/40' : 'bg-[#1a1a1a] text-[#bbb] border border-transparent hover:text-white'"
-          @click="showSaver = !showSaver"
           title="Save/Load pipelines"
+          @click="showSaver = !showSaver"
         >
           <Folder class="w-3.5 h-3.5" />
         </button>
@@ -157,6 +126,8 @@
           v-model:nodes="nodes"
           v-model:edges="edges"
           :default-viewport="{ x: 200, y: 200, zoom: 0.55 }"
+          :delete-key-code="['Backspace', 'Delete']"
+          :is-valid-connection="isValidConnection"
           fit-view-on-init
           :node-types="nodeTypes"
           @connect="onConnect"
@@ -166,27 +137,41 @@
         </VueFlow>
       </div>
 
+      <!-- Empty state: starter templates -->
       <div
-        v-if="showResults && results && Object.keys(results).length > 0"
-        class="absolute bottom-3 right-3 z-10 bg-[#111] border border-[#333] rounded-xl p-3 max-w-xs text-[10px]"
+        v-if="nodes.length === 0"
+        class="absolute inset-0 z-[5] flex items-center justify-center p-4 pointer-events-none"
       >
-        <p class="text-[#00c853] font-bold mb-1">Results</p>
-        <div v-for="(val, key) in results" :key="key" class="mb-1">
-          <span class="text-[#bbb]">{{ key }}:</span>
-          <span class="text-white ml-1">{{ formatResult(val) }}</span>
+        <div class="pointer-events-auto w-full max-w-md bg-[#111] border border-[#333] rounded-2xl p-5 shadow-xl">
+          <h2 class="text-white text-sm font-bold mb-1">Start from a template</h2>
+          <p class="text-[#999] text-[10px] mb-4 leading-relaxed">Load a working pipeline, then change its symbol or settings. Or add nodes from the sidebar.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              v-for="t in templates"
+              :key="t.id"
+              type="button"
+              class="text-left bg-[#161616] hover:bg-[#1c1c1c] border border-[#2a2a2a] hover:border-[#00c853]/50 rounded-lg p-3 transition-colors"
+              @click="applyTemplate(t)"
+            >
+              <span class="flex items-center gap-1.5 text-[11px] font-bold text-white">
+                {{ t.name }}
+                <Lock v-if="t.pro && !isPro" class="w-2.5 h-2.5 text-[#ff69b4]" aria-label="Pro" />
+                <span v-if="t.pro" class="ml-auto text-[8px] font-bold text-[#ff69b4] bg-[#ff69b4]/10 px-1 rounded">PRO</span>
+              </span>
+              <span class="block text-[10px] text-[#999] leading-snug mt-1">{{ t.description }}</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="absolute bottom-3 left-3 z-10 flex gap-3 text-[10px] text-[#bbb] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
-        <MousePointer2 class="w-3 h-3 text-[#00c853]" />
-          <span>Drag from output to input to connect</span>
-          <span class="w-px h-3 bg-[#333]" />
-          <span>Click trash icon to delete edges</span>
+      <div class="absolute bottom-3 left-3 z-10 flex items-center gap-2 text-[10px] text-[#bbb] font-mono bg-[#111]/80 border border-[#222] rounded-lg px-3 py-1.5">
+        <MousePointer2 class="w-3 h-3 text-[#00c853] flex-shrink-0" />
+        <span>Drag from an output to an input to connect · Select a node or edge and press Backspace to delete</span>
       </div>
     </div>
 
     <ProModal v-model="showProModal" />
-    <PipelineAI v-model="showAI" @apply="onAIApply" />
+    <PipelineAI v-model="showAI" @apply="applyPlan" />
     <PipelineSaver v-if="showSaver" @load="onPipelineLoad" @close="showSaver = false" />
 
     <Teleport to="body">
@@ -229,17 +214,33 @@
 
 <script setup lang="ts">
 import { VueFlow, useVueFlow } from '@vue-flow/core'
+import { computed, markRaw, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { nodeDefinitions } from '../../utils/pipeline/nodeDefinitions'
+import type { NodeDefinition } from '../../utils/pipeline/types'
 import { executePipeline } from '../../utils/pipeline/runner'
+import { migratePipeline } from '../../utils/pipeline/migrate'
+import {
+  connectionAllowed,
+  graphSignature,
+  stripEdges,
+  stripResults,
+  withConnection,
+} from '../../utils/pipeline/graph'
+import { templates, type PipelineTemplate } from '../../utils/pipeline/templates'
 import CustomNode from './nodes/CustomNode.vue'
 import ChartNode from './nodes/ChartNode.vue'
 import CandleNode from './nodes/CandleNode.vue'
 import ProModal from './ProModal.vue'
 import PipelineAI from './PipelineAI.vue'
 import PipelineSaver from './PipelineSaver.vue'
-import { Trash2, BarChart3, Play, Pause, MousePointer2, Sparkles, Folder } from '@lucide/vue'
+import { Trash2, Play, Pause, MousePointer2, Sparkles, Folder, Lock, Search } from '@lucide/vue'
+
+const STORAGE_KEY = 'kalmate-pipeline'
+const AUTO_RUN_DELAY_MS = 400
+const SAVE_DELAY_MS = 300
+const CANVAS_COLUMN_GAP = 320
 
 const nodeTypes = { custom: CustomNode, chart: ChartNode, candle: CandleNode }
 const flowContainer = ref<HTMLElement | null>(null)
@@ -251,100 +252,40 @@ const nodes = ref<any[]>([])
 const edges = ref<any[]>([])
 const running = ref(false)
 const autorun = ref(true)
-const results = ref({})
 const isPro = ref(false)
 const eraserMode = ref(false)
 const showProModal = ref(false)
-const showResults = ref(true)
 const showAI = ref(false)
 const showSaver = ref(false)
+const query = ref('')
+const lastRunAt = ref<Date | null>(null)
 const tip = ref<{ def: any; x: number; y: number } | null>(null)
 let nodeCounter = 0
 
-onMounted(() => {
-  isPro.value = (localStorage.getItem('kalmate-plan') || 'free') === 'pro'
-  const saved = localStorage.getItem('kalmate-pipeline')
-  if (saved) {
-    try {
-      const p = JSON.parse(saved)
-      if (p.edges) {
-        const oldToNew: Record<string, string> = {
-          series: 'mainSeries',
-          overlay1: 'overlayA',
-          overlay2: 'overlayB',
-          overlay3: 'overlayC',
-        }
-        for (const e of p.edges) {
-          if (oldToNew[e.targetHandle]) e.targetHandle = oldToNew[e.targetHandle]
-        }
-      }
-      nodes.value = (p.nodes || []).map((n: any) => ({ ...n, zIndex: n.zIndex ?? 10 }))
-      edges.value = p.edges || []
-      results.value = p.results || {}
-      nodeCounter = p.counter || 0
-      if (p.autorun !== undefined) autorun.value = p.autorun
-    } catch {}
-  }
+// ---- Sidebar ----
+
+const matchesQuery = (def: NodeDefinition) => {
+  const q = query.value.trim().toLowerCase()
+  return !q || def.label.toLowerCase().includes(q)
+}
+
+const groups = computed(() => {
+  const of = (category: NodeDefinition['category']) =>
+    nodeDefinitions.filter(d => d.category === category && !d.pro && matchesQuery(d))
+  return [
+    { key: 'input', title: 'Input', pro: false, items: of('input') },
+    { key: 'process', title: 'Process', pro: false, items: of('process') },
+    { key: 'output', title: 'Output', pro: false, items: of('output') },
+    { key: 'pro', title: 'Pro', pro: true, items: nodeDefinitions.filter(d => d.pro && matchesQuery(d)) },
+  ].filter(g => g.items.length > 0)
 })
 
-function saveState() {
-  localStorage.setItem('kalmate-pipeline', JSON.stringify({
-    nodes: nodes.value,
-    edges: edges.value,
-    results: results.value,
-    counter: nodeCounter,
-    autorun: autorun.value,
-  }))
+const isLocked = (def: NodeDefinition) => def.pro && !isPro.value
+
+function buttonStyle(def: NodeDefinition) {
+  if (isLocked(def)) return { background: '#111', color: '#555', border: '1px solid #222' }
+  return { background: def.color + '15', color: def.color, border: '1px solid ' + def.color + '25' }
 }
-
-watch([nodes, edges], () => { saveState() }, { deep: true })
-
-function syncPortfolioInputs() {
-  for (const node of nodes.value) {
-    if (node.data?.type === 'portfolioInput') {
-      const connectedCount = edges.value.filter(e => e.target === node.id).length
-      const neededInputs = Math.max(2, connectedCount + 1)
-      const currentWeights = node.data.weights || [1, 1]
-      if (currentWeights.length < neededInputs) {
-        const toAdd = neededInputs - currentWeights.length
-        for (let i = 0; i < toAdd; i++) {
-          currentWeights.push(1)
-        }
-        node.data.weights = [...currentWeights]
-      }
-    }
-  }
-}
-
-let autoRunTimer: any = null
-function scheduleAutoRun() {
-  if (!autorun.value || running.value) return
-  const computableTypes = new Set(['priceFeed', 'kalmanFilter', 'forecastNode', 'smaIndicator', 'emaIndicator', 'rsiIndicator', 'mathOp', 'portfolioInput', 'newsOutput'])
-  if (edges.value.length > 0 && nodes.value.some(n => computableTypes.has(n.data?.type))) {
-    clearTimeout(autoRunTimer)
-    autoRunTimer = setTimeout(() => runPipeline(), 300)
-  }
-}
-
-watch(edges, () => {
-  scheduleAutoRun()
-  syncPortfolioInputs()
-}, { deep: true })
-
-watch(nodes, () => {
-  syncPortfolioInputs()
-  scheduleAutoRun()
-}, { deep: true })
-
-watch(autorun, () => {
-  saveState()
-  if (autorun.value) scheduleAutoRun()
-})
-
-const inputNodes = computed(() => nodeDefinitions.filter(n => n.category === 'input' && !n.pro))
-const processNodes = computed(() => nodeDefinitions.filter(n => n.category === 'process' && !n.pro))
-const outputNodes = computed(() => nodeDefinitions.filter(n => n.category === 'output' && !n.pro))
-const proNodes = computed(() => nodeDefinitions.filter(n => n.pro))
 
 function showTip(node: any, event: MouseEvent | FocusEvent) {
   const e = event as MouseEvent
@@ -357,12 +298,26 @@ function hideTip() {
   tip.value = null
 }
 
+// ---- Nodes and connections ----
+
+function nodeTypeFor(type: string) {
+  return type === 'chartOutput' ? 'chart' : type === 'candleChart' ? 'candle' : 'custom'
+}
+
+function makeNode(def: NodeDefinition, id: string, position: { x: number; y: number }, data: Record<string, any>) {
+  return {
+    id,
+    type: nodeTypeFor(def.type),
+    position,
+    zIndex: 10,
+    data: { ...data, type: def.type, pro: def.pro, label: data.label ?? `${def.label} ${nodeCounter}` },
+  }
+}
+
 function addNode(type: string) {
   const def = nodeDefinitions.find(n => n.type === type)
   if (!def) return
   nodeCounter++
-  const id = `${type}-${nodeCounter}`
-  const nodeType = type === 'chartOutput' ? 'chart' : type === 'candleChart' ? 'candle' : 'custom'
   let x = 250
   let y = 200
   if (flowContainer.value) {
@@ -371,37 +326,48 @@ function addNode(type: string) {
     x = center.x - 100 + nodeCounter * 10
     y = center.y - 100
   }
-  nodes.value = [...nodes.value, {
-    id,
-    type: nodeType,
-    position: { x, y },
-    zIndex: 10,
-    data: { ...def.defaultData, label: `${def.label} ${nodeCounter}`, type, pro: def.pro },
-  }]
+  nodes.value = [...nodes.value, makeNode(def, `${type}-${nodeCounter}`, { x, y }, structuredClone(def.defaultData))]
+}
+
+function isValidConnection(conn: any) {
+  return connectionAllowed(conn, nodes.value, edges.value)
 }
 
 function onConnect(connection: any) {
-  const { source, target, sourceHandle, targetHandle } = connection
-  if (sourceHandle?.startsWith('left:') || targetHandle?.startsWith('right:')) {
-    const newSource = target
-    const newTarget = source
-    const newSourceHandle = (targetHandle || '').replace('right:', '')
-    const newTargetHandle = (sourceHandle || '').replace('left:', '')
-    edges.value = [...edges.value, {
-      id: `e-${newSource}-${newSourceHandle}-${newTarget}-${newTargetHandle}`,
-      source: newSource,
-      target: newTarget,
-      sourceHandle: newSourceHandle,
-      targetHandle: newTargetHandle,
-      style: { stroke: '#555', strokeWidth: 2 },
-    }]
-  } else {
-    edges.value = [...edges.value, {
-      ...connection,
-      id: `e-${source}-${sourceHandle}-${target}-${targetHandle}`,
-      style: { stroke: '#555', strokeWidth: 2 },
-    }]
+  if (!connectionAllowed(connection, nodes.value, edges.value)) return
+  edges.value = withConnection(edges.value, connection)
+  syncPortfolioInputs()
+}
+
+/**
+ * Weighted Average has one weight (and one input handle) per slot. Keep
+ * at least two slots, plus one free slot after the last connected input.
+ */
+function syncPortfolioInputs() {
+  for (const node of nodes.value) {
+    if (node.data?.type !== 'portfolioInput') continue
+    let maxIdx = -1
+    for (const e of edges.value) {
+      if (e.target !== node.id) continue
+      const m = /^in(\d+)$/.exec(e.targetHandle ?? '')
+      if (m) maxIdx = Math.max(maxIdx, Number(m[1]))
+    }
+    const weights: number[] = Array.isArray(node.data.weights) ? node.data.weights : [1, 1]
+    const needed = Math.max(2, maxIdx + 2)
+    if (weights.length < needed) {
+      node.data.weights = [...weights, ...Array.from({ length: needed - weights.length }, () => 1)]
+    } else if (!Array.isArray(node.data.weights)) {
+      node.data.weights = weights
+    }
   }
+}
+
+/** Nearest element with the class in the event path. Edges are SVG elements, so this is not limited to HTMLElement. */
+function findInPath(e: Event, className: string): Element | null {
+  for (const el of e.composedPath()) {
+    if (el instanceof Element && el.classList.contains(className)) return el
+  }
+  return null
 }
 
 function onCanvasClick(e: MouseEvent) {
@@ -410,14 +376,15 @@ function onCanvasClick(e: MouseEvent) {
     return
   }
   if (!eraserMode.value) return
-  const target = e.target as HTMLElement
-  const edgeEl = target.closest('.vue-flow__edge')
+  // composedPath is fixed when the event is dispatched, so it still finds the
+  // node even when a click on its title has already swapped the title for an input.
+  const edgeEl = findInPath(e, 'vue-flow__edge')
   if (edgeEl) {
     const edgeId = edgeEl.getAttribute('data-id')
     if (edgeId) edges.value = edges.value.filter(ed => ed.id !== edgeId)
     return
   }
-  const nodeEl = target.closest('.vue-flow__node')
+  const nodeEl = findInPath(e, 'vue-flow__node')
   if (nodeEl) {
     const nodeId = nodeEl.getAttribute('data-id')
     if (nodeId) {
@@ -427,19 +394,40 @@ function onCanvasClick(e: MouseEvent) {
   }
 }
 
-function formatResult(val: any): string {
-  if (!val) return '-'
-  if (val.error) return 'Error: ' + val.error
-  if (typeof val === 'number') return val.toFixed(2)
-  if (typeof val.price === 'number') return '$' + val.price.toFixed(2)
-  if (typeof val.scalar === 'number') return val.scalar.toFixed(2)
-  if (typeof val.source === 'number') return '$' + val.source.toFixed(2)
-  if (val.signal === 1) return 'Undervalued'
-  if (val.signal === -1) return 'Overvalued'
-  return 'OK'
+// ---- Running ----
+
+const errorCount = computed(() => nodes.value.filter(n => n.data?.result?.error).length)
+
+const lastRunLabel = computed(() => {
+  const d = lastRunAt.value
+  if (!d) return ''
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
+})
+
+/**
+ * Changes only when something that affects results changes (not positions,
+ * labels or results), so writing results back never schedules another run.
+ */
+const signature = computed(() => graphSignature(nodes.value, edges.value))
+
+let runTimer: ReturnType<typeof setTimeout> | null = null
+let queued = false
+
+function scheduleRun(delay = AUTO_RUN_DELAY_MS) {
+  if (runTimer) clearTimeout(runTimer)
+  runTimer = setTimeout(() => {
+    runTimer = null
+    runPipeline()
+  }, delay)
 }
 
 async function runPipeline() {
+  if (nodes.value.length === 0) return
+  if (running.value) {
+    queued = true
+    return
+  }
   running.value = true
   try {
     const spec = {
@@ -458,73 +446,153 @@ async function runPipeline() {
       })),
     }
     const res = await executePipeline(spec)
-    results.value = res
-    nodes.value = nodes.value.map((n: any) => ({
-      ...n,
-      data: { ...n.data, result: res[n.id] || n.data.result },
-    }))
+    // Results go into each node's data. The signature ignores them, so this does not trigger another run.
+    nodes.value = nodes.value.map((n: any) =>
+      res[n.id] === undefined
+        ? n
+        : { ...n, data: { ...n.data, result: markRaw(res[n.id]) } },
+    )
+    lastRunAt.value = new Date()
   } catch (e) {
     console.error(e)
+  } finally {
+    running.value = false
+    if (queued) {
+      queued = false
+      scheduleRun(0)
+    }
   }
-  running.value = false
 }
+
+watch(signature, () => {
+  if (autorun.value) scheduleRun()
+})
+
+watch(autorun, (on) => {
+  scheduleSave()
+  if (on) scheduleRun(0)
+})
+
+// ---- Saving and loading ----
+
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      nodes: stripResults(nodes.value),
+      edges: stripEdges(edges.value),
+      counter: nodeCounter,
+      autorun: autorun.value,
+    }))
+  } catch (e) {
+    // Quota or private-mode errors must not break the editor.
+    console.warn('Pipeline could not be saved', e)
+  }
+}
+
+function scheduleSave() {
+  if (saveTimer) clearTimeout(saveTimer)
+  saveTimer = setTimeout(() => {
+    saveTimer = null
+    saveState()
+  }, SAVE_DELAY_MS)
+}
+
+watch([nodes, edges], scheduleSave, { deep: true })
+watch(edges, syncPortfolioInputs)
+
+/** Replaces the canvas with a saved pipeline, migrated to the current node set. */
+function loadGraph(saved: any) {
+  const m = migratePipeline(saved)
+  nodes.value = m.nodes.map(n => ({ ...n, zIndex: n.zIndex ?? 10 }))
+  edges.value = m.edges
+  nodeCounter = m.counter
+  autorun.value = m.autorun
+  syncPortfolioInputs()
+}
+
+function onPipelineLoad(data: any) {
+  loadGraph(data)
+  scheduleRun(300)
+}
+
+onMounted(() => {
+  isPro.value = (localStorage.getItem('kalmate-plan') || 'free') === 'pro'
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) loadGraph(JSON.parse(raw))
+  } catch (e) {
+    console.warn('Saved pipeline could not be read', e)
+  }
+  if (nodes.value.length > 0) scheduleRun(0)
+})
+
+onBeforeUnmount(() => {
+  if (saveTimer) {
+    clearTimeout(saveTimer)
+    saveState()
+  }
+  if (runTimer) clearTimeout(runTimer)
+})
 
 function confirmClear() {
   if (nodes.value.length === 0) return
   if (confirm('Delete all nodes and connections?')) {
-    clearAll()
+    nodes.value = []
+    edges.value = []
   }
 }
 
-function clearAll() {
-  nodes.value = []
-  edges.value = []
-  results.value = {}
-  localStorage.removeItem('kalmate-pipeline')
-}
+// ---- Applying AI plans and templates (one code path) ----
 
-function onPipelineLoad(data: { nodes: any[]; edges: any[]; results: any; counter: number; autorun: boolean }) {
-  nodes.value = (data.nodes || []).map((n: any) => ({ ...n, zIndex: n.zIndex ?? 10 }))
-  edges.value = data.edges || []
-  results.value = data.results || {}
-  nodeCounter = data.counter || 0
-  if (data.autorun !== undefined) autorun.value = data.autorun
-  setTimeout(runPipeline, 300)
-}
+type PlanNode = { type: string; data?: Record<string, any>; position?: { x: number; y: number } }
+type PlanEdge = { source: number; target: number; sourceHandle: string; targetHandle: string }
 
-function onAIApply(plan: { nodes: any[]; edges: any[] }) {
+function applyPlan(plan: { nodes: PlanNode[]; edges: PlanEdge[] }) {
   const idMap = new Map<number, string>()
   const newNodes: any[] = []
   const catCount: Record<string, number> = { input: 0, process: 0, output: 0 }
   const catY: Record<string, number> = { input: 80, process: 300, output: 520 }
-  for (let i = 0; i < plan.nodes.length; i++) {
-    const spec = plan.nodes[i]
+  const existingMaxX = nodes.value.length
+    ? Math.max(...nodes.value.map(n => n.position?.x ?? 0))
+    : null
+  const originX = existingMaxX === null ? 80 : existingMaxX + CANVAS_COLUMN_GAP
+
+  plan.nodes.forEach((spec, i) => {
     const def = nodeDefinitions.find(n => n.type === spec.type)
-    if (!def) continue
+    if (!def) return
     nodeCounter++
     const id = `${spec.type}-${nodeCounter}`
     idMap.set(i, id)
-    const nodeType = spec.type === 'chartOutput' ? 'chart' : spec.type === 'candleChart' ? 'candle' : 'custom'
-    const cat = def.category
-    const col = catCount[cat]++
-    newNodes.push({
-      id,
-      type: nodeType,
-      position: spec.position || { x: 80 + col * 280, y: catY[cat] },
-      zIndex: 10,
-      data: { ...def.defaultData, ...spec.data, label: `${def.label} ${nodeCounter}`, type: spec.type, pro: def.pro },
-    })
+    const col = catCount[def.category] ?? 0
+    catCount[def.category] = col + 1
+    const position = spec.position || { x: originX + col * CANVAS_COLUMN_GAP, y: catY[def.category] }
+    newNodes.push(makeNode(def, id, position, { ...structuredClone(def.defaultData), ...(spec.data ?? {}) }))
+  })
+
+  const allNodes = [...nodes.value, ...newNodes]
+  let nextEdges = edges.value
+  for (const e of plan.edges) {
+    const source = idMap.get(e.source)
+    const target = idMap.get(e.target)
+    if (!source || !target) continue
+    const conn = { source, target, sourceHandle: e.sourceHandle, targetHandle: e.targetHandle }
+    if (!connectionAllowed(conn, allNodes, nextEdges)) continue
+    nextEdges = withConnection(nextEdges, conn)
   }
-  const newEdges = plan.edges.map(e => ({
-    id: `e-${idMap.get(e.source)}-${idMap.get(e.target)}`,
-    source: idMap.get(e.source) || '',
-    target: idMap.get(e.target) || '',
-    sourceHandle: e.sourceHandle,
-    targetHandle: e.targetHandle,
-  })).filter(e => e.source && e.target)
-  nodes.value = [...nodes.value, ...newNodes]
-  edges.value = [...edges.value, ...newEdges]
-  setTimeout(runPipeline, 300)
+  nodes.value = allNodes
+  edges.value = nextEdges
+  syncPortfolioInputs()
+  scheduleRun(300)
+}
+
+function applyTemplate(t: PipelineTemplate) {
+  if (t.pro && !isPro.value) {
+    showProModal.value = true
+    return
+  }
+  applyPlan(t.plan)
 }
 </script>
 

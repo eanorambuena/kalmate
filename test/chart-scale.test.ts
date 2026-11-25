@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { pointX, toTimeDomain, splitTimeDomain, xLimit } from '../utils/chart-scale.ts'
+import { pointX, toTimeDomain, splitTimeDomain, xLimit, splitPanels, groupByUnit, yRange, valueToY, plotX, bandPath, nearestIndex, medianGap } from '../utils/chart-scale.ts'
 
 const SVG_W = 260
 const PAD = 5
@@ -86,5 +86,129 @@ describe('chart-scale', () => {
     assert.ok(visible >= 2, 'a contiguous leading portion of the forecast is drawn')
     assert.ok(truncated > 0, 'the overflow tail of the forecast is cut off')
     assert.equal(visible + truncated, forecast.length)
+  })
+})
+
+type P = { timestamp: number; value: number; lower?: number; upper?: number }
+const pts = (values: number[]): P[] => values.map((v, i) => ({ timestamp: BASE + i * DAY, value: v }))
+
+describe('chart panels', () => {
+  it('puts price series in the main panel and every other unit in the secondary panel', () => {
+    const series = [
+      { handle: 'mainSeries', label: 'Price', unit: 'price', points: pts([1, 2]) },
+      { handle: 'overlayA', label: 'SMA', unit: 'price', points: pts([1, 2]) },
+      { handle: 'overlayB', label: 'RSI', unit: 'index', points: pts([40, 60]) },
+      { handle: 'overlayC', label: 'Dev', unit: 'percent', points: pts([0.01, -0.02]) },
+    ]
+    const { main, secondary } = splitPanels(series)
+    assert.deepEqual(main.map(s => s.label), ['Price', 'SMA'])
+    assert.deepEqual(secondary.map(s => s.label), ['RSI', 'Dev'])
+  })
+
+  it('leaves the secondary panel empty when everything is a price', () => {
+    const series = [{ handle: 'mainSeries', label: 'Price', unit: 'price', points: pts([1, 2]) }]
+    const { main, secondary } = splitPanels(series)
+    assert.equal(main.length, 1)
+    assert.equal(secondary.length, 0)
+  })
+
+  it('treats a series without a unit as a price', () => {
+    const { main, secondary } = splitPanels([{ handle: 'mainSeries', label: 'X', points: pts([1]) }])
+    assert.equal(main.length, 1)
+    assert.equal(secondary.length, 0)
+  })
+
+  it('uses the main series unit as the main panel when no price series is connected', () => {
+    // Rebased series are unit "index": both belong in the main panel.
+    const series = [
+      { handle: 'mainSeries', label: 'AAPL', unit: 'index', points: pts([100, 110]) },
+      { handle: 'overlayA', label: 'MSFT', unit: 'index', points: pts([100, 95]) },
+      { handle: 'overlayB', label: 'Dev', unit: 'percent', points: pts([0, 0.1]) },
+    ]
+    const { main, secondary } = splitPanels(series)
+    assert.deepEqual(main.map(s => s.label), ['AAPL', 'MSFT'])
+    assert.deepEqual(secondary.map(s => s.label), ['Dev'])
+  })
+
+  it('groups series by unit, keeping the first-seen unit order', () => {
+    const series = [
+      { handle: 'a', label: 'RSI', unit: 'index', points: pts([1]) },
+      { handle: 'b', label: 'Dev', unit: 'percent', points: pts([1]) },
+      { handle: 'c', label: 'RSI 2', unit: 'index', points: pts([1]) },
+    ]
+    const groups = groupByUnit(series)
+    assert.deepEqual([...groups.keys()], ['index', 'percent'])
+    assert.deepEqual(groups.get('index')!.map(s => s.label), ['RSI', 'RSI 2'])
+  })
+})
+
+describe('chart y range and scaling', () => {
+  it('returns null for no finite values', () => {
+    assert.equal(yRange([]), null)
+    assert.equal(yRange([{ points: [] }]), null)
+  })
+
+  it('spans the values', () => {
+    assert.deepEqual(yRange([{ points: pts([3, 1, 7]) }]), { min: 1, max: 7 })
+  })
+
+  it('includes the lower and upper bands of a forecast', () => {
+    const band: P[] = [
+      { timestamp: BASE, value: 10, lower: 10, upper: 10 },
+      { timestamp: BASE + DAY, value: 12, lower: 8, upper: 15 },
+    ]
+    assert.deepEqual(yRange([{ points: band }]), { min: 8, max: 15 })
+  })
+
+  it('pads a flat series so the scale is never zero-width', () => {
+    const r = yRange([{ points: pts([5, 5, 5]) }])!
+    assert.ok(r.max > r.min)
+    assert.ok(r.min < 5 && r.max > 5)
+  })
+
+  it('maps min to the bottom and max to the top of the panel', () => {
+    const r = { min: 2, max: 6 }
+    assert.equal(valueToY(2, r, 10, 110), 110)
+    assert.equal(valueToY(6, r, 10, 110), 10)
+    assert.equal(valueToY(4, r, 10, 110), 60)
+  })
+})
+
+
+describe('chart geometry helpers', () => {
+  it('plotX maps the time domain linearly onto [x0, x1]', () => {
+    const dom = { min: BASE, max: BASE + 10 * DAY }
+    assert.equal(plotX(BASE, 0, 11, dom, 30, 230), 30)
+    assert.equal(plotX(BASE + 10 * DAY, 10, 11, dom, 30, 230), 230)
+    assert.equal(plotX(BASE + 5 * DAY, 5, 11, dom, 30, 230), 130)
+  })
+
+  it('plotX falls back to index spacing without timestamps', () => {
+    assert.equal(plotX(undefined, 0, 3, null, 30, 230), 30)
+    assert.equal(plotX(undefined, 2, 3, null, 30, 230), 230)
+  })
+
+  it('bandPath closes a polygon from upper points forward and lower points back', () => {
+    const upper = [{ x: 0, y: 1 }, { x: 10, y: 2 }]
+    const lower = [{ x: 0, y: 5 }, { x: 10, y: 6 }]
+    assert.equal(bandPath(upper, lower), 'M0,1 L10,2 L10,6 L0,5 Z')
+  })
+
+  it('bandPath is empty for fewer than two points', () => {
+    assert.equal(bandPath([{ x: 0, y: 1 }], [{ x: 0, y: 2 }]), '')
+  })
+
+  it('nearestIndex finds the closest timestamp', () => {
+    const ts = [BASE, BASE + DAY, BASE + 2 * DAY]
+    assert.equal(nearestIndex(ts, BASE - DAY), 0)
+    assert.equal(nearestIndex(ts, BASE + 0.4 * DAY), 0)
+    assert.equal(nearestIndex(ts, BASE + 0.6 * DAY), 1)
+    assert.equal(nearestIndex(ts, BASE + 9 * DAY), 2)
+    assert.equal(nearestIndex([], BASE), -1)
+  })
+
+  it('medianGap is the median spacing between timestamps, or 0 when there are fewer than two', () => {
+    assert.equal(medianGap([BASE, BASE + DAY, BASE + 2 * DAY, BASE + 10 * DAY]), DAY)
+    assert.equal(medianGap([BASE]), 0)
   })
 })
