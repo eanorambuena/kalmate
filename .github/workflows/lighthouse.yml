@@ -33,14 +33,25 @@ jobs:
           echo "Using Chrome: $CHROME_PATH"
           mkdir -p reports
           FLAGS="--headless=new --no-sandbox --disable-gpu"
-          pnpm exec lighthouse https://kalmate.pages.dev \
-            --output=html --output=json \
-            --output-path=./reports/lighthouse \
-            --chrome-path="$CHROME_PATH" --chrome-flags="$FLAGS"
-          pnpm exec lighthouse https://kalmate.pages.dev/terminal \
-            --output=html \
-            --output-path=./reports/lighthouse-terminal \
-            --chrome-path="$CHROME_PATH" --chrome-flags="$FLAGS"
+          # Headless Chrome on shared runners sometimes reports NO_FCP on a page
+          # that renders fine; retry before calling the audit failed.
+          audit() {
+            local url="$1"; shift
+            for attempt in 1 2 3; do
+              if pnpm exec lighthouse "$url" "$@" \
+                --config-path=.github/lighthouse-config.json \
+                --chrome-path="$CHROME_PATH" --chrome-flags="$FLAGS"; then
+                return 0
+              fi
+              echo "::warning::Lighthouse attempt $attempt failed for $url"
+              sleep 10
+            done
+            return 1
+          }
+          audit https://kalmate.pages.dev \
+            --output=html --output=json --output-path=./reports/lighthouse
+          audit https://kalmate.pages.dev/terminal \
+            --output=html --output-path=./reports/lighthouse-terminal
 
       - name: Summary
         if: always()

@@ -48,4 +48,12 @@ describe('lighthouse workflow', () => {
     assert.doesNotMatch(lh, /npx lighthouse/)
     assert.match(lh, /pnpm exec lighthouse/)
   })
+
+  it('retries flaky headless audits (NO_FCP) and waits longer for first paint', () => {
+    assert.match(lh, /--config-path=\.github\/lighthouse-config\.json/)
+    const cfg = JSON.parse(readFileSync('.github/lighthouse-config.json', 'utf8'))
+    assert.equal(cfg.extends, 'lighthouse:default')
+    assert.ok(cfg.settings.maxWaitForFcp >= 60000)
+    assert.match(lh, /for attempt in 1 2 3/)
+  })
 })
