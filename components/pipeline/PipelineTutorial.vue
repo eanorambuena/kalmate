@@ -54,8 +54,8 @@ const steps = [
   { icon: Shuffle, color: '#2979ff', title: 'Welcome to Pipeline Builder', text: 'Visual pipeline builder for financial analysis. Connect nodes to create strategies without code.' },
   { icon: Plus, color: '#2979ff', title: 'Add Nodes', text: 'Click the FREE/Pro buttons on the toolbar to add nodes to the canvas. Each node has inputs (blue) and outputs (green).' },
   { icon: Link2, color: '#00c853', title: 'Connect Nodes', text: 'Drag from an output port (green) to an input port (blue) to connect nodes. The flow goes from left to right.' },
-  { icon: Package, color: '#2979ff', title: 'Available Nodes', text: 'Input: Symbol Input, Price Feed. Process: Kalman Filter. Output: Chart, Price Display, Alert.' },
-  { icon: Diamond, color: '#ff69b4', title: 'Pro Nodes', text: 'SMA, RSI, Price Forecast, Multi Symbol, Telegram, Email. Upgrade on Pricing to unlock.' },
+  { icon: Package, color: '#2979ff', title: 'Available Nodes', text: 'Input: Symbol, Currency, Number, Price Feed. Process: Kalman Filter, Z-Score, Rebase to 100, Fundamentals, Fair Value, Compare to Reference, Math, Weighted Average, News. Output: Chart, Candle Chart, Display, Alert.' },
+  { icon: Diamond, color: '#ff69b4', title: 'Pro Nodes', text: 'SMA, EMA, RSI and Forecast. Forecast projects the price with a 95% band and checks its past accuracy against a no-change forecast. Upgrade on Pricing to unlock.' },
   { icon: Play, color: '#2979ff', title: 'Run Pipeline', text: 'Press Run to execute the pipeline. Results appear on each node and in the side panel.' },
 ]
 

@@ -149,7 +149,7 @@
         </div>
 
         <p>
-          In Kalmate's Pipeline, the Kalman filter node outputs: <strong class="text-white">smoothed price</strong>, <strong class="text-white">trend component</strong>, <strong class="text-white">cycle component</strong>, and <strong class="text-white">confidence bands</strong>. It's particularly useful for noisy markets where SMA/EMA give inconsistent signals.
+          In Kalmate's Pipeline, the Kalman Filter node outputs: <strong class="text-white">smoothed price</strong> (its estimate of the underlying level), <strong class="text-white">deviation %</strong> (how far the price sits from that level), and a <strong class="text-white">signal</strong> (+1 when the price is below the level, -1 when above). It's particularly useful for noisy markets where SMA/EMA give inconsistent signals.
         </p>
 
         <div class="bg-[#111] border border-[#222] rounded-xl p-6 my-6">
@@ -175,11 +175,11 @@
           Open <NuxtLink to="/terminal/pipeline" class="text-[#00c853] hover:underline">Kalmate's Pipeline</NuxtLink> and build this setup in under 30 seconds:
         </p>
         <ol class="list-decimal pl-6 space-y-2">
-          <li>Add a <strong class="text-white">Symbol Input</strong> node, set it to <code class="text-[#00c853]">AAPL</code></li>
-          <li>Add a <strong class="text-white">Price Feed</strong> node, connect from Symbol Input</li>
-          <li>Add an <strong class="text-white">SMA Indicator</strong> (period 20), connect from Price Feed</li>
-          <li>Add a <strong class="text-white">Kalman Filter</strong>, connect from Price Feed</li>
-          <li>Add two <strong class="text-white">Chart Output</strong> nodes, connect SMA to one and Kalman to the other</li>
+          <li>Add a <strong class="text-white">Symbol</strong> node, set it to <code class="text-[#00c853]">AAPL</code></li>
+          <li>Add a <strong class="text-white">Price Feed</strong> node, connect Symbol to it</li>
+          <li>Add an <strong class="text-white">SMA</strong> node (period 20), connect Price Feed's Price Series to it</li>
+          <li>Add a <strong class="text-white">Kalman Filter</strong>, connect Price Feed's Price Series to it</li>
+          <li>Add a <strong class="text-white">Chart</strong> node: Price Series to Main Series, SMA to Overlay A, and the Kalman Smoothed output to Overlay B</li>
           <li>Compare the smoothed lines — see how Kalman adapts while SMA lags</li>
         </ol>
         <p class="mt-4">

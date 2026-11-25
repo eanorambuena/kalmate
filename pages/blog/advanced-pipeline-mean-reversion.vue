@@ -11,103 +11,98 @@
         <span class="text-[#00c853]">Tutorial</span>
       </div>
 
-      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">Advanced Pipeline: Multi-Symbol Mean-Reversion with RSI + SMA</h1>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">Advanced Pipeline: Mean Reversion with Z-Score and RSI</h1>
 
       <div class="prose prose-invert max-w-none text-[#ccc] leading-relaxed space-y-4">
         <p class="text-lg">
-          In this advanced tutorial, you'll build a mean-reversion strategy that monitors <strong class="text-white">3 symbols simultaneously</strong>, calculates RSI to detect oversold conditions, smooths the data with SMA, and sends a browser notification when an asset crosses your threshold.
+          In this advanced tutorial, you'll build a mean-reversion check for one asset. The Z-Score measures how far today's price sits from its own recent average, RSI measures momentum, and an Alert node reports when the Z-Score drops below your threshold.
         </p>
 
         <div class="bg-[#111] border border-[#222] rounded-xl p-6 my-8">
           <h3 class="text-[#00c853] text-sm font-mono tracking-widest mb-3">PIPELINE FLOW</h3>
           <div class="flex items-center gap-2 text-sm text-[#ccc] flex-wrap">
-            <span class="bg-[#2979ff]/20 border border-[#2979ff]/30 px-3 py-1 rounded">Multi-Symbol Input</span>
+            <span class="bg-[#2979ff]/20 border border-[#2979ff]/30 px-3 py-1 rounded">Symbol</span>
             <span class="text-[#555]">→</span>
-            <span class="bg-[#00c853]/20 border border-[#00c853]/30 px-3 py-1 rounded">RSI</span>
+            <span class="bg-[#2979ff]/20 border border-[#2979ff]/30 px-3 py-1 rounded">Price Feed</span>
             <span class="text-[#555]">→</span>
-            <span class="bg-[#00c853]/20 border border-[#00c853]/30 px-3 py-1 rounded">SMA</span>
+            <span class="bg-[#00c853]/20 border border-[#00c853]/30 px-3 py-1 rounded">Z-Score</span>
             <span class="text-[#555]">→</span>
-            <span class="bg-[#ff69b4]/20 border border-[#ff69b4]/30 px-3 py-1 rounded">Alert Output</span>
+            <span class="bg-[#ff69b4]/20 border border-[#ff69b4]/30 px-3 py-1 rounded">Alert</span>
           </div>
-          <p class="text-[#888] text-xs mt-3">Detect mean-reversion opportunities across multiple assets in real time.</p>
+          <p class="text-[#888] text-xs mt-3">RSI and Chart nodes sit beside the Z-Score to show momentum and the price history.</p>
         </div>
 
         <h2 class="text-2xl font-bold text-white mt-8 mb-4">What Is Mean Reversion?</h2>
-        <p>Mean reversion assumes that prices tend to return to their average over time. When RSI drops below 30, the asset is oversold — a potential buying opportunity. When RSI rises above 70, it's overbought. This pipeline automates the monitoring.</p>
+        <p>Mean reversion assumes that prices tend to return toward their average over time. A Z-Score below -2 means the price is unusually low against its own recent history; above +2 means unusually high. RSI below 30 is read as oversold, above 70 as overbought. Neither is a guarantee: the pipeline only shows where the asset stands.</p>
 
-        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 1: Add Multi-Symbol Input</h2>
+        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 1: Add Symbol and Price Feed</h2>
         <ol class="list-decimal pl-6 space-y-2">
           <li>Open <NuxtLink to="/terminal/pipeline" class="text-[#00c853] hover:underline">/terminal/pipeline</NuxtLink>.</li>
-          <li>Drag <strong class="text-white">Multi-Symbol Input</strong> (Pro node) onto the canvas.</li>
-          <li>Configure it with: <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">AAPL, MSFT, GOOGL</code></li>
-          <li>Set interval to <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">60s</code>.</li>
+          <li>Drag a <strong class="text-white">Symbol</strong> node onto the canvas and set its ticker to <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">AAPL</code>.</li>
+          <li>Drag a <strong class="text-white">Price Feed</strong> node and connect Symbol's output to its input.</li>
         </ol>
 
-        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 2: Add RSI Node</h2>
-        <p>The Relative Strength Index compares recent gains to losses to identify overbought/oversold conditions.</p>
+        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 2: Add Z-Score</h2>
+        <p>The Z-Score compares the log price with its rolling mean and standard deviation over the window.</p>
         <ol class="list-decimal pl-6 space-y-2">
-          <li>Drag <strong class="text-white">RSI</strong> (Pro node) onto the canvas.</li>
-          <li>Connect Multi-Symbol Output → RSI Input.</li>
-          <li>Click RSI, set <strong>Period</strong> to <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">14</code> (standard).</li>
-          <li>Set <strong>Oversold Threshold</strong> to <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">30</code>, <strong>Overbought</strong> to <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">70</code>.</li>
+          <li>Drag a <strong class="text-white">Z-Score</strong> node onto the canvas.</li>
+          <li>Connect Price Feed's <strong>Price Series</strong> output to Z-Score's input.</li>
+          <li>Keep the <strong>Window</strong> at <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">252</code> days (about one trading year).</li>
         </ol>
 
         <div class="bg-[#0a0a0a] border border-[#222] rounded-xl p-4 my-6 font-mono text-xs">
-          <div class="text-[#888] mb-2">// RSI calculation (14-period)</div>
-          <div class="text-[#ccc]">RSI = 100 - (100 / (1 + RS))</div>
-          <div class="text-[#ccc]">RS = average gain / average loss (last 14 periods)</div>
+          <div class="text-[#888] mb-2">// Z-Score (window N)</div>
+          <div class="text-[#ccc]">z = (log price - rolling mean of log price) / rolling std dev</div>
         </div>
 
-        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 3: Add SMA Node</h2>
-        <p>Adding a Simple Moving Average helps confirm the trend direction alongside RSI.</p>
+        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 3: Add RSI and a Chart</h2>
         <ol class="list-decimal pl-6 space-y-2">
-          <li>Drag <strong class="text-white">SMA</strong> (Pro node) onto the canvas.</li>
-          <li>Connect RSI Output → SMA Input.</li>
-          <li>Set <strong>Period</strong> to <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">20</code>.</li>
+          <li>Drag an <strong class="text-white">RSI</strong> (Pro node) onto the canvas and connect Price Feed's Price Series to it.</li>
+          <li>Keep <strong>Period</strong> at <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">14</code> (the standard).</li>
+          <li>Drag a <strong class="text-white">Chart</strong> node. Connect Price Feed's Price Series to <strong>Main Series</strong>.</li>
+          <li>Connect the RSI node's <strong>RSI Series</strong> output to an overlay. The chart draws it in a panel below the price.</li>
         </ol>
 
-        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 4: Add Alert Output</h2>
+        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 4: Add an Alert</h2>
         <ol class="list-decimal pl-6 space-y-2">
-          <li>Drag <strong class="text-white">Alert Output</strong> (Pro node) onto the canvas.</li>
-          <li>Connect SMA Output → Alert Input.</li>
-          <li>Configure the alert: <strong>Condition</strong>: <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">RSI &lt; 30</code>, <strong>Message</strong>: <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">"{{symbol}} oversold! RSI: {{value}}"</code>.</li>
-          <li>Enable <strong>Browser Notification</strong>.</li>
+          <li>Drag an <strong class="text-white">Alert</strong> node onto the canvas.</li>
+          <li>Connect Z-Score's <strong>Z-Score</strong> output (the latest value) to the Alert's <strong>Value</strong> input.</li>
+          <li>Set <strong>Trigger when</strong> to <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">Below threshold</code> and <strong>Threshold</strong> to <code class="bg-[#0a0a0a] px-1.5 py-0.5 rounded text-[#00c853] font-mono">-2</code>.</li>
         </ol>
 
-        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 5: Run and Monitor</h2>
+        <h2 class="text-2xl font-bold text-white mt-8 mb-4">Step 5: Run and Read the Result</h2>
         <ol class="list-decimal pl-6 space-y-2">
           <li>Click <strong class="text-[#00c853]">▶ Run</strong>.</li>
-          <li>The pipeline fetches prices for AAPL, MSFT, and GOOGL every 60 seconds.</li>
-          <li>RSI calculates for each symbol independently.</li>
-          <li>When any symbol crosses below 30, you get a browser notification.</li>
-          <li>Check the RSI values in real-time using a <strong>Price Display</strong> node connected to SMA output.</li>
+          <li>The Z-Score node shows the latest value. The Alert shows <strong>Triggered</strong> when the value is below -2, and <strong>Watching</strong> otherwise.</li>
+          <li>The Alert only reports the state inside the editor. It does not send notifications, so check the pipeline when you want an update.</li>
         </ol>
 
         <div class="bg-[#111] border border-[#222] rounded-xl p-6 my-8">
-          <h3 class="text-[#00c853] text-sm font-mono tracking-widest mb-3">PRO TIP: Combine with Telegram</h3>
-          <p class="text-[#ccc] text-sm">Replace Alert Output with <strong class="text-white">Telegram Output</strong> to get notifications on your phone. Configure your bot token and chat ID, and you'll never miss a trade signal.</p>
+          <h3 class="text-[#00c853] text-sm font-mono tracking-widest mb-3">TIP: Check the Forecast Before You Trust a Signal</h3>
+          <p class="text-[#ccc] text-sm">Add a <strong class="text-white">Forecast</strong> node to the Price Series and connect its Forecast output to the chart. The Skill vs No Change output shows how the chosen model did against the "no change" forecast on this asset's own past. If skill is near zero, the model has no edge here.</p>
         </div>
 
         <h2 class="text-2xl font-bold text-white mt-8 mb-4">Tuning Your Strategy</h2>
         <ul class="list-disc pl-6 space-y-2">
-          <li><strong class="text-white">Lower RSI period</strong> (e.g., 7) for more signals but more false positives.</li>
-          <li><strong class="text-white">Add a Forecast node</strong> after SMA to predict where RSI is heading.</li>
-          <li><strong class="text-white">Use a Math node</strong> to combine multiple conditions (e.g., RSI &lt; 30 AND price &gt; SMA).</li>
-          <li><strong class="text-white">Log results</strong> to a Price Display to track signal accuracy over time.</li>
+          <li><strong class="text-white">Shorten the Z-Score window</strong> (e.g., 60) to react to shorter swings, at the cost of more noise.</li>
+          <li><strong class="text-white">Combine signals</strong> with a Weighted Average node: connect RSI and Z-Score to its inputs and display the result.</li>
+          <li><strong class="text-white">Compare with a reference</strong> using Compare to Reference, for example against a fair value or a target price, to label the price as Undervalued or Overvalued within a tolerance band.</li>
         </ul>
 
         <div class="bg-[#0a0a0a] border border-[#222] rounded-xl p-4 my-6 font-mono text-xs">
-          <div class="text-[#888] mb-2">// Exportable pipeline config</div>
+          <div class="text-[#888] mb-2">// Pipeline nodes used in this tutorial</div>
           <div class="text-[#ccc]">[</div>
-          <div class="text-[#ccc] ml-4">{ "type": "multi-symbol-input", "config": { "symbols": ["AAPL","MSFT","GOOGL"], "interval": 60000 } },</div>
-          <div class="text-[#ccc] ml-4">{ "type": "rsi", "config": { "period": 14, "oversold": 30, "overbought": 70 } },</div>
-          <div class="text-[#ccc] ml-4">{ "type": "sma", "config": { "period": 20 } },</div>
-          <div class="text-[#ccc] ml-4">{ "type": "alert", "config": { "condition": "rsi < 30", "message": "{{symbol}} oversold at {{value}}", "notify": true } }</div>
+          <div class="text-[#ccc] ml-4">{ "type": "symbolInput", "data": { "symbol": "AAPL" } },</div>
+          <div class="text-[#ccc] ml-4">{ "type": "priceFeed", "data": {} },</div>
+          <div class="text-[#ccc] ml-4">{ "type": "zScore", "data": { "window": 252 } },</div>
+          <div class="text-[#ccc] ml-4">{ "type": "rsiIndicator", "data": { "period": 14 } },</div>
+          <div class="text-[#ccc] ml-4">{ "type": "chartOutput", "data": {} },</div>
+          <div class="text-[#ccc] ml-4">{ "type": "alertOutput", "data": { "condition": "below", "threshold": -2 } }</div>
           <div class="text-[#ccc]">]</div>
         </div>
 
         <p class="mt-8">
-          Check the complete <NuxtLink to="/blog/pipeline-nodes-reference" class="text-[#00c853] hover:underline">Pipeline Node Reference</NuxtLink> (publishes July 5) for all 18 node types.
+          Check the complete <NuxtLink to="/blog/pipeline-nodes-reference" class="text-[#00c853] hover:underline">Pipeline Node Reference</NuxtLink> for all 21 node types.
         </p>
       </div>
     </main>
@@ -120,10 +115,10 @@
 definePageMeta({ layout: 'landing' })
 
 useHead({
-  title: 'Advanced Pipeline: RSI + SMA Mean Reversion — Kalmate Tutorial',
+  title: 'Advanced Pipeline: Z-Score and RSI Mean Reversion — Kalmate Tutorial',
   meta: [
-    { name: 'description', content: 'Build a multi-symbol mean-reversion strategy in Kalmate\'s visual pipeline. Monitor AAPL, MSFT, GOOGL with RSI and SMA, get browser notifications on oversold signals.' },
-    { name: 'keywords', content: 'kalmate advanced pipeline, mean reversion strategy, RSI calculation, SMA pipeline, multi-symbol pipeline, trading strategy automation, visual pipeline tutorial' },
+    { name: 'description', content: 'Build a mean-reversion check in Kalmate\'s visual pipeline: a Z-Score and RSI on one asset, with an Alert when the Z-Score drops below -2. Shows the state in the editor; no notifications.' },
+    { name: 'keywords', content: 'kalmate advanced pipeline, mean reversion, z-score, RSI calculation, alert node, visual pipeline tutorial' },
   ],
 })
 </script>

@@ -58,7 +58,7 @@ const blogPosts = [
   { slug: 'what-is-a-financial-terminal', title: 'What Is a Financial Terminal and Why Do You Need One?', excerpt: 'Bloomberg costs $24K/year. Kalmate is free. Compare costs, explore 29 symbols across 6 asset classes, and see real-time AAPL data in action.', category: 'Education', date: 'June 15, 2026' },
   { slug: 'understanding-market-indicators', title: 'Understanding Market Indicators: SMA, EMA, and Kalman Filters', excerpt: 'See SMA(3) vs EMA(3) calculated step by step with real numbers. Learn when to use each indicator and try them live in Kalmate\'s Pipeline.', category: 'Tutorial', date: 'June 10, 2026' },
   { slug: 'build-diversified-portfolio', title: 'How to Build a Diversified Portfolio in 2026', excerpt: 'Step-by-step guide with real symbols: SPY, QQQ, ^TNX, GC=F, BTC-USD. Track your diversified portfolio live in Kalmate\'s free Portfolio Tracker.', category: 'Education', date: 'June 5, 2026' },
-  { slug: 'first-pipeline-tutorial', title: 'Your First Pipeline: Symbol Input → Kalman Filter → Chart Output', excerpt: 'Step-by-step beginner tutorial: build a live price-smoothing pipeline in 5 minutes. Drag nodes, connect them, watch real-time AAPL data flow.', category: 'Tutorial', date: 'June 21, 2026' },
+  { slug: 'first-pipeline-tutorial', title: 'Your First Pipeline: Symbol → Price Feed → Kalman Filter → Chart', excerpt: 'Step-by-step beginner tutorial: build a price-smoothing pipeline in a few minutes. Drag nodes, connect them, and see AAPL history smoothed on a chart.', category: 'Tutorial', date: 'June 21, 2026' },
 ]
 
 const titleWords = 'Financial Intelligence at Your Fingertips'.split(' ')

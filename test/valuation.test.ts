@@ -1,0 +1,49 @@
+import { describe, it } from 'node:test'
+import assert from 'node:assert/strict'
+import { rollingZScore } from '../utils/valuation.ts'
+import { executors } from '../utils/pipeline/runner.ts'
+import { nodeDefinitions } from '../utils/pipeline/nodeDefinitions.ts'
+
+// Deterministic PRNG so the tests are reproducible.
+function rng(seed: number) {
+  let s = seed >>> 0
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0
+    return s / 0x100000000
+  }
+}
+
+function randomWalk(n: number, seed: number, start = 100): number[] {
+  const r = rng(seed)
+  const out = [start]
+  for (let i = 1; i < n; i++) out.push((out[i - 1] ?? start) * Math.exp((r() - 0.5) * 0.04))
+  return out
+}
+
+describe('valuation', () => {
+  it('z-score is zero before the window fills and flags a dislocation', () => {
+    const prices = [...Array(60).fill(100), 80]
+    const { z } = rollingZScore(prices, 20)
+    assert.equal(z[5], 0)
+    const last = z[z.length - 1] ?? NaN
+    assert.ok(last < -2, `expected strong negative z, got ${last}`)
+  })
+
+  it('z-score of a flat window is zero, not NaN', () => {
+    const { z } = rollingZScore(Array(40).fill(50), 10)
+    assert.ok(z.every(v => v === 0))
+  })
+
+  it('runner zScore executor drops the warm-up points', async () => {
+    const series = randomWalk(400, 5).map((v, i) => ({ timestamp: i * 86_400_000, value: v }))
+    const zs = await executors.zScore!({ nodeId: 'z', inputs: { priceSeries: series }, data: { window: 50 } })
+    assert.equal(zs.zSeries.length, series.length - 49)
+    assert.ok(Number.isFinite(zs.zScore))
+  })
+
+  it('node definitions exist for the new valuation nodes', () => {
+    const types = nodeDefinitions.map(n => n.type)
+    assert.ok(types.includes('fairValue'))
+    assert.ok(types.includes('zScore'))
+  })
+})
