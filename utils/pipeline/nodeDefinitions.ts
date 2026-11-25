@@ -246,7 +246,7 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: 'fairValue',
     label: 'Fair Value',
-    description: "Estimates fair value from the company's own historical P/E and P/B multiples applied to today's earnings and book value. Upside compares that estimate with the current price. US-listed tickers only.",
+    description: "A valuation reference, not a forecast: applies the company's own historical P/E and P/B multiples to today's earnings and book value. Upside is the gap between that estimate and the current price; it has not been shown to predict future returns. US-listed tickers only.",
     category: 'process',
     color: PROCESS,
     pro: false,

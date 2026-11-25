@@ -1,7 +1,6 @@
 import { describe, it, before, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { calcSMA, calcRSI, calcEMA } from '../utils/indicators.ts'
-import { runKalmanFilter, createDefaultParams, calibrateMLE } from '../utils/kalman.ts'
 import type { ExecutionContext } from '../utils/pipeline/types.ts'
 
 const prices = [100, 102, 101, 103, 105, 104, 106, 108, 107, 109, 110, 112, 111, 113, 115]
@@ -94,50 +93,6 @@ describe('indicators', () => {
   })
 })
 
-describe('kalman filter', () => {
-  it('runKalmanFilter returns valid result structure', () => {
-    const params = createDefaultParams()
-    const result = runKalmanFilter(prices, params, 10)
-    assert.ok(Array.isArray(result.smoothed))
-    assert.ok(Array.isArray(result.trend))
-    assert.ok(Array.isArray(result.cycle))
-    assert.ok(Array.isArray(result.predicted))
-    assert.ok(Array.isArray(result.confidence))
-    assert.equal(result.smoothed.length, prices.length)
-    assert.equal(result.predicted.length, 10)
-    assert.ok(typeof result.logLikelihood === 'number')
-  })
-
-  it('calibrateMLE returns valid params', () => {
-    const params = calibrateMLE(prices)
-    assert.ok(params.phi >= 0.01 && params.phi <= 0.99)
-    assert.ok(typeof params.mu === 'number')
-    assert.ok(params.sigmaChi > 0)
-    assert.ok(params.sigmaXi > 0)
-    assert.ok(params.sigmaObs > 0)
-  })
-
-  it('short series (< 5) still returns with default params', () => {
-    const short = [100, 101, 102]
-    const params = createDefaultParams()
-    const result = runKalmanFilter(short, params, 3)
-    assert.ok(result.smoothed.length <= short.length)
-  })
-
-  it('calibrateMLE does not produce NaN on flat prices', () => {
-    const flat = Array.from({ length: 110 }, (_, i) => 100)
-    const params = calibrateMLE(flat)
-    assert.ok(Number.isFinite(params.phi))
-    assert.ok(Number.isFinite(params.mu))
-    assert.ok(Number.isFinite(params.sigmaChi))
-    assert.ok(Number.isFinite(params.sigmaXi))
-    assert.ok(Number.isFinite(params.sigmaObs))
-    const result = runKalmanFilter(flat, params, 5)
-    for (const v of result.smoothed) {
-      assert.ok(Number.isFinite(v))
-    }
-  })
-})
 
 describe('executors', () => {
   let executors: Record<string, (ctx: ExecutionContext) => any>

@@ -28,3 +28,24 @@ describe('wrangler is a pinned project dependency', () => {
     assert.match(pkg.devDependencies?.wrangler ?? '', /^\d+\.\d+\.\d+$/)
   })
 })
+
+describe('lighthouse workflow', () => {
+  const lh = readFileSync('.github/workflows/lighthouse.yml', 'utf8')
+
+  it('pins pnpm instead of activating pnpm@latest', () => {
+    assert.doesNotMatch(lh, /pnpm@latest/)
+    const block = lh.slice(lh.indexOf('pnpm/action-setup'), lh.indexOf('pnpm/action-setup') + 120)
+    assert.match(block, /version:\s*['"]?\d+\.\d+/)
+  })
+
+  it('audits the live site only after a successful deploy', () => {
+    assert.match(lh, /workflow_run:/)
+    assert.match(lh, /Deploy to Cloudflare Pages/)
+    assert.match(lh, /conclusion == 'success'/)
+  })
+
+  it('uses the lighthouse version pinned in devDependencies', () => {
+    assert.doesNotMatch(lh, /npx lighthouse/)
+    assert.match(lh, /pnpm exec lighthouse/)
+  })
+})

@@ -58,7 +58,7 @@ export const templates: PipelineTemplate[] = [
   {
     id: 'valuation',
     name: 'Valuation',
-    description: 'The price against a fair value built from the company’s own historical P/E and P/B. US-listed tickers only.',
+    description: 'The price against a valuation reference built from the company’s own historical P/E and P/B. A reference point, not a forecast. US-listed tickers only.',
     pro: false,
     plan: {
       nodes: [

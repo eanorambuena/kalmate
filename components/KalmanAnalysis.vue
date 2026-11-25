@@ -1,19 +1,24 @@
 <script setup lang="ts">
+import PipelineChart, { type ChartLine } from './pipeline/PipelineChart.vue'
+
 interface KalmanData {
   symbol: string
+  /** Unix seconds. */
   timestamps: number[]
   prices: number[]
   smoothed: number[]
-  trend: number[]
-  cycle: number[]
+  deviationPct: number | null
+  position: 'above' | 'below' | null
   predicted: number[]
-  confidence: number[]
-  lastPrice: number
-  predictedPrice: number
-  signal: string
-  logLikelihood: number
+  lower: number[]
+  upper: number[]
+  lastPrice: number | null
+  predictedPrice: number | null
+  backtest: { skill: number; hitRate: number; coverage: number; n: number }
   error?: string
 }
+
+const STEPS = 15
 
 const props = defineProps<{
   symbol: string
@@ -22,29 +27,64 @@ const props = defineProps<{
 const { data, pending, error } = await useAsyncData(
   `kalman-${props.symbol}`,
   async () => {
-    return await $fetch<KalmanData>(`/api/kalman?symbol=${props.symbol}&range=1y&predict=15`)
+    return await $fetch<KalmanData>(`/api/kalman?symbol=${encodeURIComponent(props.symbol)}&range=1y&predict=${STEPS}`)
   },
   { default: () => null as KalmanData | null }
 )
 
-const chartData = computed(() => {
-  if (!data.value) return null
+/** Median spacing of the last points, so forecast steps land on trading days. */
+function stepMs(ts: number[]): number {
+  const gaps = ts.slice(-30).slice(1).map((t, i) => t - ts.slice(-30)[i]!).sort((a, b) => a - b)
+  return (gaps[Math.floor(gaps.length / 2)] ?? 86_400) * 1000
+}
+
+const lines = computed<ChartLine[]>(() => {
   const d = data.value
-  const labels = d.timestamps.map(t => new Date(t * 1000).toLocaleDateString())
-  return { labels, ...d }
+  if (!d || d.error || !d.prices?.length) return []
+  const ms = d.timestamps.map(t => t * 1000)
+  const out: ChartLine[] = [
+    { key: 'price', label: 'Price', unit: 'price', color: '#9e9e9e', points: d.prices.map((v, i) => ({ timestamp: ms[i]!, value: v })) },
+    { key: 'trend', label: 'Kalman trend', unit: 'price', color: '#00c853', points: d.smoothed.map((v, i) => ({ timestamp: ms[i]!, value: v })) },
+  ]
+  if (d.predicted.length) {
+    const last = ms[ms.length - 1]!
+    const lastPrice = d.prices[d.prices.length - 1]!
+    const step = stepMs(d.timestamps)
+    out.push({
+      key: 'forecast',
+      label: 'Forecast (95% band)',
+      unit: 'price',
+      color: '#2979ff',
+      points: [
+        { timestamp: last, value: lastPrice, lower: lastPrice, upper: lastPrice },
+        ...d.predicted.map((v, i) => ({ timestamp: last + (i + 1) * step, value: v, lower: d.lower[i], upper: d.upper[i] })),
+      ],
+    })
+  }
+  return out
 })
 
-function formatPrice(v: number): string {
-  return v ? '$' + v.toFixed(2) : '-'
+function formatPrice(v: number | null | undefined): string {
+  return v != null && Number.isFinite(v) ? '$' + v.toFixed(2) : '-'
 }
 
-function formatSignal(s: string): string {
-  return s === 'overpriced' ? 'Overvalued' : s === 'underpriced' ? 'Undervalued' : '-'
+function pct(v: number | null | undefined, digits = 1): string {
+  return v != null && Number.isFinite(v) ? `${v > 0 ? '+' : ''}${(v * 100).toFixed(digits)}%` : '-'
 }
 
-function signalColor(s: string): string {
-  return s === 'overpriced' ? '#ff4444' : s === 'underpriced' ? '#00c853' : '#888'
-}
+const positionLabel = computed(() => {
+  const p = data.value?.position
+  return p === 'above' ? 'Above trend' : p === 'below' ? 'Below trend' : '-'
+})
+
+const skillText = computed(() => {
+  const b = data.value?.backtest
+  if (!b?.n) return 'Not enough history to validate the forecast'
+  const verdict = b.skill > 0
+    ? `beat "no change" by ${(b.skill * 100).toFixed(1)}%`
+    : `did not beat "no change" (${(b.skill * 100).toFixed(1)}%)`
+  return `Over ${b.n} past ${STEPS}-day forecasts the model ${verdict}; direction right ${(b.hitRate * 100).toFixed(0)}% of the time, ${(b.coverage * 100).toFixed(0)}% inside the band.`
+})
 </script>
 
 <template>
@@ -61,10 +101,10 @@ function signalColor(s: string): string {
   </div>
 
   <div v-else-if="data" class="bg-[#111] border border-[#2a2a2a] rounded-xl p-5">
-    <div class="flex items-center justify-between mb-5">
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
       <div>
         <h3 class="text-white font-bold text-base">Kalman Analysis</h3>
-        <p class="text-[#aaa] text-xs font-mono">{{ symbol }} · Schwartz-Smith 2-Factor Model</p>
+        <p class="text-[#aaa] text-xs font-mono">{{ symbol }} · Local-trend Kalman filter · validated forecast</p>
       </div>
       <div class="flex items-center gap-4 text-xs">
         <div class="text-center">
@@ -72,119 +112,27 @@ function signalColor(s: string): string {
           <p class="text-white font-bold">{{ formatPrice(data.lastPrice) }}</p>
         </div>
         <div class="text-center">
-          <p class="text-[#aaa]">Predicted</p>
+          <p class="text-[#aaa]">Forecast ({{ STEPS }}d)</p>
           <p class="text-white font-bold">{{ formatPrice(data.predictedPrice) }}</p>
         </div>
         <div class="text-center">
-          <p class="text-[#aaa]">Signal</p>
-          <p class="font-bold" :style="{ color: signalColor(data.signal) }">{{ formatSignal(data.signal) }}</p>
+          <p class="text-[#aaa]">Vs. trend</p>
+          <p class="font-bold" :class="data.position === 'above' ? 'text-[#ffab40]' : 'text-[#40c4ff]'">
+            {{ positionLabel }} <span class="font-mono font-normal">{{ pct(data.deviationPct) }}</span>
+          </p>
         </div>
       </div>
     </div>
 
-    <div class="relative h-64 mb-4">
-      <svg class="w-full h-full" viewBox="0 0 700 240" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="confGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#2979ff" stop-opacity="0.15" />
-            <stop offset="100%" stop-color="#2979ff" stop-opacity="0" />
-          </linearGradient>
-        </defs>
+    <PipelineChart
+      v-if="lines.length"
+      :lines="lines"
+      height="280px"
+      initial-horizon="6M"
+      :aria-label="`${symbol}: price, Kalman trend and forecast`"
+    />
 
-        <g v-if="chartData" transform="translate(0, 0)">
-          <line x1="0" y1="240" x2="700" y2="240" stroke="#2a2a2a" stroke-width="1" />
-          <line x1="0" y1="0" x2="0" y2="240" stroke="#2a2a2a" stroke-width="1" />
-
-          <path
-            :d="'M' + chartData.prices.map((v: number, i: number) => {
-              const min = Math.min(...chartData.prices)
-              const max = Math.max(...chartData.prices)
-              const y = 240 - ((v - min) / (max - min || 1)) * 220 - 10
-              const x = (i / (chartData.prices.length - 1 || 1)) * 680 + 10
-              return x + ',' + y
-            }).join(' L')"
-            fill="none"
-            stroke="#888"
-            stroke-width="1"
-            opacity="0.5"
-          />
-
-          <path
-            :d="'M' + chartData.smoothed.map((v: number, i: number) => {
-              const min = Math.min(...chartData.prices)
-              const max = Math.max(...chartData.prices)
-              const y = 240 - ((v - min) / (max - min || 1)) * 220 - 10
-              const x = (i / (chartData.smoothed.length - 1 || 1)) * 680 + 10
-              return x + ',' + y
-            }).join(' L')"
-            fill="none"
-            stroke="#00c853"
-            stroke-width="2"
-          />
-
-          <path
-            v-if="chartData.predicted.length"
-            :d="'M' + chartData.predicted.map((v: number, i: number) => {
-              const all = [...chartData.prices, ...chartData.predicted]
-              const min = Math.min(...all)
-              const max = Math.max(...all)
-              const y = 240 - ((v - min) / (max - min || 1)) * 220 - 10
-              const x = ((chartData.prices.length - 1 + i) / (chartData.prices.length + chartData.predicted.length - 1)) * 680 + 10
-              return x + ',' + y
-            }).join(' L')"
-            fill="none"
-            stroke="#2979ff"
-            stroke-width="2"
-            stroke-dasharray="6,3"
-          />
-
-          <path
-            v-if="chartData.confidence.length"
-            :d="'M' + chartData.predicted.map((v: number, i: number) => {
-              const all = [...chartData.prices, ...chartData.predicted]
-              const min2 = Math.min(...all)
-              const max2 = Math.max(...all)
-              const upper = v + chartData.confidence[i]
-              const y = 240 - ((upper - min2) / (max2 - min2 || 1)) * 220 - 10
-              const x = ((chartData.prices.length - 1 + i) / (chartData.prices.length + chartData.predicted.length - 1)) * 680 + 10
-              return x + ',' + y
-            }).join(' L')
-            + ' L' + chartData.predicted.map((v: number, i: number) => {
-              const all = [...chartData.prices, ...chartData.predicted]
-              const min2 = Math.min(...all)
-              const max2 = Math.max(...all)
-              const lower = Math.max(0.01, v - chartData.confidence[i])
-              const y = 240 - ((lower - min2) / (max2 - min2 || 1)) * 220 - 10
-              const x = ((chartData.prices.length - 1 + i) / (chartData.prices.length + chartData.predicted.length - 1)) * 680 + 10
-              return x + ',' + y
-            }).join(' L') + ' Z'"
-            fill="url(#confGrad)"
-            stroke="none"
-          />
-        </g>
-      </svg>
-      <div class="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] text-[#aaa] px-2">
-        <span>{{ chartData?.labels?.[0] || '' }}</span>
-        <span>{{ chartData?.labels?.[chartData.labels.length - 1] || '' }}</span>
-      </div>
-    </div>
-
-    <div class="flex items-center justify-between text-xs text-[#aaa]">
-      <div class="flex items-center gap-4">
-        <span class="flex items-center gap-1.5">
-          <span class="w-3 h-0.5 bg-[#888] opacity-50 inline-block" /> Price
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span class="w-3 h-0.5 bg-[#00c853] inline-block" /> Smoothed
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span class="w-3 h-0.5 bg-[#2979ff] dashed inline-block" style="border-top: 1px dashed #2979ff; height: 0; background: none;" /> Predicted
-        </span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span>Cycle: <span :style="{ color: signalColor(data.signal) }">{{ (data.cycle[data.cycle.length - 1] * 100).toFixed(1) }}%</span></span>
-        <span>LogLik: {{ data.logLikelihood.toFixed(0) }}</span>
-      </div>
-    </div>
+    <p class="mt-3 text-[11px] text-[#aaa]">{{ skillText }}</p>
+    <p class="mt-1 text-[10px] text-[#666]">Descriptive analysis, not investment advice.</p>
   </div>
 </template>
