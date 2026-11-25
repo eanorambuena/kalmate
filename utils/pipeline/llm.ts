@@ -116,7 +116,8 @@ export async function generateWithLLM(query: string, opts: LLMOptions): Promise<
         signal: typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal ? AbortSignal.timeout(TIMEOUT_MS) : undefined,
       })
     } catch (e: any) {
-      if (ticket) opts.budget?.settle(ticket, 0)
+      // The request may have reached Groq before it failed, so keep its estimate counted.
+      if (ticket) opts.budget?.settle(ticket, ticket.tokens)
       return { error: e?.name === 'TimeoutError' ? 'The AI service timed out' : 'Could not reach the AI service' }
     }
 

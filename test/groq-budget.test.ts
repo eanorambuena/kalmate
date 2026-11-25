@@ -213,6 +213,16 @@ describe('createBudget', () => {
       assert.equal(b.reserve(MODEL, 3800).ok, true)
     })
 
+    it('does not subtract a request twice when its headers already arrived but it is not settled yet', () => {
+      const { b } = mk()
+      b.observe(MODEL, H(1000))
+      const x: any = b.reserve(MODEL, 300)
+      const y: any = b.reserve(MODEL, 300)
+      b.observe(MODEL, H(700), x) // Groq counted x; y is still in flight, so 400 remain for us
+      b.observe(MODEL, H(400), y) // x is still being read, but Groq already counted it
+      assert.equal(b.reserve(MODEL, 400).ok, true, '400 really remain')
+    })
+
     it('releases an in-flight request even when the reported usage is unusable', () => {
       const { b } = mk()
       const a: any = b.reserve(MODEL, 2000)

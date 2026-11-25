@@ -50,7 +50,10 @@ prompt is the cheapest way to raise that.
   correct the picture, so the budget tracks the real account even if the table
   is wrong.
 - A 429 from Groq blocks that model for its `Retry-After` time (at most 15
-  minutes).
+  minutes). The block is shared by every client, so one caller's request can
+  trigger it for everyone; that is intended, because Groq's limit is shared too.
+- A request that times out or fails on the network keeps its estimated tokens
+  counted, since Groq may have processed it anyway.
 - A single request larger than the token limit is still allowed when the window
   is empty, so a misconfigured limit cannot lock the feature out.
 

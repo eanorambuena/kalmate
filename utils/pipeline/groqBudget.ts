@@ -77,7 +77,7 @@ export function limitsFromEnv(env: Record<string, string | undefined>): Partial<
 }
 
 /** `epoch` identifies which Groq-reported count (if any) was in force when this was reserved. */
-interface Ticket { ok: true; model: string; t: number; tokens: number; epoch: number }
+interface Ticket { ok: true; model: string; t: number; tokens: number; epoch: number; counted?: boolean }
 export type Reservation = Ticket | { ok: false; reason: 'rpm' | 'tpm' | 'rpd' | 'tpd' | 'blocked'; retryAfterSec: number }
 
 interface ModelState {
@@ -201,8 +201,9 @@ export function createBudget(options: BudgetOptions = {}) {
       let pending = 0
       for (const other of s.inflight) {
         if (t - other.t > MAX_RESET_SEC * 1000) s.inflight.delete(other) // its response never came back
-        else if (other !== ticket) pending += other.tokens
+        else if (other !== ticket && !other.counted) pending += other.tokens // counted: Groq's headers already include it
       }
+      if (ticket?.ok) ticket.counted = true
       s.known = {
         remaining: Math.max(0, remaining - pending),
         until: t + Math.min(resetSec, MAX_RESET_SEC) * 1000,

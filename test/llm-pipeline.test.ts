@@ -169,6 +169,16 @@ describe('local budget in front of Groq', () => {
     }
   })
 
+  it('keeps counting a request that timed out, since Groq may still have processed it', async () => {
+    const budget = createBudget({ override: { rpm: 1000, tpm: 1_000_000, rpd: 1000, tpd: 10_000 }, margin: 1, now: clock().now })
+    let calls = 0
+    const timingOut = async () => { calls++; throw Object.assign(new Error('timed out'), { name: 'TimeoutError' }) }
+    const results: any[] = []
+    for (let i = 0; i < 6; i++) results.push(await generateWithLLM('AAPL chart', { apiKey: 'k', fetch: timingOut as any, models: [M], budget }))
+    assert.ok(calls < 6, `the daily token budget should stop the retries, but ${calls} of 6 reached the network`)
+    assert.match(results.at(-1).error, /Rate limited/)
+  })
+
   it('uses the remaining-tokens headers to avoid the next 429', async () => {
     const budget = createBudget({ override: { rpm: 100, tpm: 1_000_000, rpd: 1000, tpd: 10_000_000 }, margin: 1, now: clock().now })
     const f = fakeFetch([okWithUsage(500, { 'x-ratelimit-remaining-tokens': '10', 'x-ratelimit-reset-tokens': '30s' })])
