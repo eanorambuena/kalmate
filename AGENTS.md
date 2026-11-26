@@ -1,7 +1,5 @@
 # Kalmate — Agent Guidelines
 
-# Kalmate — Agent Guidelines
-
 ## Commits
 - Use **Conventional Commits**: `type(scope): description`
   - Types: `feat`, `fix`, `refactor`, `ci`, `chore`, `docs`, `test`, `perf`, `a11y`, `seo`, `i18n`
@@ -20,3 +18,8 @@
 - Default language: English
 - All user-facing text must be in English
 - No Spanish hardcoded strings
+
+## Claude Code and reviews
+- `CLAUDE.md` explains the PR workflow and the automatic reviewers (`.claude/settings.json`, `.claude/REVIEWER_AUTOMATION.md`).
+- Reviewer personas and prompts live in `.claude/skills/use-reviewers/`.
+- Reply to review comments with a commit reference when fixed, or a short reason when not changing.

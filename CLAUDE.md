@@ -102,7 +102,7 @@ Consider opening an issue for v2 customization.
 
 ## Commit Messages
 
-Use **Conventional Commits**:
+Use **Conventional Commits** (see `AGENTS.md`):
 
 ```
 type(scope): description
@@ -121,14 +121,13 @@ Claude-Session: <the current session URL>
 
 ## Testing
 
-Before every commit:
+Before every commit (the pre-commit hook runs these too):
 
 ```bash
 pnpm test        # Run unit tests
 pnpm test:all    # Run full test suite
 ```
 
-The pre-commit hook runs these automatically.
 
 ## Tech Stack Reference
 
@@ -136,7 +135,7 @@ The pre-commit hook runs these automatically.
 - **Tailwind CSS** for styling
 - **pnpm** for package management (never npm)
 - **Cloudflare Pages** for deployment
-- `node:test` + `node:assert/strict` for tests
+- `node:test` + `node:assert/strict` for tests (run with `pnpm test`)
 
 ## i18n Requirements
 
@@ -150,20 +149,17 @@ The pre-commit hook runs these automatically.
 ```
 kalmate/
 ├── .claude/
-│   ├── settings.json                 # Hook configuration + permissions
+│   ├── settings.json                  # Reviewer hook + permissions
 │   ├── REVIEWER_AUTOMATION.md         # Automation details
 │   └── skills/use-reviewers/          # Reviewer skill + examples
-│       ├── SKILL.md
-│       ├── EXAMPLES.md
-│       └── README.md
-├── AGENTS.md                          # Agent/commit guidelines
+├── AGENTS.md                          # Commit, test and i18n rules (read first)
 ├── CLAUDE.md                          # This file
-├── src/
-│   ├── components/                    # Vue components
-│   ├── pages/                         # Nuxt pages
-│   └── server/                        # Server API routes
-├── tests/                             # Test files
-└── pnpm-lock.yaml
+├── app.vue, pages/, layouts/, components/, composables/, plugins/
+├── server/                            # Nitro API routes (e.g. server/api/generate-pipeline.post.ts)
+├── utils/                             # Shared logic (pipeline engine, rate limits, market data)
+├── test/                              # node:test suites (*.test.ts)
+├── docs/                              # Design notes (e.g. groq-rate-limits.md)
+└── nuxt.config.ts, wrangler.toml      # Build and Cloudflare Pages config
 ```
 
 ## Common Workflows
@@ -254,11 +250,11 @@ To use different reviewer combinations:
 - `.claude/REVIEWER_AUTOMATION.md` — Event-driven loop details
 - `.claude/skills/use-reviewers/SKILL.md` — Reviewer focus areas & prompts
 - `.claude/skills/use-reviewers/EXAMPLES.md` — Real workflow examples
-- `AGENTS.md` — Commit and test guidelines
+- `AGENTS.md` — Commit, test and i18n rules
 
 ## Contact / Questions
 
 For questions about this workflow or Claude Code usage:
-- Check `REVIEWER_AUTOMATION.md` for automation details
+- Check `.claude/REVIEWER_AUTOMATION.md` for automation details
 - Check `.claude/skills/use-reviewers/` for reviewer guidelines
 - Run `/help` in Claude Code for general help
